@@ -34,9 +34,9 @@ df.show()
 ```python
 print(df.collect())
 
->> [Row(geom=Point(x=(6.0,), y=(52.0,)))]
+>> [Row(geom=Point(x=6.0, y=52.0))]
 
 print(df.toPandas())
 >>         geom
-        0  Point(x=(6.0,), y=(52.0,))
+        0  Point(x=6.0, y=52.0)
 ```
