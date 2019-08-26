@@ -1,14 +1,10 @@
 from abc import ABC
 from enum import Enum
-from plistlib import Dict
-import inspect
 
 import attr
 
-from geo_pyspark.exceptions import GeometryUnavailableException
-from geo_pyspark.utils.binary_parser import BinaryParser
-from geo_pyspark.utils.cls_finder import ClsFinder
-from geo_pyspark.utils.decorators import classproperty
+from exceptions import GeometryUnavailableException
+from utils.decorators import classproperty
 
 
 class GeomEnum(Enum):
@@ -42,7 +38,7 @@ class Point(Geometry):
 
     @classmethod
     def from_bytes(cls, bytes: bytearray) -> 'Geometry':
-        from geo_pyspark.utils.point_parser import PointParser
+        from utils.point_parser import PointParser
         return PointParser.deserialize(bytes)
 
 

@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from pyspark.sql import SparkSession
 
-from geo_pyspark.registrator import GeoSparkRegistrator
+from registrator import GeoSparkRegistrator
 
 spark = SparkSession.builder.\
         config("--master", "local").\

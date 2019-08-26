@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from geo_pyspark.gis.geometry import GeometryFactory, Undefined, Point
-from geo_pyspark.utils.binary_parser import BinaryParser
+from gis.geometry import GeometryFactory, Point
+from utils.binary_parser import BinaryParser
 
 
 class TestNonSparkGeometry(TestCase):

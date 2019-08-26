@@ -1,6 +1,5 @@
 import attr
 from pyspark.sql import SparkSession
-from pyspark.sql.types import UserDefinedType
 
 
 @attr.s
