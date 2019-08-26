@@ -23,12 +23,15 @@ GeoSparkRegistrator.registerAll(spark)
 df = spark.sql("""SELECT st_geomfromtext('POINT(6.0 52.0)') as geom""")
 
 df.show()
-+------------+
-|        geom|
-+------------+
-|POINT (6 52)|
-+------------+
 
+```
+    +------------+
+    |        geom|
+    +------------+
+    |POINT (6 52)|
+    +------------+
+
+```python
 print(df.collect())
 
 >> [Row(geom=Point(x=(6.0,), y=(52.0,)))]
