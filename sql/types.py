@@ -23,9 +23,9 @@ class Geometry(UserDefinedType):
         pass
 
     def deserialize(self, datum):
-        gm_type = GeometryFactory.from_number(datum[1])
+        geom = GeometryFactory.geometry_from_bytes(datum)
 
-        return gm_type.from_bytes(datum)
+        return geom
 
     @classmethod
     def module(cls):
