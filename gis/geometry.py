@@ -27,45 +27,6 @@ class GeomEnum(Enum):
 
 
 @attr.s
-class Geometry(ABC):
-
-    @classmethod
-    def from_bytes(cls, bytes: bytearray) -> 'Geometry':
-        raise NotImplementedError
-
-
-@attr.s
-class Point(Geometry):
-    x = attr.ib()
-    y = attr.ib()
-
-    @classmethod
-    def from_bytes(cls, bytes: bytearray) -> 'Geometry':
-        from utils.point_parser import PointParser
-        return PointParser.deserialize(bytes)
-
-
-@attr.s
-class Polygon(Geometry):
-    pass
-
-
-@attr.s
-class PolyLine(Geometry):
-    pass
-
-
-@attr.s
-class MultiPoint(Geometry):
-    pass
-
-
-@attr.s
-class Undefined(Geometry):
-    pass
-
-
-@attr.s
 class GeometryFactory:
 
     @classmethod
