@@ -1,14 +1,23 @@
 from abc import ABC
 
 import attr
+from shapely.geometry.base import BaseGeometry
 
 
 @attr.s
-class Parser(ABC):
+class GeometryParser(ABC):
+
+    @property
+    def name(self):
+        raise NotImplementedError
 
     @classmethod
-    def deserialize(cls, bytes: bytearray):
-        raise NotImplementedError()
+    def serialize(cls):
+        raise NotImplementedError("Parser has to implement serialize method")
+
+    @classmethod
+    def deserialize(cls, bytes: bytearray) -> BaseGeometry:
+        raise NotImplementedError("Parser has to implement deserialize method")
 
     @classmethod
     def remove_negatives(cls, bytes):
