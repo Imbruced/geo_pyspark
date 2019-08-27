@@ -41,12 +41,12 @@ class GeometryFactory:
             raise GeometryUnavailableException(f"Can not deserialize object")
 
     @classproperty
-    def geom_cls(self):
+    def parsers(self):
         geom_cls = dict(
-            undefined=Undefined,
-            point=Point,
-            polyline=PolyLine,
-            polygon=Polygon,
-            multipoint=MultiPoint
+            undefined=UndefinedParser,
+            point=PointParser,
+            polyline=PolyLineParser,
+            polygon=PolygonParser,
+            multipoint=MultiPointParser
         )
         return geom_cls
