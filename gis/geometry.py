@@ -30,13 +30,15 @@ class GeomEnum(Enum):
 class GeometryFactory:
 
     @classmethod
-    def from_number(cls, value: int) -> Geometry:
-        if GeomEnum.has_value(value):
-            name = GeomEnum.get_name(value)
-            geom = cls.geom_cls[name]
+    def geometry_from_bytes(cls, bytes: bytearray) -> BaseGeometry:
+        gm_type = bytes[1]
+        if GeomEnum.has_value(gm_type):
+            name = GeomEnum.get_name(gm_type)
+            parser: GeometryParser = cls.parsers[name]
+            geom = parser.deserialize(bytes)
             return geom
         else:
-            raise GeometryUnavailableException(f"Geometry number {value} is not available")
+            raise GeometryUnavailableException(f"Can not deserialize object")
 
     @classproperty
     def geom_cls(self):
