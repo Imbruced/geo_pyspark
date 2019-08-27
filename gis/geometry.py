@@ -2,9 +2,12 @@ from abc import ABC
 from enum import Enum
 
 import attr
+from shapely.geometry.base import BaseGeometry
 
 from exceptions import GeometryUnavailableException
+from utils.abstract_parser import GeometryParser
 from utils.decorators import classproperty
+from utils.parsers import UndefinedParser, PointParser, PolyLineParser, PolygonParser, MultiPointParser
 
 
 class GeomEnum(Enum):
