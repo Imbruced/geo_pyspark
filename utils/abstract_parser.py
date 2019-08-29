@@ -3,6 +3,8 @@ from abc import ABC
 import attr
 from shapely.geometry.base import BaseGeometry
 
+from utils.binary_parser import BinaryParser
+
 
 @attr.s
 class GeometryParser(ABC):
@@ -16,14 +18,5 @@ class GeometryParser(ABC):
         raise NotImplementedError("Parser has to implement serialize method")
 
     @classmethod
-    def deserialize(cls, bytes: bytearray) -> BaseGeometry:
+    def deserialize(cls, bin_parser: BinaryParser) -> BaseGeometry:
         raise NotImplementedError("Parser has to implement deserialize method")
-
-    @classmethod
-    def remove_negatives(cls, bytes):
-        return [cls.remove_negative(bt) for bt in bytes]
-
-    @classmethod
-    def remove_negative(cls, byte):
-        bt_pos = byte if byte >= 0 else byte + 128
-        return bt_pos
