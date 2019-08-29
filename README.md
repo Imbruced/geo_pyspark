@@ -43,6 +43,7 @@ print(df.toPandas())
 
 ## convert to pandas and geopandas
 
+```python
 counties = spark.\
     read.\
     option("delimiter", "|").\
@@ -60,6 +61,7 @@ gdf = gpd.GeoDataFrame(pd_df, geometry="geometry")
 
 gdf.plot()
 plt.show()
+```
 
 <img src="https://github.com/Imbruced/geo_pyspark/blob/data/geopandas_plot.PNG" width="250">
 
