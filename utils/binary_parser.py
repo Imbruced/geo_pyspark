@@ -5,16 +5,22 @@ import attr
 
 DOUBLE_SIZE = 8
 INT_SIZE = 4
+BYTE_SIZE = 1
+
+size_dict = {
+    "d": DOUBLE_SIZE,
+    "i": INT_SIZE,
+    "b": BYTE_SIZE
+}
 
 
 @attr.s
 class BinaryParser:
 
-    @classmethod
-    def read_double(cls, bytes: Union[bytearray, List[int]]):
-        if type(bytes) == list:
-            bytes = bytearray(bytes)
-        return struct.unpack("d", bytes)
+    def read_double(self):
+        data = self.unpack("d", self.bytes)
+        self.current_index = self.current_index + DOUBLE_SIZE
+        return data
 
     @classmethod
     def read_int(cls, bytes: Union[bytearray, List[int]]):
