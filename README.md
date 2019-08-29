@@ -40,3 +40,25 @@ print(df.toPandas())
 >>         geom
         0  Point(x=6.0, y=52.0)
 ```
+
+## convert to pandas and geopandas
+
+counties = spark.\
+    read.\
+    option("delimiter", "|").\
+    option("header", "true").\
+    csv("data/counties.csv")
+
+counties.createOrReplaceTempView("county")
+
+df = spark.sql(
+        f"SELECT *, st_geomfromtext(geom) as geometry from county"
+)
+
+pd_df = df.toPandas()
+gdf = gpd.GeoDataFrame(pd_df, geometry="geometry")
+
+gdf.plot()
+plt.show()
+
+
