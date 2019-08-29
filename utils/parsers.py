@@ -64,8 +64,27 @@ class PolygonParser(GeometryParser):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, bytes: bytearray) -> Union[Polygon, MultiPolygon]:
-        raise NotImplementedError()
+    def deserialize(cls, parser) -> Union[Polygon, MultiPolygon]:
+        """TODO exception handling for shapely constructors"""
+        for x in range(4):
+            parser.read_double()
+        num_rings = parser.read_int()
+        num_points = parser.read_int()
+        offsets = cls.read_offsets(parser, num_parts=num_rings, max_offset=num_points)
+        polygons = []
+        for i in range(num_rings):
+            read_scale = offsets[i + 1] - offsets[i]
+            cs_ring = read_coordinates(parser, read_scale)
+            polygons.append(Polygon(cs_ring))
+        return MultiPolygon(polygons)
+
+    @staticmethod
+    def read_offsets(parser, num_parts, max_offset):
+        offsets = []
+        for i in range(num_parts):
+            offsets.append(parser.read_int())
+        offsets.append(max_offset)
+        return offsets
 
 
 @attr.s
