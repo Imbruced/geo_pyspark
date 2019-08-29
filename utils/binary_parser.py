@@ -22,17 +22,20 @@ class BinaryParser:
         self.current_index = self.current_index + DOUBLE_SIZE
         return data
 
-    @classmethod
-    def read_int(cls, bytes: Union[bytearray, List[int]]):
-        if type(bytes) == list:
-            bytes = bytearray(bytes)
-        return struct.unpack("i", bytes)
+    def read_int(self):
+        data = self.unpack("i", self.bytes)
+        self.current_index = self.current_index + INT_SIZE
+        return data
 
-    @classmethod
-    def read_byte(cls, bytes: Union[bytearray, List[int]]):
-        if type(bytes) == list:
-            bytes = bytearray(bytes)
-        return struct.unpack("b", bytes)
+    def read_byte(self):
+        data = self.unpack("b", self.bytes)
+        self.current_index = self.current_index + BYTE_SIZE
+        return data
+
+    def unpack(self, tp: str, bytes: bytearray):
+        max_index = self.current_index + size_dict[tp]
+        bytes = self._convert_to_binary_array(bytes[self.current_index: max_index])
+        return struct.unpack(tp, bytes)[0]
 
     @classmethod
     def remove_negatives(cls, bytes):
