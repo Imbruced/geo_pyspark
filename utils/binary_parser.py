@@ -36,3 +36,9 @@ class BinaryParser:
     def remove_negative(cls, byte):
         bt_pos = byte if byte >= 0 else byte + 256
         return bt_pos
+
+    @staticmethod
+    def _convert_to_binary_array(bytes):
+        if type(bytes) == list:
+            bytes = bytearray(bytes)
+        return bytes
