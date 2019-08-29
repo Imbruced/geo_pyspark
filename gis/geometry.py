@@ -6,6 +6,7 @@ from shapely.geometry.base import BaseGeometry
 
 from exceptions import GeometryUnavailableException
 from utils.abstract_parser import GeometryParser
+from utils.binary_parser import BinaryParser
 from utils.decorators import classproperty
 from utils.parsers import UndefinedParser, PointParser, PolyLineParser, PolygonParser, MultiPointParser
 
@@ -31,11 +32,13 @@ class GeometryFactory:
 
     @classmethod
     def geometry_from_bytes(cls, bytes: bytearray) -> BaseGeometry:
-        gm_type = bytes[1]
+        bin_parser = BinaryParser(bytes)
+        g_type = bin_parser.read_byte()
+        gm_type = bin_parser.read_byte()
         if GeomEnum.has_value(gm_type):
             name = GeomEnum.get_name(gm_type)
             parser: GeometryParser = cls.parsers[name]
-            geom = parser.deserialize(bytes)
+            geom = parser.deserialize(bin_parser)
             return geom
         else:
             raise GeometryUnavailableException(f"Can not deserialize object")
