@@ -63,5 +63,5 @@ gdf.plot()
 plt.show()
 ```
 
-<img src="https://github.com/Imbruced/geo_pyspark/blob/data/geopandas_plot.PNG" width="250">
+<img src="https://github.com/Imbruced/geo_pyspark/blob/master/data/geopandas_plot.PNG" width="250">
 
