@@ -10,7 +10,7 @@ from shapely.geometry import MultiPoint
 from shapely.geometry.base import BaseGeometry
 
 from utils.abstract_parser import GeometryParser
-from utils.binary_parser import BinaryParser
+from utils.binary_parser import BinaryParser, DOUBLE_SIZE, INT_SIZE
 
 
 @attr.s
@@ -22,11 +22,10 @@ class PointParser(GeometryParser):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, bytes: bytearray) -> Point:
-        no_neg = cls.remove_negatives(bytes)
-        x = BinaryParser.read_double(bytearray(no_neg[2: 10]))
-        y = BinaryParser.read_double(bytearray(no_neg[10: 18]))
-        return Point(x[0], y[0])
+    def deserialize(cls, bin_parser: BinaryParser) -> Point:
+        x = bin_parser.read_double()
+        y = bin_parser.read_double()
+        return Point(x, y)
 
 
 @attr.s
