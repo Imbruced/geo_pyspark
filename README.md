@@ -61,4 +61,5 @@ gdf = gpd.GeoDataFrame(pd_df, geometry="geometry")
 gdf.plot()
 plt.show()
 
+<img src="https://github.com/Imbruced/geo_pyspark/blob/data/geopandas_plot.PNG" width="250">
 
