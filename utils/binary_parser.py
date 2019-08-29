@@ -16,6 +16,12 @@ size_dict = {
 
 @attr.s
 class BinaryParser:
+    bytes = attr.ib(type=Union[bytearray, List[int]])
+    current_index = attr.ib(default=0)
+
+    def __attrs_post_init__(self):
+        no_negatives = self.remove_negatives(self.bytes)
+        self.bytes = self._convert_to_binary_array(no_negatives)
 
     def read_double(self):
         data = self.unpack("d", self.bytes)
