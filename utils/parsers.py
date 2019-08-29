@@ -55,6 +55,13 @@ class PolyLineParser(GeometryParser):
         raise NotImplementedError()
 
 
+def read_coordinates(parser, read_scale):
+    coordinates = []
+    for i in range(read_scale):
+        coordinates.append((parser.read_double(), parser.read_double()))
+    return coordinates
+
+
 @attr.s
 class PolygonParser(GeometryParser):
     name = "Polygon"
