@@ -11,7 +11,7 @@ example:
 
 ```python
 from pyspark.sql import SparkSession
-from registrator import GeoSparkRegistrator
+from geo_pyspark.register import GeoSparkRegistrator
 
 
 spark = SparkSession.builder.\
@@ -63,5 +63,5 @@ gdf.plot()
 plt.show()
 ```
 
-<img src="https://github.com/Imbruced/geo_pyspark/blob/master/data/geopandas_plot.PNG" width="250">
+<img src="https://github.com/Imbruced/geo_pyspark/blob/master/geo_pyspark/data/geopandas_plot.PNG" width="250">
 

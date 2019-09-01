@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a2941b4a25b6b0f2eaab7d3c893e183069cda250b86b03b7c559794ddcd32883"
+            "sha256": "72a8007cdd25f2e8152a63da181394d6aa6f050c276b47fae9235ae704d1f4c1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -68,6 +68,10 @@
                 "sha256:fa31dfe8855b9cd0b128b47a4df558f1b8eda90d2181bff1dd9854e5556efb3e"
             ],
             "version": "==1.8.6"
+        },
+        "geo-pyspark": {
+            "editable": true,
+            "path": "."
         },
         "geopandas": {
             "hashes": [

@@ -11,7 +11,7 @@ setup(
     url='https://github.com/Imbruced/geo_pyspark',
     author='Pawel Kocinski',
     author_email='pawel93kocinski@gmail.com',
-    packages=['register', 'sql'],
+    packages=['geo_pyspark'],
     python_requires='>=3.6',
     install_requires=['pyspark', 'findspark', 'pandas', 'geopandas'],
     project_urls={  # Optional
