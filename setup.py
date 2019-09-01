@@ -14,7 +14,7 @@ setup(
     packages=['geo_pyspark'],
     python_requires='>=3.6',
     install_requires=['pyspark', 'findspark', 'pandas', 'geopandas'],
-    project_urls={  # Optional
+    project_urls={
         'Bug Reports': 'https://github.com/Imbruced/geo_pyspark'
     },
 )
