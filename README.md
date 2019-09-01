@@ -15,7 +15,6 @@ from geo_pyspark.register import GeoSparkRegistrator
 
 
 spark = SparkSession.builder.\
-        config("--master", "local").\
         getOrCreate()
 
 GeoSparkRegistrator.registerAll(spark)
