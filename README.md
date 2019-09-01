@@ -20,7 +20,7 @@ spark = SparkSession.builder.\
 
 GeoSparkRegistrator.registerAll(spark)
 
-df = spark.sql("""SELECT st_geomfromtext('POINT(6.0 52.0)') as geom""")
+df = spark.sql("""SELECT st_geomfromwkt('POINT(6.0 52.0)') as geom""")
 
 df.show()
 
@@ -53,7 +53,7 @@ counties = spark.\
 counties.createOrReplaceTempView("county")
 
 df = spark.sql(
-        f"SELECT *, st_geomfromtext(geom) as geometry from county"
+        f"SELECT *, st_geomfromwkt(geom) as geometry from county"
 )
 
 pd_df = df.toPandas()
