@@ -9,7 +9,7 @@ from geo_pyspark.register.geo_registrator import GeoSparkRegistrator
 def find_spark_version() -> str:
     from pyspark.version import __version__
     major_version = __version__.split(".")[:-1]
-    return ".".join(major_version)
+    return "_".join(major_version)
 
 
 abs_path = path.abspath(path.dirname(__file__))
