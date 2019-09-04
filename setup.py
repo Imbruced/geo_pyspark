@@ -12,12 +12,13 @@ def create_data_files() -> List[Tuple[str, List[str]]]:
     data_files = []
     jars_path = os.path.join(here, jars_relative_path)
     for version in os.listdir(jars_path):
-        version_path = os.path.join(jars_path, version)
-        jar_files = [os.path.join(jars_relative_path, version, jar_file) for jar_file in os.listdir(version_path)]
-        print(jar_files)
-        data_files.append((os.path.join(jars_relative_path, version), jar_files))
+        if version != "__init__.py":
+            version_path = os.path.join(jars_path, version)
+            jar_files = [os.path.join(jars_relative_path, version, jar_file) for jar_file in os.listdir(version_path)]
+            data_files.append((os.path.join(jars_relative_path, version), jar_files))
     return data_files
 
+print(here)
 
 setup(
     name='geo_pyspark',
@@ -32,5 +33,6 @@ setup(
     project_urls={
         'Bug Reports': 'https://github.com/Imbruced/geo_pyspark'
     },
+    package_data={'geo_pyspark.jars.2_3': ["*.jar"]},
     data_files=create_data_files()
 )
