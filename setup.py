@@ -33,6 +33,9 @@ setup(
     project_urls={
         'Bug Reports': 'https://github.com/Imbruced/geo_pyspark'
     },
-    package_data={'geo_pyspark.jars.2_3': ["*.jar"]},
+    package_data={
+        'geo_pyspark.jars.2_3': ["*.jar"],
+        'geo_pyspark.jars.2_4': ["*.jar"]
+    },
     data_files=create_data_files()
 )
