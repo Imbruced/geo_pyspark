@@ -35,7 +35,8 @@ setup(
     },
     package_data={
         'geo_pyspark.jars.2_3': ["*.jar"],
-        'geo_pyspark.jars.2_4': ["*.jar"]
+        'geo_pyspark.jars.2_4': ["*.jar"],
+        'geo_pyspark.jars.2_2': ["*.jar"]
     },
     data_files=create_data_files()
 )
