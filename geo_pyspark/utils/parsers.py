@@ -23,9 +23,9 @@ class PointParser(GeometryParser):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, bin_parser: BinaryParser) -> Point:
-        x = bin_parser.read_double()
-        y = bin_parser.read_double()
+    def deserialize(cls, parser: BinaryParser) -> Point:
+        x = parser.read_double()
+        y = parser.read_double()
         return Point(x, y)
 
 
@@ -38,7 +38,7 @@ class UndefinedParser(GeometryParser):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, bytes: bytearray) -> BaseGeometry:
+    def deserialize(cls, parser: BinaryParser) -> BaseGeometry:
         raise NotImplementedError()
 
 
@@ -51,11 +51,11 @@ class PolyLineParser(GeometryParser):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, bytes: bytearray) -> Union[LineString, MultiLineString]:
+    def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
         raise NotImplementedError()
 
 
-def read_coordinates(parser, read_scale):
+def read_coordinates(parser: BinaryParser, read_scale: int):
     coordinates = []
     for i in range(read_scale):
         coordinates.append((parser.read_double(), parser.read_double()))
@@ -71,7 +71,7 @@ class PolygonParser(GeometryParser):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, parser) -> Union[Polygon, MultiPolygon]:
+    def deserialize(cls, parser: BinaryParser) -> Union[Polygon, MultiPolygon]:
         """TODO exception handling for shapely constructors"""
         for x in range(4):
             parser.read_double()
@@ -84,14 +84,6 @@ class PolygonParser(GeometryParser):
             cs_ring = read_coordinates(parser, read_scale)
             polygons.append(Polygon(cs_ring))
         return MultiPolygon(polygons)
-
-    @staticmethod
-    def read_offsets(parser, num_parts, max_offset):
-        offsets = []
-        for i in range(num_parts):
-            offsets.append(parser.read_int())
-        offsets.append(max_offset)
-        return offsets
 
 
 @attr.s
