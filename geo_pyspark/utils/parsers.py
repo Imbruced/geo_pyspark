@@ -107,5 +107,11 @@ class MultiPointParser(GeometryParser):
         raise NotImplementedError()
 
     @classmethod
-    def deserialize(cls, bytes: bytearray) -> MultiPoint:
-        raise NotImplementedError()
+    def deserialize(cls, parser: BinaryParser) -> MultiPoint:
+        for _ in range(4):
+            parser.read_double()
+        number_of_points = parser.read_int()
+
+        coordinates = read_coordinates(parser, number_of_points)
+
+        return MultiPoint(coordinates)
