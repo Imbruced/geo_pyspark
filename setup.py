@@ -1,24 +1,9 @@
-import os
-from typing import Tuple, List
-
 from setuptools import setup, find_packages
 from os import path
 
 here = path.abspath(path.dirname(__file__))
 jars_relative_path = "geo_pyspark/jars"
 
-
-def create_data_files() -> List[Tuple[str, List[str]]]:
-    data_files = []
-    jars_path = os.path.join(here, jars_relative_path)
-    for version in os.listdir(jars_path):
-        if version != "__init__.py":
-            version_path = os.path.join(jars_path, version)
-            jar_files = [os.path.join(jars_relative_path, version, jar_file) for jar_file in os.listdir(version_path)]
-            data_files.append((os.path.join(jars_relative_path, version), jar_files))
-    return data_files
-
-print(here)
 
 setup(
     name='geo_pyspark',
@@ -35,7 +20,8 @@ setup(
     },
     package_data={
         'geo_pyspark.jars.2_3': ["*.jar"],
-        'geo_pyspark.jars.2_4': ["*.jar"]
-    },
-    data_files=create_data_files()
+        'geo_pyspark.jars.2_4': ["*.jar"],
+        'geo_pyspark.jars.2_2': ["*.jar"]
+
+    }
 )
