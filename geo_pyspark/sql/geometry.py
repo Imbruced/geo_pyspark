@@ -3,7 +3,7 @@ from enum import Enum
 import attr
 from shapely.geometry.base import BaseGeometry
 
-from geo_pyspark.exceptions import GeometryUnavailableException
+from geo_pyspark.sql.exceptions import GeometryUnavailableException
 from geo_pyspark.utils.abstract_parser import GeometryParser
 from geo_pyspark.utils.binary_parser import BinaryParser
 from geo_pyspark.utils.decorators import classproperty
