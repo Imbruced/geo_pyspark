@@ -15,6 +15,18 @@ from geo_pyspark.utils.binary_parser import BinaryParser
 
 
 @attr.s
+class OffsetsReader:
+
+    @staticmethod
+    def read_offsets(parser, num_parts, max_offset):
+        offsets = []
+        for i in range(num_parts):
+            offsets.append(parser.read_int())
+        offsets.append(max_offset)
+        return offsets
+
+
+@attr.s
 class PointParser(GeometryParser):
     name = "Point"
 
@@ -77,7 +89,7 @@ class PolygonParser(GeometryParser):
             parser.read_double()
         num_rings = parser.read_int()
         num_points = parser.read_int()
-        offsets = cls.read_offsets(parser, num_parts=num_rings, max_offset=num_points)
+        offsets = OffsetsReader.read_offsets(parser, num_parts=num_rings, max_offset=num_points)
         polygons = []
         for i in range(num_rings):
             read_scale = offsets[i + 1] - offsets[i]
