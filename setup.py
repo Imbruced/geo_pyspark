@@ -22,6 +22,6 @@ setup(
         'geo_pyspark.jars.2_3': ["*.jar"],
         'geo_pyspark.jars.2_4': ["*.jar"],
         'geo_pyspark.jars.2_2': ["*.jar"]
-
     }
 )
+
