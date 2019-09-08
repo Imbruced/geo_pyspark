@@ -1,7 +1,7 @@
 from typing import Union
 
 import attr
-from shapely.geometry import Point
+from shapely.geometry import Point, LinearRing
 from shapely.geometry import Polygon
 from shapely.geometry import MultiPolygon
 from shapely.geometry import LineString
@@ -9,9 +9,16 @@ from shapely.geometry import MultiLineString
 from shapely.geometry import MultiPoint
 from shapely.geometry.base import BaseGeometry
 
-
+from geo_pyspark.sql.exceptions import InvalidGeometryException
 from geo_pyspark.utils.abstract_parser import GeometryParser
 from geo_pyspark.utils.binary_parser import BinaryParser
+
+
+def read_coordinates(parser: BinaryParser, read_scale: int):
+    coordinates = []
+    for i in range(read_scale):
+        coordinates.append((parser.read_double(), parser.read_double()))
+    return coordinates
 
 
 @attr.s
@@ -64,14 +71,27 @@ class PolyLineParser(GeometryParser):
 
     @classmethod
     def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
-        raise NotImplementedError()
+        for _ in range(4):
+            parser.read_double()
 
+        num_parts = parser.read_int()
+        num_points = parser.read_int()
 
-def read_coordinates(parser: BinaryParser, read_scale: int):
-    coordinates = []
-    for i in range(read_scale):
-        coordinates.append((parser.read_double(), parser.read_double()))
-    return coordinates
+        offsets = OffsetsReader.read_offsets(parser, num_parts, num_points)
+        lines = []
+        for i in range(num_parts):
+            read_scale = offsets[i + 1] - offsets[i]
+            coordinate_sequence = read_coordinates(parser, read_scale)
+            lines.append(LineString(coordinate_sequence))
+
+        if num_parts == 1:
+            line = lines[0]
+        elif num_parts > 1:
+            line = MultiLineString(lines)
+        else:
+            raise InvalidGeometryException("Invalid geometry")
+
+        return line
 
 
 @attr.s
