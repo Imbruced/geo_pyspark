@@ -84,17 +84,42 @@ class PolygonParser(GeometryParser):
 
     @classmethod
     def deserialize(cls, parser: BinaryParser) -> Union[Polygon, MultiPolygon]:
-        """TODO exception handling for shapely constructors"""
-        for x in range(4):
+        for _ in range(4):
             parser.read_double()
         num_rings = parser.read_int()
         num_points = parser.read_int()
         offsets = OffsetsReader.read_offsets(parser, num_parts=num_rings, max_offset=num_points)
         polygons = []
+        holes = []
+        shells_ccw = False
+        shell = None
         for i in range(num_rings):
             read_scale = offsets[i + 1] - offsets[i]
             cs_ring = read_coordinates(parser, read_scale)
-            polygons.append(Polygon(cs_ring))
+            if (len(cs_ring)) < 3:
+                continue
+
+            ring = LinearRing(cs_ring)
+
+            if shell is None:
+                shell = ring
+                shells_ccw = LinearRing(cs_ring).is_ccw
+            elif LinearRing(cs_ring).is_ccw != shells_ccw:
+                holes.append(ring)
+            else:
+                if shell is not None:
+                    polygon = Polygon(shell, holes)
+                    polygons.append(polygon)
+                shell = ring
+                holes = []
+
+        if shell is not None:
+            geometry = Polygon(shell, holes)
+            polygons.append(geometry)
+
+        if polygons.__len__() == 1:
+            return polygons[0]
+
         return MultiPolygon(polygons)
 
 
