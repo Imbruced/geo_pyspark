@@ -6,7 +6,6 @@ from shapely.geometry.base import BaseGeometry
 from geo_pyspark.utils.binary_parser import BinaryParser
 
 
-
 @attr.s
 class GeometryParser(ABC):
 
