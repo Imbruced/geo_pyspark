@@ -2,6 +2,7 @@ import attr
 from pyspark.sql import SparkSession
 from geo_pyspark.sql.types import Geometry
 
+
 @attr.s
 class GeoSparkRegistrator:
 

@@ -1,7 +1,7 @@
 from pyspark.sql.types import DataType, UserDefinedType, StructType, StructField
 
 
-from geo_pyspark.gis.geometry import GeometryFactory
+from geo_pyspark.sql.geometry import GeometryFactory
 
 
 class GeometryType(DataType):

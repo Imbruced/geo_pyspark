@@ -18,6 +18,6 @@ spark_version = find_spark_version()
 jars_path = os.path.join(module_path, "jars", spark_version)
 
 findspark.add_jars(os.path.join(jars_path, "*"))
-findspark.init(os.environ["SPARK_HOME"])
+findspark.init()
 
 __all__ = ["GeoSparkRegistrator"]
