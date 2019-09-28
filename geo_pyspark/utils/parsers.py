@@ -9,9 +9,11 @@ from shapely.geometry import MultiLineString
 from shapely.geometry import MultiPoint
 from shapely.geometry.base import BaseGeometry
 
+from geo_pyspark.sql.enums import ShapeEnum
 from geo_pyspark.sql.exceptions import InvalidGeometryException
+from geo_pyspark.sql.geometry import GeomEnum
 from geo_pyspark.utils.abstract_parser import GeometryParser
-from geo_pyspark.utils.binary_parser import BinaryParser
+from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 
 
 def read_coordinates(parser: BinaryParser, read_scale: int):
@@ -38,8 +40,15 @@ class PointParser(GeometryParser):
     name = "Point"
 
     @classmethod
-    def serialize(cls):
-        raise NotImplementedError()
+    def serialize(cls, obj: Point, binary_buffer: BinaryBuffer):
+        if isinstance(obj, Point):
+            binary_buffer.put_byte(ShapeEnum.shape.value)
+            binary_buffer.put_byte(GeomEnum.point.value)
+            binary_buffer.put_double(obj.x)
+            binary_buffer.put_double(obj.y)
+        else:
+            raise TypeError(f"Need a {cls.name} instance")
+        return binary_buffer.byte_array
 
     @classmethod
     def deserialize(cls, parser: BinaryParser) -> Point:
