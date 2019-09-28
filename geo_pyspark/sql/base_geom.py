@@ -1,13 +1,12 @@
 from abc import ABC
 from typing import Sequence
 
-from shapely.geometry import Point as ShapelyPoint, LinearRing as ShapelyLinearRing
+from shapely.geometry import Point as ShapelyPoint
 from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import MultiPolygon as ShapelyMultiPolygon
 from shapely.geometry import LineString as ShapelyLineString
 from shapely.geometry import MultiLineString as ShapelyMultiLineString
 from shapely.geometry import MultiPoint as ShapelyMultiPoint
-import attr
 
 from geo_pyspark.sql.types import GeometryType
 from geo_pyspark.utils.types import numeric
@@ -36,8 +35,9 @@ class LineString(ShapelyLineString):
 
 class MultiLineString(ShapelyMultiLineString):
     __UDT__ = GeometryType()
-    pass
 
+    def __init__(self, lines):
+        super().__init__(lines)
 
 class MultiLineString(ShapelyMultiLineString):
     __UDT__ = GeometryType()
