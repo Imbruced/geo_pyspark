@@ -57,3 +57,31 @@ class BinaryParser:
         if type(bytes) == list:
             bytes = bytearray(bytes)
         return bytes
+
+
+@attr.s
+class BinaryBuffer:
+
+    array = attr.ib(default=[])
+
+    def put_double(self, value):
+        bytes = self.__pack("d", value)
+        self.__extend_buffer(bytes)
+
+    def put_int(self, value):
+        bytes = self.__pack("i", value)
+        self.__extend_buffer(bytes)
+
+    def put_byte(self, value):
+        bytes = self.__pack("b", value)
+        self.__extend_buffer(bytes)
+
+    def __pack(self, type, value):
+        return struct.pack(type, value)
+
+    def __extend_buffer(self, bytes):
+        self.array.extend(list(bytes))
+
+    @property
+    def byte_array(self):
+        return self.array
