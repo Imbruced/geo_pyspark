@@ -30,8 +30,8 @@ class MultiPoint(ShapelyMultiPoint):
 class LineString(ShapelyLineString):
     __UDT__ = GeometryType()
 
-    def __init__(self, x: numeric, y: numeric):
-        super().__init__(x, y)
+    def __init__(self, coordinates: Sequence[Sequence[numeric]]):
+        super().__init__(coordinates)
 
 
 class MultiLineString(ShapelyMultiLineString):
