@@ -39,6 +39,7 @@ class MultiLineString(ShapelyMultiLineString):
     def __init__(self, lines):
         super().__init__(lines)
 
-class MultiLineString(ShapelyMultiLineString):
+
+class Polygon(ShapelyPolygon):
     __UDT__ = GeometryType()
     pass
