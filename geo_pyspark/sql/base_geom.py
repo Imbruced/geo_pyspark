@@ -43,3 +43,8 @@ class MultiLineString(ShapelyMultiLineString):
 class Polygon(ShapelyPolygon):
     __UDT__ = GeometryType()
     pass
+
+
+class MultiPolygon(ShapelyMultiPolygon):
+    __UDT__ = GeometryType()
+    pass
