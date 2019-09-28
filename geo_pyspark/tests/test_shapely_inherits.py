@@ -1,8 +1,10 @@
 from unittest import TestCase
 
 from shapely.geometry import Point as ShapelyPoint
+from shapely.geometry import MultiPoint as ShapelyMultiPoint
+from shapely.geometry import LineString as ShapelyLineString
 
-from geo_pyspark.sql.base_geom import Point
+from geo_pyspark.sql.base_geom import Point, MultiPoint, LineString
 from geo_pyspark.sql.types import GeometryType
 
 
@@ -19,7 +21,9 @@ class TestGeometries(TestCase):
         self.assertEqual(type(multipoint.__UDT__), GeometryType)
 
     def test_linestring(self):
-        pass
+        linestring = LineString([[21.00, 52.00], [22.00, 52.00], [24.00, 54.00]])
+        self.assertEqual(isinstance(linestring, ShapelyLineString), True)
+        self.assertEqual(type(linestring.__UDT__), GeometryType)
 
     def test_multilinestring(self):
         pass
