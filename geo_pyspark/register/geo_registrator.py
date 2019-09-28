@@ -1,6 +1,15 @@
 import attr
 from pyspark.sql import SparkSession
-# from geo_pyspark.sql.types import GeometryType
+from shapely.geometry import Point, MultiPoint, Polygon, MultiPolygon, LineString, MultiLineString
+
+from geo_pyspark.sql.types import GeometryType
+
+Point.__UDT__ = GeometryType()
+MultiPoint.__UDT__ = GeometryType()
+Polygon.__UDT__ = GeometryType()
+MultiPolygon.__UDT__ = GeometryType()
+LineString.__UDT__ = GeometryType()
+MultiLineString.__UDT__ = GeometryType()
 
 
 @attr.s
