@@ -1,6 +1,6 @@
 import attr
 from pyspark.sql import SparkSession
-from geo_pyspark.sql.types import Geometry
+# from geo_pyspark.sql.types import GeometryType
 
 
 @attr.s
