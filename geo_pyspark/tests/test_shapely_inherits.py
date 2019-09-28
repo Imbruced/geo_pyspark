@@ -14,7 +14,9 @@ class TestGeometries(TestCase):
         self.assertEqual(type(point.__UDT__), GeometryType)
 
     def test_multipoint(self):
-        pass
+        multipoint = MultiPoint([[21.00, 52.00], [22.00, 52.00]])
+        self.assertEqual(isinstance(multipoint, ShapelyMultiPoint), True)
+        self.assertEqual(type(multipoint.__UDT__), GeometryType)
 
     def test_linestring(self):
         pass
