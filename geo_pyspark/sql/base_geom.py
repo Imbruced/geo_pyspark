@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Sequence
 
 from shapely.geometry import Point as ShapelyPoint, LinearRing as ShapelyLinearRing
 from shapely.geometry import Polygon as ShapelyPolygon
@@ -20,7 +21,11 @@ class Point(ShapelyPoint):
 
 
 class MultiPoint(ShapelyMultiPoint):
-    pass
+    __UDT__ = GeometryType()
+
+    def __init__(self, points: Sequence[Sequence[numeric]]):
+        super().__init__(points)
+
 
 class LineString(ShapelyLineString):
     __UDT__ = GeometryType()
