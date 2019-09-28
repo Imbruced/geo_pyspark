@@ -1,29 +1,14 @@
-from enum import Enum
+from typing import List
 
 import attr
 from shapely.geometry.base import BaseGeometry
 
+from geo_pyspark.sql.enums import GeomEnum
 from geo_pyspark.sql.exceptions import GeometryUnavailableException
 from geo_pyspark.utils.abstract_parser import GeometryParser
-from geo_pyspark.utils.binary_parser import BinaryParser
+from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 from geo_pyspark.utils.decorators import classproperty
 from geo_pyspark.utils.parsers import MultiPointParser, PolygonParser, PolyLineParser, PointParser, UndefinedParser
-
-
-class GeomEnum(Enum):
-    undefined = 0
-    point = 1
-    polyline = 3
-    polygon = 5
-    multipoint = 8
-
-    @classmethod
-    def has_value(cls, value):
-        return value in cls._value2member_map_
-
-    @classmethod
-    def get_name(cls, value):
-        return cls._value2member_map_[value].name
 
 
 @attr.s
@@ -41,6 +26,16 @@ class GeometryFactory:
             return geom
         else:
             raise GeometryUnavailableException(f"Can not deserialize object")
+
+    @classmethod
+    def to_bytes(cls, geom: BaseGeometry) -> List[int]:
+        geom_name = str(geom.__class__.__name__).lower()
+
+        try:
+            appr_parser = cls.parsers[geom_name]
+        except KeyError:
+            raise KeyError(f"Parser for geometry {geom_name}")
+        return appr_parser.serialize(geom, BinaryBuffer())
 
     @classproperty
     def parsers(self):
