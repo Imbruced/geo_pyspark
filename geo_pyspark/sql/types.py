@@ -1,7 +1,4 @@
-import attr
-from pyspark.sql.types import UserDefinedType, StructType, StructField, DataType, StringType, ArrayType, ByteType
-from pyspark.sql import types as t
-from shapely.geometry.base import BaseGeometry
+from pyspark.sql.types import UserDefinedType, ArrayType, ByteType
 
 from geo_pyspark.sql.geometry import GeometryFactory
 
@@ -19,7 +16,7 @@ class GeometryType(UserDefinedType):
         return self.serialize(obj)
 
     def serialize(self, obj):
-        return [0, 1, 0, 0, 0, 0, 0, 0, 53, 64, 0, 0, 0, 0, 0, 0, 74, 64, 1, 3, 1, -127]
+        return GeometryFactory.to_bytes(obj)
 
     def deserialize(self, datum):
         geom = GeometryFactory.geometry_from_bytes(datum)
