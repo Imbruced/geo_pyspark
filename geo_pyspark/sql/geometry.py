@@ -43,6 +43,8 @@ class GeometryFactory:
             undefined=UndefinedParser,
             point=PointParser,
             polyline=PolyLineParser,
+            multilinestring=PolyLineParser,
+            linestring=PolyLineParser,
             polygon=PolygonParser,
             multipoint=MultiPointParser
         )
