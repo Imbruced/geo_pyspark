@@ -85,6 +85,19 @@ class BinaryBuffer:
     def __translate_values(self, values):
         return [el if el < 128 else el - 256 for el in values]
 
+    def add_empty_bytes(self, tp: str, number_of_empty):
+        if tp == "double":
+            for _ in range(number_of_empty):
+                self.put_double(0.0)
+        elif tp == "int":
+            for _ in range(number_of_empty):
+                self.put_int(0)
+        elif tp == "double":
+            for _ in range(number_of_empty):
+                self.put_byte(0)
+        else:
+            raise TypeError(f"Passed {tp} is not available")
+
     @property
     def byte_array(self):
         return self.__translate_values(self.array)
