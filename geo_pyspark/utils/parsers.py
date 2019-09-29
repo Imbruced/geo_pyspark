@@ -60,8 +60,7 @@ class PointParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: Point, binary_buffer: BinaryBuffer):
         if isinstance(obj, Point):
-            binary_buffer.put_byte(ShapeEnum.shape.value)
-            binary_buffer.put_byte(GeomEnum.point.value)
+            add_shape_geometry_metadata(GeomEnum.point.value, binary_buffer)
             binary_buffer.put_double(obj.x)
             binary_buffer.put_double(obj.y)
             binary_buffer.put_byte(-127)
@@ -96,18 +95,15 @@ class LineStringParser:
     @classmethod
     def serialize(cls, obj: LineString, binary_buffer: BinaryBuffer):
         if isinstance(obj, LineString):
-            binary_buffer.put_byte(ShapeEnum.shape.value)
-            binary_buffer.put_byte(GeomEnum.polyline.value)
-            for _ in range(4):
-                binary_buffer.put_double(0.0)
+            add_shape_geometry_metadata(GeomEnum.polyline.value, binary_buffer)
+            binary_buffer.add_empty_bytes("double", 4)
             num_points = obj.coords.__len__()
             binary_buffer.put_int(1)
             binary_buffer.put_int(num_points)
             binary_buffer.put_int(0)
 
-            for coordinate in obj.coords:
-                binary_buffer.put_double(Point(coordinate).x)
-                binary_buffer.put_double(Point(coordinate).y)
+            put_coordinates(obj.coords, binary_buffer)
+
             binary_buffer.put_byte(-127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
@@ -125,10 +121,8 @@ class MultiLineStringParser:
     @classmethod
     def serialize(cls, obj: MultiLineString, binary_buffer: BinaryBuffer):
         if isinstance(obj, MultiLineString):
-            binary_buffer.put_byte(ShapeEnum.shape.value)
-            binary_buffer.put_byte(GeomEnum.polyline.value)
-            for _ in range(4):
-                binary_buffer.put_double(0.0)
+            add_shape_geometry_metadata(GeomEnum.polyline.value, binary_buffer)
+            binary_buffer.add_empty_bytes("double", 4)
 
             num_parts = len(obj.geoms)
             num_points = sum([len(el.coords) for el in obj.geoms])
@@ -142,9 +136,7 @@ class MultiLineStringParser:
                 offset = offset + obj.geoms[_].coords.__len__()
 
             for geom in obj.geoms:
-                for coordinate in geom.coords:
-                    binary_buffer.put_double(Point(coordinate).x)
-                    binary_buffer.put_double(Point(coordinate).y)
+                put_coordinates(geom.coords, binary_buffer)
 
             binary_buffer.put_byte(-127)
         else:
@@ -196,14 +188,12 @@ class PolygonParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: Polygon, binary_buffer: BinaryBuffer):
         if isinstance(obj, Polygon):
-            binary_buffer.put_byte(ShapeEnum.shape.value)
-            binary_buffer.put_byte(GeomEnum.polygon.value)
+            add_shape_geometry_metadata(GeomEnum.polygon.value, binary_buffer)
             num_rings = obj.interiors.__len__() + 1
             num_points = sum([el.coords.__len__() for el in obj.interiors]) + \
                 obj.exterior.coords.__len__()
 
-            for _ in range(4):
-                binary_buffer.put_double(0.0)
+            binary_buffer.add_empty_bytes("double", 4)
 
             binary_buffer.put_int(num_rings)
             binary_buffer.put_int(num_points)
@@ -215,19 +205,11 @@ class PolygonParser(GeometryParser):
                 binary_buffer.put_int(offset)
                 offset = offset + obj.interiors[_].coords.__len__()
 
-            for coordinate in obj.exterior.coords:
-                binary_buffer.put_double(Point(coordinate).x)
-                binary_buffer.put_double(Point(coordinate).y)
+            put_coordinates(obj.exterior.coords, binary_buffer)
 
             for ring in obj.interiors:
-                if ring.is_ccw:
-                    coordinates = ring.coords
-                else:
-                    coordinates = reversed(ring.coords)
-
-                for coordinate in coordinates:
-                    binary_buffer.put_double(Point(coordinate).x)
-                    binary_buffer.put_double(Point(coordinate).y)
+                coordinates = reverse_linear_ring(ring)
+                put_coordinates(coordinates, binary_buffer)
 
             binary_buffer.put_byte(-127)
 
@@ -301,10 +283,8 @@ class MultiPointParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: MultiPoint, binary_buffer: BinaryBuffer):
         if isinstance(obj, MultiPoint):
-            binary_buffer.put_byte(ShapeEnum.shape.value)
-            binary_buffer.put_byte(GeomEnum.multipoint.value)
-            for _ in range(4):
-                binary_buffer.put_double(0.0)
+            add_shape_geometry_metadata(GeomEnum.multipoint.value, binary_buffer)
+            binary_buffer.add_empty_bytes("double", 4)
             binary_buffer.put_int(len(obj.geoms))
             for point in obj.geoms:
                 binary_buffer.put_double(point.x)
