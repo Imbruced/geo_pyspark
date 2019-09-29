@@ -59,10 +59,10 @@ class BinaryParser:
         return bytes
 
 
-@attr.s
 class BinaryBuffer:
 
-    array = attr.ib(default=[])
+    def __init__(self):
+        self.array = []
 
     def put_double(self, value):
         bytes = self.__pack("d", value)
@@ -82,6 +82,9 @@ class BinaryBuffer:
     def __extend_buffer(self, bytes):
         self.array.extend(list(bytes))
 
+    def __translate_values(self, values):
+        return [el if el < 128 else el - 256 for el in values]
+
     @property
     def byte_array(self):
-        return self.array
+        return self.__translate_values(self.array)
