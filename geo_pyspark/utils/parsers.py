@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Iterable, Tuple, List
 
 import attr
 from shapely.geometry import Point, LinearRing
@@ -14,6 +14,7 @@ from geo_pyspark.sql.exceptions import InvalidGeometryException
 from geo_pyspark.sql.geometry import GeomEnum
 from geo_pyspark.utils.abstract_parser import GeometryParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
+from geo_pyspark.utils.types import numeric
 
 
 def read_coordinates(parser: BinaryParser, read_scale: int):
