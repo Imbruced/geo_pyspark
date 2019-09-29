@@ -8,7 +8,8 @@ from geo_pyspark.sql.exceptions import GeometryUnavailableException
 from geo_pyspark.utils.abstract_parser import GeometryParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 from geo_pyspark.utils.decorators import classproperty
-from geo_pyspark.utils.parsers import MultiPointParser, PolygonParser, PolyLineParser, PointParser, UndefinedParser
+from geo_pyspark.utils.parsers import MultiPointParser, PolygonParser, PolyLineParser, PointParser, UndefinedParser, \
+    MultiLineStringParser, LineStringParser, MultiPolygonParser
 
 
 @attr.s
@@ -43,9 +44,10 @@ class GeometryFactory:
             undefined=UndefinedParser,
             point=PointParser,
             polyline=PolyLineParser,
-            multilinestring=PolyLineParser,
-            linestring=PolyLineParser,
+            multilinestring=MultiLineStringParser,
+            linestring=LineStringParser,
             polygon=PolygonParser,
-            multipoint=MultiPointParser
+            multipoint=MultiPointParser,
+            multipolygon=MultiPolygonParser
         )
         return geom_cls
