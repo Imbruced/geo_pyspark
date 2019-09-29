@@ -104,4 +104,3 @@ class TestGeometryConvert(TestCase):
                 ((40, 40), (30, 30), (40, 20), (30, 10))
             ]).wkt
         )
-
