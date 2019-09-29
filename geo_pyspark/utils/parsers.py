@@ -144,13 +144,7 @@ class PolyLineParser(GeometryParser):
 
     @classmethod
     def serialize(cls, obj: Union[MultiLineString, LineString], binary_buffer: BinaryBuffer):
-        if isinstance(obj, MultiLineString):
-            MultiLineStringParser.serialize(obj, binary_buffer)
-        elif isinstance(obj, LineString):
-            LineStringParser.serialize(obj, binary_buffer)
-        else:
-            raise TypeError(f"Need a {MultiLineStringParser.name} instance or {LineStringParser.name}")
-        return binary_buffer.byte_array
+        raise NotImplementedError("")
 
     @classmethod
     def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
@@ -182,8 +176,46 @@ class PolygonParser(GeometryParser):
     name = "Polygon"
 
     @classmethod
-    def serialize(cls):
-        raise NotImplementedError()
+    def serialize(cls, obj: Polygon, binary_buffer: BinaryBuffer):
+        if isinstance(obj, Polygon):
+            binary_buffer.put_byte(ShapeEnum.shape.value)
+            binary_buffer.put_byte(GeomEnum.polygon.value)
+            num_rings = obj.interiors.__len__() + 1
+            num_points = sum([el.coords.__len__() for el in obj.interiors]) + \
+                obj.exterior.coords.__len__()
+
+            for _ in range(4):
+                binary_buffer.put_double(0.0)
+
+            binary_buffer.put_int(num_rings)
+            binary_buffer.put_int(num_points)
+
+            offset = 0
+            binary_buffer.put_int(offset)
+            offset += obj.exterior.coords.__len__()
+            for _ in range(num_rings-1):
+                binary_buffer.put_int(offset)
+                offset = offset + obj.interiors[_].coords.__len__()
+
+            for coordinate in obj.exterior.coords:
+                binary_buffer.put_double(Point(coordinate).x)
+                binary_buffer.put_double(Point(coordinate).y)
+
+            for ring in obj.interiors:
+                if ring.is_ccw:
+                    coordinates = ring.coords
+                else:
+                    coordinates = reversed(ring.coords)
+
+                for coordinate in coordinates:
+                    binary_buffer.put_double(Point(coordinate).x)
+                    binary_buffer.put_double(Point(coordinate).y)
+
+            binary_buffer.put_byte(-127)
+
+        else:
+            raise TypeError(f"Need a {cls.name} instance")
+        return binary_buffer.byte_array
 
     @classmethod
     def deserialize(cls, parser: BinaryParser) -> Union[Polygon, MultiPolygon]:
@@ -224,6 +256,24 @@ class PolygonParser(GeometryParser):
             return polygons[0]
 
         return MultiPolygon(polygons)
+
+
+@attr.s
+class MultiPolygonParser(GeometryParser):
+    name = "MultiPolygon"
+
+    @classmethod
+    def serialize(cls, obj: MultiPolygon, binary_buffer: BinaryBuffer):
+        if isinstance(obj, MultiPolygon):
+            raise NotImplementedError("Currently not supported")
+        else:
+            raise TypeError(f"Need a {cls.name} instance")
+
+        return binary_buffer.byte_array
+
+    @classmethod
+    def deserialize(cls, parser: BinaryParser) -> MultiPolygon:
+        raise NotImplementedError("For multipolygon, PolygonParser class is used.")
 
 
 @attr.s
