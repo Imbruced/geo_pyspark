@@ -46,6 +46,7 @@ class PointParser(GeometryParser):
             binary_buffer.put_byte(GeomEnum.point.value)
             binary_buffer.put_double(obj.x)
             binary_buffer.put_double(obj.y)
+            binary_buffer.put_int(-127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
@@ -157,7 +158,7 @@ class MultiPointParser(GeometryParser):
     name = "MultiPoint"
 
     @classmethod
-    def serialize(cls):
+    def serialize(cls, obj: Point, binary_buffer: BinaryBuffer):
         raise NotImplementedError()
 
     @classmethod
