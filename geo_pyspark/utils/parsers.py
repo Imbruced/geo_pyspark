@@ -46,7 +46,7 @@ class PointParser(GeometryParser):
             binary_buffer.put_byte(GeomEnum.point.value)
             binary_buffer.put_double(obj.x)
             binary_buffer.put_double(obj.y)
-            binary_buffer.put_int(-127)
+            binary_buffer.put_byte(-127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
@@ -63,7 +63,7 @@ class UndefinedParser(GeometryParser):
     name = "Undefined"
 
     @classmethod
-    def serialize(cls):
+    def serialize(cls, obj: BaseGeometry, binary_buffer: BinaryBuffer):
         raise NotImplementedError()
 
     @classmethod
@@ -72,12 +72,85 @@ class UndefinedParser(GeometryParser):
 
 
 @attr.s
+class LineStringParser:
+    name = "LineString"
+
+    @classmethod
+    def serialize(cls, obj: LineString, binary_buffer: BinaryBuffer):
+        if isinstance(obj, LineString):
+            binary_buffer.put_byte(ShapeEnum.shape.value)
+            binary_buffer.put_byte(GeomEnum.polyline.value)
+            for _ in range(4):
+                binary_buffer.put_double(0.0)
+            num_points = obj.coords.__len__()
+            binary_buffer.put_int(1)
+            binary_buffer.put_int(num_points)
+            binary_buffer.put_int(0)
+
+            for coordinate in obj.coords:
+                binary_buffer.put_double(Point(coordinate).x)
+                binary_buffer.put_double(Point(coordinate).y)
+            binary_buffer.put_byte(-127)
+        else:
+            raise TypeError(f"Need a {cls.name} instance")
+        return binary_buffer.byte_array
+
+    @classmethod
+    def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
+        raise NotImplemented()
+
+
+@attr.s
+class MultiLineStringParser:
+    name = "MultiLineString"
+
+    @classmethod
+    def serialize(cls, obj: MultiLineString, binary_buffer: BinaryBuffer):
+        if isinstance(obj, MultiLineString):
+            binary_buffer.put_byte(ShapeEnum.shape.value)
+            binary_buffer.put_byte(GeomEnum.polyline.value)
+            for _ in range(4):
+                binary_buffer.put_double(0.0)
+
+            num_parts = len(obj.geoms)
+            num_points = sum([len(el.coords) for el in obj.geoms])
+
+            binary_buffer.put_int(num_parts)
+            binary_buffer.put_int(num_points)
+
+            offset = 0
+            for _ in range(num_parts):
+                binary_buffer.put_int(offset)
+                offset = offset + obj.geoms[_].coords.__len__()
+
+            for geom in obj.geoms:
+                for coordinate in geom.coords:
+                    binary_buffer.put_double(Point(coordinate).x)
+                    binary_buffer.put_double(Point(coordinate).y)
+
+            binary_buffer.put_byte(-127)
+        else:
+            raise TypeError(f"Need a {cls.name} instance")
+        return binary_buffer.byte_array
+
+    @classmethod
+    def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
+        raise NotImplemented()
+
+
+@attr.s
 class PolyLineParser(GeometryParser):
     name = "Polyline"
 
     @classmethod
-    def serialize(cls):
-        raise NotImplementedError()
+    def serialize(cls, obj: Union[MultiLineString, LineString], binary_buffer: BinaryBuffer):
+        if isinstance(obj, MultiLineString):
+            MultiLineStringParser.serialize(obj, binary_buffer)
+        elif isinstance(obj, LineString):
+            LineStringParser.serialize(obj, binary_buffer)
+        else:
+            raise TypeError(f"Need a {MultiLineStringParser.name} instance or {LineStringParser.name}")
+        return binary_buffer.byte_array
 
     @classmethod
     def deserialize(cls, parser: BinaryParser) -> Union[LineString, MultiLineString]:
@@ -158,8 +231,20 @@ class MultiPointParser(GeometryParser):
     name = "MultiPoint"
 
     @classmethod
-    def serialize(cls, obj: Point, binary_buffer: BinaryBuffer):
-        raise NotImplementedError()
+    def serialize(cls, obj: MultiPoint, binary_buffer: BinaryBuffer):
+        if isinstance(obj, MultiPoint):
+            binary_buffer.put_byte(ShapeEnum.shape.value)
+            binary_buffer.put_byte(GeomEnum.multipoint.value)
+            for _ in range(4):
+                binary_buffer.put_double(0.0)
+            binary_buffer.put_int(len(obj.geoms))
+            for point in obj.geoms:
+                binary_buffer.put_double(point.x)
+                binary_buffer.put_double(point.y)
+            binary_buffer.put_byte(-127)
+        else:
+            raise TypeError(f"Need a {cls.name} instance")
+        return binary_buffer.byte_array
 
     @classmethod
     def deserialize(cls, parser: BinaryParser) -> MultiPoint:
