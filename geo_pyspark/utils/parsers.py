@@ -23,6 +23,24 @@ def read_coordinates(parser: BinaryParser, read_scale: int):
     return coordinates
 
 
+def put_coordinates(coordinates: Iterable[Iterable[numeric]], binary_buffer: BinaryBuffer):
+    for coordinate in coordinates:
+        binary_buffer.put_double(Point(coordinate).x)
+        binary_buffer.put_double(Point(coordinate).y)
+
+
+def add_shape_geometry_metadata(geom_type: int, binary_buffer: BinaryBuffer):
+    binary_buffer.put_byte(ShapeEnum.shape.value)
+    binary_buffer.put_byte(geom_type)
+
+
+def reverse_linear_ring(linear_ring: LinearRing) -> List[Tuple[numeric, numeric]]:
+    if linear_ring.is_ccw:
+        return linear_ring.coords
+    else:
+        return list(reversed(linear_ring.coords))
+
+
 @attr.s
 class OffsetsReader:
 
