@@ -164,5 +164,3 @@ class TestsSerializers(TestCase):
         ).createOrReplaceTempView("polygon")
         length = spark.sql("select st_area(geom) from polygon").collect()[0][0]
         self.assertEqual(length, 4.75)
-
-
