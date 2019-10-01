@@ -35,11 +35,34 @@ def add_shape_geometry_metadata(geom_type: int, binary_buffer: BinaryBuffer):
     binary_buffer.put_byte(geom_type)
 
 
-def reverse_linear_ring(linear_ring: LinearRing) -> List[Tuple[numeric, numeric]]:
-    if linear_ring.is_ccw:
+def reverse_linear_ring(linear_ring: LinearRing, ccw: bool = True) -> List[Tuple[numeric, numeric]]:
+    if linear_ring.is_ccw == ccw:
         return linear_ring.coords
     else:
         return list(reversed(linear_ring.coords))
+
+
+def get_number_of_polygon_points(geom: Polygon) -> int:
+    interior_point_num = sum([el.coords.__len__() for el in geom.interiors])
+    exterior_num_points = geom.exterior.coords.__len__()
+    return interior_point_num + exterior_num_points
+
+
+def get_number_of_rings(geom: Polygon) -> int:
+    return geom.interiors.__len__() + 1
+
+
+def add_offsets_to_polygon(geom: Polygon, binary_buffer: BinaryBuffer, initial_offset: int) -> int:
+    offset = initial_offset
+    num_rings = get_number_of_rings(geom)
+    binary_buffer.put_int(offset)
+    offset += geom.exterior.coords.__len__()
+    for _ in range(num_rings - 1):
+        binary_buffer.put_int(offset)
+        offset = offset + geom.interiors[_].coords.__len__()
+
+    return offset
+
 
 
 @attr.s
@@ -190,23 +213,20 @@ class PolygonParser(GeometryParser):
     def serialize(cls, obj: Polygon, binary_buffer: BinaryBuffer):
         if isinstance(obj, Polygon):
             add_shape_geometry_metadata(GeomEnum.polygon.value, binary_buffer)
-            num_rings = obj.interiors.__len__() + 1
-            num_points = sum([el.coords.__len__() for el in obj.interiors]) + \
-                obj.exterior.coords.__len__()
+
+            num_rings = get_number_of_rings(obj)
+
+            num_points = get_number_of_polygon_points(obj)
 
             binary_buffer.add_empty_bytes("double", 4)
 
             binary_buffer.put_int(num_rings)
             binary_buffer.put_int(num_points)
 
-            offset = 0
-            binary_buffer.put_int(offset)
-            offset += obj.exterior.coords.__len__()
-            for _ in range(num_rings-1):
-                binary_buffer.put_int(offset)
-                offset = offset + obj.interiors[_].coords.__len__()
+            add_offsets_to_polygon(obj, binary_buffer, 0)
 
-            put_coordinates(obj.exterior.coords, binary_buffer)
+            coordinates_exterior = reverse_linear_ring(obj.exterior, False)
+            put_coordinates(coordinates_exterior, binary_buffer)
 
             for ring in obj.interiors:
                 coordinates = reverse_linear_ring(ring)
@@ -266,10 +286,33 @@ class MultiPolygonParser(GeometryParser):
     @classmethod
     def serialize(cls, obj: MultiPolygon, binary_buffer: BinaryBuffer):
         if isinstance(obj, MultiPolygon):
-            raise NotImplementedError("Currently not supported")
+            num_polygons = len(obj.geoms)
+            num_points = sum([get_number_of_polygon_points(polygon) for polygon in obj.geoms])
+            num_rings = sum([get_number_of_rings(polygon) for polygon in obj.geoms])
+
+            add_shape_geometry_metadata(GeomEnum.polygon.value, binary_buffer)
+            binary_buffer.add_empty_bytes("double", 4)
+            binary_buffer.put_int(num_rings)
+            binary_buffer.put_int(num_points)
+
+            offset = 0
+            for geom in obj.geoms:
+                offset = add_offsets_to_polygon(geom, binary_buffer, offset)
+
+            for geom in obj.geoms:
+                coordinates_exterior = reverse_linear_ring(geom.exterior, False)
+                put_coordinates(coordinates_exterior, binary_buffer)
+
+                for ring in geom.interiors:
+                    coordinates = reverse_linear_ring(ring)
+                    put_coordinates(coordinates, binary_buffer)
+
+            binary_buffer.put_byte(1)
+            binary_buffer.put_byte(3)
+            binary_buffer.put_byte(1)
+            binary_buffer.put_byte(-127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
-
         return binary_buffer.byte_array
 
     @classmethod

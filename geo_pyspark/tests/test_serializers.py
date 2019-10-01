@@ -7,7 +7,7 @@ import geopandas as gpd
 from geo_pyspark.data import data_path
 from geo_pyspark.register import GeoSparkRegistrator
 from geo_pyspark.sql.types import GeometryType
-from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon
+from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon
 from pyspark.sql import types as t, SparkSession
 
 spark = SparkSession.builder.\
@@ -136,5 +136,33 @@ class TestsSerializers(TestCase):
         print(spark.createDataFrame(
             gdf
         ).toPandas())
+
+    def test_multipolygon_serialization(self):
+        ext = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
+        int = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
+
+        polygons = [
+            Polygon(ext, [int]),
+            Polygon([[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])
+        ]
+        multipolygon = MultiPolygon(polygons)
+
+        data = [
+            [1, multipolygon]
+        ]
+
+        schema = t.StructType(
+            [
+                t.StructField("id", IntegerType(), True),
+                t.StructField("geom", GeometryType(), True)
+            ]
+        )
+
+        spark.createDataFrame(
+            data,
+            schema
+        ).createOrReplaceTempView("polygon")
+        length = spark.sql("select st_area(geom) from polygon").collect()[0][0]
+        self.assertEqual(length, 4.75)
 
 
