@@ -52,18 +52,6 @@ And install package from wheel file
 pip install dist/geo_pyspark-0.1.0-py3-none-any.whl
 ```
 
-### bare python
-
-clone repository
-
-```bash
-git clone https://github.com/Imbruced/geo_pyspark.git
-```
-
-```python
-python setup.py install
-```
-
 ## Example usage
 
 
