@@ -67,7 +67,7 @@ python setup.py install
 ## Example usage
 
 
-example:
+### Basic Usage
 
 ```python
 from pyspark.sql import SparkSession
@@ -79,7 +79,7 @@ spark = SparkSession.builder.\
 
 GeoSparkRegistrator.registerAll(spark)
 
-df = spark.sql("""SELECT st_geomfromwkt('POINT(6.0 52.0)') as geom""")
+df = spark.sql("""SELECT st_GeomFromWKT('POINT(6.0 52.0)') as geom""")
 
 df.show()
 
@@ -90,4 +90,74 @@ df.show()
     |POINT (6 52)|
     +------------+
 
-##
+### Converting GeoPandas to Spark DataFrame with GeoSpark Geometry UDT.
+
+```python
+import os
+
+import geopandas as gpd
+from pyspark.sql import SparkSession
+
+from geo_pyspark.data import data_path
+from geo_pyspark.register import GeoSparkRegistrator
+
+spark = SparkSession.builder.\
+        getOrCreate()
+
+GeoSparkRegistrator.registerAll(spark)
+
+gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))
+
+spark.createDataFrame(
+    gdf
+).show()
+
+```
+
+    +---------+----+-----------+--------------------+--------------------+
+    |   osm_id|code|     fclass|                name|            geometry|
+    +---------+----+-----------+--------------------+--------------------+
+    | 26860257|2422|  camp_site|            de Kroon|POINT (15.3393145...|
+    | 26860294|2406|     chalet|      Leśne Ustronie|POINT (14.8709625...|
+    | 29947493|2402|      motel|                null|POINT (15.0946636...|
+    | 29947498|2602|        atm|                null|POINT (15.0732014...|
+    | 29947499|2401|      hotel|                null|POINT (15.0696777...|
+    | 29947505|2401|      hotel|                null|POINT (15.0155749...|
+    +---------+----+-----------+--------------------+--------------------+
+    
+    
+### Converting Spark DataFrame with GeoSpark Geometry UDT to Geopandas.
+
+
+```python
+import os
+
+import geopandas as gpd
+from pyspark.sql import SparkSession
+
+from geo_pyspark.data import data_path
+from geo_pyspark.register import GeoSparkRegistrator
+
+spark = SparkSession.builder.\
+        getOrCreate()
+
+GeoSparkRegistrator.registerAll(spark)
+
+counties = spark.\
+    read.\
+    option("delimiter", "|").\
+    option("header", "true").\
+    csv(os.path.join(data_path, "counties.csv"))
+    
+counties.createOrReplaceTempView("county")
+
+counties_geom = spark.sql(
+        "SELECT *, st_geomFromWKT(geom) as geometry from county"
+)
+
+df = counties_geom.toPandas()
+gdf = gpd.GeoDataFrame(df, geometry="geometry")
+gdf.plot()
+
+```
+<img src="https://github.com/Imbruced/geo_pyspark/blob/master/geo_pyspark/data/geopandas_plot.PNG" width="250">
