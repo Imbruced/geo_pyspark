@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from pyspark.sql import SparkSession
 
-from geo_pyspark.data import csv_point_input_location, csv_point1_input_location
+from geo_pyspark.data import csv_point_input_location, csv_point1_input_location, csv_polygon1_input_location
 from geo_pyspark.register import GeoSparkRegistrator
 
 spark = SparkSession.builder. \
@@ -85,3 +85,27 @@ class TestPredicate(TestCase):
         equal_df.show()
 
         assert (equal_df.count() == 5, f"Expected 5 value but got ${equal_df.count()}")
+
+    def test_st_equals_for_polygon(self):
+        polygon_csv_df = spark.read.format("csv").\
+                option("delimiter", ",").\
+                option("header", "false").load(
+                csv_polygon1_input_location
+        )
+        polygon_csv_df.createOrReplaceTempView("polygontable")
+
+        polygon_df = spark.sql(
+            "select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+        equal_df1 = spark.sql(
+            "select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromEnvelope(100.01,200.01,100.5,200.5)) ")
+        equal_df1.show()
+
+        assert (equal_df1.count() == 5, f"Expected 5 value but got ${equal_df1.count()}")
+
+        equal_df_2 = spark.sql(
+            "select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromEnvelope(100.5,200.5,100.01,200.01)) ")
+        equal_df_2.show()
+
+        assert (equal_df_2.count() == 5, f"Expected 5 value but got ${equal_df_2.count()}")
