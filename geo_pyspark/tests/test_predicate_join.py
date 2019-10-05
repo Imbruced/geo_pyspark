@@ -412,3 +412,32 @@ class TestPredicateJoin(TestCase):
         equal_join_df.explain()
         equal_join_df.show(3)
         assert equal_join_df.count() == 100, f"Expected 100 but got {equal_join_df.count()}"
+
+    def test_st_equals_in_a_join_for_st_point_and_st_polygon(self):
+        point_csv_df = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_point1_input_location)
+
+        point_csv_df.createOrReplaceTempView("pointtable")
+        point_csv_df.show()
+        point_df = spark.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20)) ) as pointshape from pointtable")
+        point_df.createOrReplaceTempView("pointdf")
+        point_df.show()
+
+        polygon_csv_df = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_polygon1_input_location)
+
+        polygon_csv_df.createOrReplaceTempView("polygontable")
+        polygon_csv_df.show()
+        polygon_df = spark.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+
+        equal_join_df = spark.sql("select * from pointdf, polygondf where ST_Equals(pointdf.pointshape,polygondf.polygonshape) ")
+
+        equal_join_df.explain()
+        equal_join_df.show(3)
+        assert equal_join_df.count() == 0, f"Expected 0 but got {equal_join_df.count()}"
