@@ -50,7 +50,7 @@ class TestPredicateJoin(TestCase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 1000
+        self.assertEqual(range_join_df.count(), 1000)
 
     def test_st_intersects_in_a_join(self):
         polygon_csv_df = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
@@ -80,7 +80,7 @@ class TestPredicateJoin(TestCase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 1000
+        self.assertEqual(range_join_df.count(), 1000)
 
     def test_st_touches_in_a_join(self):
         polygon_csv_df = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(csv_polygon_input_location)
@@ -101,7 +101,7 @@ class TestPredicateJoin(TestCase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 1000
+        self.assertEqual(range_join_df.count(), 1000)
 
     def test_st_within_in_a_join(self):
         polygon_csv_df = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
@@ -129,7 +129,7 @@ class TestPredicateJoin(TestCase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 1000
+        self.assertEqual(range_join_df.count(), 1000)
 
     def test_st_overlaps_in_a_join(self):
         polygon_csv_df = spark.read.format("csv").\
@@ -156,7 +156,7 @@ class TestPredicateJoin(TestCase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 57
+        self.assertEqual(range_join_df.count(), 57)
 
     def test_st_crosses_in_a_join(self):
         polygon_csv_df = spark.read.format("csv").\
@@ -190,7 +190,7 @@ class TestPredicateJoin(TestCase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 1000
+        self.assertEqual(range_join_df.count(), 1000)
 
     def test_st_distance_radius_in_a_join(self):
         point_csv_df_1 = spark.read.format("csv").\
@@ -222,7 +222,7 @@ class TestPredicateJoin(TestCase):
             "select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) <= 2")
         distance_join_df.explain()
         distance_join_df.show(10)
-        assert distance_join_df.count() == 2998
+        self.assertEqual(distance_join_df.count(), 2998)
 
     def test_st_distance_less_radius_in_a_join(self):
         point_csv_df_1 = spark.read.format("csv").\
@@ -248,7 +248,7 @@ class TestPredicateJoin(TestCase):
         distance_join_df = spark.sql("select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) < 2")
         distance_join_df.explain()
         distance_join_df.show(10)
-        assert distance_join_df.count() == 2998
+        self.assertEqual(distance_join_df.count(), 2998)
 
     def test_st_contains_in_a_range_and_join(self):
         polygon_csv_df = spark.read.format("csv").\
@@ -277,7 +277,7 @@ class TestPredicateJoin(TestCase):
 
         range_join_df.explain()
         range_join_df.show(3)
-        assert range_join_df.count() == 500
+        self.assertEqual(range_join_df.count(), 500)
 
     def test_super_small_data_join(self):
         raw_point_df = spark.createDataFrame(
@@ -321,7 +321,7 @@ class TestPredicateJoin(TestCase):
 
         within_envelope_df = spark.sql(
             "select * FROM pointDf, polygonDf WHERE ST_Within(pointDf.latlon_point, polygonDf.polygon)")
-        assert within_envelope_df.count() == 1
+        self.assertEqual(within_envelope_df.count(), 1)
 
     def test_st_equals_in_a_join_for_st_point(self):
 
@@ -350,7 +350,7 @@ class TestPredicateJoin(TestCase):
 
         equal_join_df.explain()
         equal_join_df.show(3)
-        assert equal_join_df.count() == 100, f"Expected 100 but got {equal_join_df.count()}"
+        self.assertEqual(equal_join_df.count(), 100, f"Expected 100 but got {equal_join_df.count()}")
 
     def test_st_equals_in_a_join_for_st_polygon(self):
         polygon_csv_df1 = spark.read.format("csv").\
@@ -383,7 +383,7 @@ class TestPredicateJoin(TestCase):
 
         equal_join_df.explain()
         equal_join_df.show(3)
-        assert equal_join_df.count() == 100, f"Expected 100 but got {equal_join_df.count()}"
+        self.assertEqual(equal_join_df.count(), 100, f"Expected 100 but got {equal_join_df.count()}")
 
     def test_st_equals_in_a_join_for_st_polygon_random_shuffle(self):
         polygon_csv_df1 = spark.read.format("csv").\
@@ -411,7 +411,7 @@ class TestPredicateJoin(TestCase):
 
         equal_join_df.explain()
         equal_join_df.show(3)
-        assert equal_join_df.count() == 100, f"Expected 100 but got {equal_join_df.count()}"
+        self.assertEqual(equal_join_df.count(), 100, f"Expected 100 but got {equal_join_df.count()}")
 
     def test_st_equals_in_a_join_for_st_point_and_st_polygon(self):
         point_csv_df = spark.read.format("csv").\
@@ -440,4 +440,4 @@ class TestPredicateJoin(TestCase):
 
         equal_join_df.explain()
         equal_join_df.show(3)
-        assert equal_join_df.count() == 0, f"Expected 0 but got {equal_join_df.count()}"
+        self.assertEqual(equal_join_df.count(), 0, f"Expected 0 but got {equal_join_df.count()}")
