@@ -245,3 +245,32 @@ class TestPredicateJoin(TestCase):
         distance_join_df.explain()
         distance_join_df.show(10)
         assert distance_join_df.count() == 2998
+
+    def test_st_contains_in_a_range_and_join(self):
+        polygon_csv_df = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_polygon_input_location)
+
+        polygon_csv_df.createOrReplaceTempView("polygontable")
+        polygon_csv_df.show()
+        polygon_df = spark.sql("select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+
+        point_csv_df = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_point_input_location)
+        point_csv_df.createOrReplaceTempView("pointtable")
+        point_csv_df.show()
+        point_df = spark.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable")
+        point_df.createOrReplaceTempView("pointdf")
+        point_df.show()
+
+        range_join_df = spark.sql("select * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape) " +
+        "and ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondf.polygonshape)")
+
+        range_join_df.explain()
+        range_join_df.show(3)
+        assert range_join_df.count() == 500
