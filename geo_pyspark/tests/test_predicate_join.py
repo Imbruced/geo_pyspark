@@ -1,6 +1,8 @@
 from unittest import TestCase
 
+from pyspark import Row
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StringType, IntegerType, StructField, DoubleType
 
 from geo_pyspark.data import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location
 from geo_pyspark.register import GeoSparkRegistrator
@@ -274,3 +276,47 @@ class TestPredicateJoin(TestCase):
         range_join_df.explain()
         range_join_df.show(3)
         assert range_join_df.count() == 500
+
+    def test_super_small_data_join(self):
+        raw_point_df = spark.createDataFrame(
+            spark.sparkContext.parallelize(
+                [Row(1, "40.0", "-120.0"), Row(2, "30.0", "-110.0"), Row(3, "20.0", "-100.0")]
+            ),
+            StructType(
+                [
+                    StructField("id", IntegerType(), True),
+                    StructField("lat", StringType(), True),
+                    StructField("lon", StringType(), True)
+                ]
+            )
+        )
+
+        raw_point_df.createOrReplaceTempView("rawPointDf")
+
+        pointDF = spark.sql(
+            "select id, ST_Point(cast(lat as Decimal(24,20)), cast(lon as Decimal(24,20))) AS latlon_point FROM rawPointDf")
+        pointDF.createOrReplaceTempView("pointDf")
+        pointDF.show(truncate=False)
+
+        raw_polygon_df = spark.createDataFrame(
+            spark.sparkContext.parallelize(
+                [
+                    Row("A", 25.0, -115.0, 35.0, -105.0), Row("B", 25.0, -135.0, 35.0, -125.0)
+                ]),
+            StructType(
+                [
+                    StructField("id", StringType(), True), StructField("latmin", DoubleType(), True),
+                    StructField("lonmin", DoubleType(), True), StructField("latmax", DoubleType(), True),
+                    StructField("lonmax", DoubleType(), True)
+                ]
+            ))
+        raw_polygon_df.createOrReplaceTempView("rawPolygonDf")
+
+        polygon_envelope_df = spark.sql("select id, ST_PolygonFromEnvelope(" +
+                                             "cast(latmin as Decimal(24,20)), cast(lonmin as Decimal(24,20)), " +
+                                             "cast(latmax as Decimal(24,20)), cast(lonmax as Decimal(24,20))) AS polygon FROM rawPolygonDf")
+        polygon_envelope_df.createOrReplaceTempView("polygonDf")
+
+        within_envelope_df = spark.sql(
+            "select * FROM pointDf, polygonDf WHERE ST_Within(pointDf.latlon_point, polygonDf.polygon)")
+        assert within_envelope_df.count() == 1
