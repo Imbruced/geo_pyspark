@@ -3,6 +3,8 @@ from unittest import TestCase
 
 from pyspark.sql import SparkSession
 from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon
+import geopandas as gpd
+import matplotlib.pyplot as plt
 
 from geo_pyspark.data import data_path
 from geo_pyspark.register import GeoSparkRegistrator
@@ -18,9 +20,6 @@ class TestGeometryConvert(TestCase):
     def test_register_functions(self):
         df = spark.sql("""SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom""")
         df.show()
-
-    def test_geometry_factory(self):
-        pass
 
     def test_collect(self):
 
@@ -104,3 +103,26 @@ class TestGeometryConvert(TestCase):
                 ((40, 40), (30, 30), (40, 20), (30, 10))
             ]).wkt
         )
+
+    def test_from_geopandas_convert(self):
+        gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))
+
+        spark.createDataFrame(
+            gdf
+        ).show()
+
+    def test_to_geopandas(self):
+        counties = spark. \
+            read. \
+            option("delimiter", "|"). \
+            option("header", "true"). \
+            csv(os.path.join(data_path, "counties.csv")).limit(1)
+
+        counties.createOrReplaceTempView("county")
+
+        counties_geom = spark.sql(
+            "SELECT *, st_geomFromWKT(geom) as geometry from county"
+        )
+
+        gdf = counties_geom.toPandas()
+        print(gpd.GeoDataFrame(gdf, geometry="geometry"))
