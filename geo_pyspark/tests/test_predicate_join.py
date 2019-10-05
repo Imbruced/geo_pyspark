@@ -5,7 +5,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StringType, IntegerType, StructField, DoubleType
 
 from geo_pyspark.data import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location, \
-    csv_point1_input_location, csv_point2_input_location
+    csv_point1_input_location, csv_point2_input_location, csv_polygon1_input_location, csv_polygon2_input_location, \
+    csv_polygon1_random_input_location, csv_polygon2_random_input_location
 from geo_pyspark.register import GeoSparkRegistrator
 
 
@@ -346,6 +347,67 @@ class TestPredicateJoin(TestCase):
         point_df2.show()
 
         equal_join_df = spark.sql("select * from pointdf1, pointdf2 where ST_Equals(pointdf1.pointshape1,pointdf2.pointshape2) ")
+
+        equal_join_df.explain()
+        equal_join_df.show(3)
+        assert equal_join_df.count() == 100, f"Expected 100 but got {equal_join_df.count()}"
+
+    def test_st_equals_in_a_join_for_st_polygon(self):
+        polygon_csv_df1 = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_polygon1_input_location)
+
+        polygon_csv_df1.createOrReplaceTempView("polygontable1")
+        polygon_csv_df1.show()
+
+        polygon_df1 = spark.sql(
+            "select ST_PolygonFromEnvelope(cast(polygontable1._c0 as Decimal(24,20)),cast(polygontable1._c1 as Decimal(24,20)), cast(polygontable1._c2 as Decimal(24,20)), cast(polygontable1._c3 as Decimal(24,20))) as polygonshape1 from polygontable1")
+        polygon_df1.createOrReplaceTempView("polygondf1")
+        polygon_df1.show()
+
+        polygon_csv_df2 = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").load(csv_polygon2_input_location)
+
+        polygon_csv_df2.createOrReplaceTempView("polygontable2")
+        polygon_csv_df2.show()
+
+        polygon_df2 = spark.sql(
+            "select ST_PolygonFromEnvelope(cast(polygontable2._c0 as Decimal(24,20)),cast(polygontable2._c1 as Decimal(24,20)), cast(polygontable2._c2 as Decimal(24,20)), cast(polygontable2._c3 as Decimal(24,20))) as polygonshape2 from polygontable2")
+        polygon_df2.createOrReplaceTempView("polygondf2")
+        polygon_df2.show()
+
+        equal_join_df = spark.sql(
+            "select * from polygondf1, polygondf2 where ST_Equals(polygondf1.polygonshape1,polygondf2.polygonshape2) ")
+
+        equal_join_df.explain()
+        equal_join_df.show(3)
+        assert equal_join_df.count() == 100, f"Expected 100 but got {equal_join_df.count()}"
+
+    def test_st_equals_in_a_join_for_st_polygon_random_shuffle(self):
+        polygon_csv_df1 = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_polygon1_random_input_location)
+        polygon_csv_df1.createOrReplaceTempView("polygontable1")
+        polygon_csv_df1.show()
+        polygon_df1 = spark.sql("select ST_PolygonFromEnvelope(cast(polygontable1._c0 as Decimal(24,20)),cast(polygontable1._c1 as Decimal(24,20)), cast(polygontable1._c2 as Decimal(24,20)), cast(polygontable1._c3 as Decimal(24,20))) as polygonshape1 from polygontable1")
+        polygon_df1.createOrReplaceTempView("polygondf1")
+        polygon_df1.show()
+
+        polygon_csv_df2 = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_polygon2_random_input_location)
+
+        polygon_csv_df2.createOrReplaceTempView("polygontable2")
+        polygon_csv_df2.show()
+        polygon_df2 = spark.sql("select ST_PolygonFromEnvelope(cast(polygontable2._c0 as Decimal(24,20)),cast(polygontable2._c1 as Decimal(24,20)), cast(polygontable2._c2 as Decimal(24,20)), cast(polygontable2._c3 as Decimal(24,20))) as polygonshape2 from polygontable2")
+        polygon_df2.createOrReplaceTempView("polygondf2")
+        polygon_df2.show()
+
+        equal_join_df = spark.sql("select * from polygondf1, polygondf2 where ST_Equals(polygondf1.polygonshape1,polygondf2.polygonshape2) ")
 
         equal_join_df.explain()
         equal_join_df.show(3)
