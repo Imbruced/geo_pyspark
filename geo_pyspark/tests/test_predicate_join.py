@@ -4,7 +4,8 @@ from pyspark import Row
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StringType, IntegerType, StructField, DoubleType
 
-from geo_pyspark.data import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location
+from geo_pyspark.data import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location, \
+    csv_point1_input_location, csv_point2_input_location
 from geo_pyspark.register import GeoSparkRegistrator
 
 
@@ -320,3 +321,32 @@ class TestPredicateJoin(TestCase):
         within_envelope_df = spark.sql(
             "select * FROM pointDf, polygonDf WHERE ST_Within(pointDf.latlon_point, polygonDf.polygon)")
         assert within_envelope_df.count() == 1
+
+    def test_st_equals_in_a_join_for_st_point(self):
+
+        point_csv_df_1 = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_point1_input_location)
+
+        point_csv_df_1.createOrReplaceTempView("pointtable1")
+        point_csv_df_1.show()
+        point_df1 = spark.sql("select ST_Point(cast(pointtable1._c0 as Decimal(24,20)),cast(pointtable1._c1 as Decimal(24,20)) ) as pointshape1 from pointtable1")
+        point_df1.createOrReplaceTempView("pointdf1")
+        point_df1.show()
+
+        point_csv_df2 = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_point2_input_location)
+        point_csv_df2.createOrReplaceTempView("pointtable2")
+        point_csv_df2.show()
+        point_df2 = spark.sql("select ST_Point(cast(pointtable2._c0 as Decimal(24,20)),cast(pointtable2._c1 as Decimal(24,20))) as pointshape2 from pointtable2")
+        point_df2.createOrReplaceTempView("pointdf2")
+        point_df2.show()
+
+        equal_join_df = spark.sql("select * from pointdf1, pointdf2 where ST_Equals(pointdf1.pointshape1,pointdf2.pointshape2) ")
+
+        equal_join_df.explain()
+        equal_join_df.show(3)
+        assert equal_join_df.count() == 100, f"Expected 100 but got {equal_join_df.count()}"
