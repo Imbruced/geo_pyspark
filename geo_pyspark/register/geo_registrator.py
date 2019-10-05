@@ -11,12 +11,7 @@ class GeoSparkRegistrator:
 
     @classmethod
     def registerAll(cls, spark: SparkSession) -> bool:
-        cls.register(spark)
-        try:
-            spark.sql("""SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom""").count()
-        except Exception:
-            pass
-
+        spark.sql("SELECT 1 as geom").count()
         cls.register(spark)
         return True
 
