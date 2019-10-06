@@ -7,7 +7,7 @@ jars_relative_path = "geo_pyspark/jars"
 
 setup(
     name='geo_pyspark',
-    version='0.1.0',
+    version='0.2.0',
     description='GeoSpark Python Wrapper',
     url='https://github.com/Imbruced/geo_pyspark',
     author='Pawel Kocinski',
