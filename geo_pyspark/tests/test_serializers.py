@@ -5,10 +5,12 @@ from pyspark.sql.types import IntegerType
 import geopandas as gpd
 
 from geo_pyspark.data import data_path
-from geo_pyspark.register import GeoSparkRegistrator
+from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 from geo_pyspark.sql.types import GeometryType
 from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon
 from pyspark.sql import types as t, SparkSession
+
+upload_jars()
 
 spark = SparkSession.builder.\
         getOrCreate()

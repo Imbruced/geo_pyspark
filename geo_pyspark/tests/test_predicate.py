@@ -3,7 +3,9 @@ from unittest import TestCase
 from pyspark.sql import SparkSession
 
 from geo_pyspark.data import csv_point_input_location, csv_point1_input_location, csv_polygon1_input_location
-from geo_pyspark.register import GeoSparkRegistrator
+from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+
+upload_jars()
 
 spark = SparkSession.builder. \
     getOrCreate()

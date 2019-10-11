@@ -4,10 +4,11 @@ from unittest import TestCase
 from pyspark.sql import SparkSession
 from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon
 import geopandas as gpd
-import matplotlib.pyplot as plt
 
 from geo_pyspark.data import data_path
-from geo_pyspark.register import GeoSparkRegistrator
+from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+
+upload_jars()
 
 spark = SparkSession.builder.\
         getOrCreate()

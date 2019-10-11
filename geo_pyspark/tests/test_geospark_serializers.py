@@ -2,8 +2,10 @@ from unittest import TestCase
 
 from pyspark.sql import SparkSession
 
-from geo_pyspark.register import GeoSparkRegistrator
+from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 from geo_pyspark.utils import GeoSparkKryoRegistrator, KryoSerializer
+
+upload_jars()
 
 spark = SparkSession.builder.\
         master("local[*]").\

@@ -4,7 +4,9 @@ from pyspark.sql import SparkSession
 from shapely.wkt import loads
 
 from geo_pyspark.data import mixed_wkt_geometry_input_location
-from geo_pyspark.register import GeoSparkRegistrator
+from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+
+upload_jars()
 
 spark = SparkSession.builder. \
     getOrCreate()

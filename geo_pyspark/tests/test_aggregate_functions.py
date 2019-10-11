@@ -5,6 +5,11 @@ from shapely.geometry import Polygon
 
 from geo_pyspark.data import csv_point_input_location, union_polygon_input_location
 from geo_pyspark.register import GeoSparkRegistrator
+from geo_pyspark.register.geo_registrator import upload_jars
+
+
+upload_jars()
+
 
 spark = SparkSession.builder. \
     getOrCreate()
