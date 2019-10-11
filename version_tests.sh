@@ -1,6 +1,7 @@
 current_dir=$PWD
 file_name=$current_dir/"spark_versions_config"
 rm  $current_dir/tests_done.txt
+pipenv --rm
 cat $file_name | while read LINE; do
     export SPARK_HOME=$LINE
     echo $SPARK_HOME
