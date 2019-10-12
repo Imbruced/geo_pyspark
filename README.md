@@ -15,6 +15,7 @@ data from files and convert them to Spark DataFrame. Please look at examples.
 
 ## Instalation
 
+Package assumes that Spark is already installed. 
 ### pipenv
 
 clone repository
@@ -53,6 +54,28 @@ pip install dist/geo_pyspark-0.1.0-py3-none-any.whl
 ```
 
 ## Example usage
+
+It is possible to add automatically jar files. 
+Use the following code
+
+```python
+from pyspark.sql import SparkSession
+
+from geo_pyspark.register import upload_jars
+from geo_pyspark.register import GeoSparkRegistrator
+
+upload_jars()
+
+spark = SparkSession.builder.\
+        getOrCreate()
+
+GeoSparkRegistrator.registerAll(spark)
+
+```
+
+This code will add GeoSpark jars to spark driver and executor.
+
+By default package will not upload jars.
 
 
 ### Basic Usage
