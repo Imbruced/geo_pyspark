@@ -3,14 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. include installation.rst
+.. include examples.rst
+.. include supported_versions
+
+
 Welcome to geo_pyspark documentation!
 =======================================
 Welcome to Documentation.
 Contents:
 
-.. include installation.rst
-.. include examples.rst
-.. include supported_versions
 
 
 =================
@@ -26,13 +28,23 @@ Package allow to use all GeoSparkSQL functions and transform it to Python Shapel
 Installation
 =================
 
+geo_pyspark depnds on Python packages and Scala libraries. To see all dependencies
+please look at Dependencies section.
+https://pypi.org/project/pyspark/.
+
+Installing with pip from source
+-------------------------------
+
+
+
+
 =================
 Examples
 =================
 
-=================
+=======================================
 Integration with GeoPandas and Shapely
-=================
+=======================================
 
 =================
 Supported versions
@@ -41,7 +53,7 @@ Supported versions
 
 .. toctree::
    :maxdepth: 2
- 
+
 
 Indices and tables
 ==================
