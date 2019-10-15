@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/geospark/version2_2/GeoSpark" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/geospark/version2_3/GeoSpark" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/geospark/version2_4/GeoSpark" vcs="Git" />
+  </component>
+</project>
