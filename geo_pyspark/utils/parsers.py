@@ -113,7 +113,7 @@ class UndefinedParser(GeometryParser):
 
 
 @attr.s
-class LineStringParser:
+class LineStringParser(GeometryParser):
     name = "LineString"
 
     @classmethod
@@ -139,7 +139,7 @@ class LineStringParser:
 
 
 @attr.s
-class MultiLineStringParser:
+class MultiLineStringParser(GeometryParser):
     name = "MultiLineString"
 
     @classmethod
