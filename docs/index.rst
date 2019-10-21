@@ -32,9 +32,63 @@ geo_pyspark depnds on Python packages and Scala libraries. To see all dependenci
 please look at Dependencies section.
 https://pypi.org/project/pyspark/.
 
-Installing with pip from source
--------------------------------
+Package needs 3 jar files to work properly:
 
+- geospark-sql_2.2-1.2.0.jar
+- geospark-1.2.0.jar
+- geo_wrapper.jar
+
+Where 2.2 is a Spark version and 1.2.0 is GeoSpark version. Jar files are placed in geo_pyspark/jars. For newest GeoSpark release jar files are places in subdirectories named as Spark version. Example, jar files for SPARK 2.4 can be found in directory geo_pyspark/jars/2_4.
+
+For older version please find appropriate jar files in directory geo_pyspark/jars/previous. 
+
+It is possible to automatically add jar files for newest GeoSpark version. Please use code as follows:
+
+.. code-block:: python
+
+  from pyspark.sql import SparkSession
+
+  from geo_pyspark.register import upload_jars
+  from geo_pyspark.register import GeoSparkRegistrator
+
+  upload_jars()
+
+  spark = SparkSession.builder.\
+        getOrCreate()
+
+  GeoSparkRegistrator.registerAll(spark)
+
+
+Function 
+
+.. code-block:: python
+
+  upload_jars()
+
+uses findspark Python package to upload jar files to executor and nodes. To avoid copying all the time, jar files can be put in directory $SPARK_HOME/jars or any other path specified in Spark config files.
+
+
+
+Installing from wheel file
+--------------------------
+
+.. code-block:: bash
+
+  pipenv run python -m pip install dist/geo_pyspark-0.2.0-py3-none-any.whl
+
+or
+
+.. code-block:: bash
+
+  pip install dist/geo_pyspark-0.2.0-py3-none-any.whl
+
+
+Installing from source
+----------------------
+
+.. code-block:: bash
+
+  python3 setup.py install
 
 
 
@@ -86,9 +140,61 @@ Example, loading the data from shapefile using geopandas read_file method and cr
       +---------+----+-----------+--------------------+--------------------+
 
 
+
+Reading data with Spark and converting to GeoPandas
+
+.. code-block:: python
+
+  import os
+
+  import geopandas as gpd
+  from pyspark.sql import SparkSession
+
+  from geo_pyspark.data import data_path
+  from geo_pyspark.register import GeoSparkRegistrator
+
+  spark = SparkSession.builder.\
+        getOrCreate()
+
+  GeoSparkRegistrator.registerAll(spark)
+
+  counties = spark.\
+    read.\
+    option("delimiter", "|").\
+    option("header", "true").\
+    csv(os.path.join(data_path, "counties.csv"))
+      
+  counties.createOrReplaceTempView("county")
+
+  counties_geom = spark.sql(
+          "SELECT *, st_geomFromWKT(geom) as geometry from county"
+  )
+
+  df = counties_geom.toPandas()
+  gdf = gpd.GeoDataFrame(df, geometry="geometry")
+  gdf.plot()
+
+
+
 ==================
 Supported versions
 ==================
+
+Apache Spark
+------------
+
+Currently package supports spark versions
+
+- 2.2
+- 2.3
+- 2.4
+
+
+GeoSpark
+--------
+
+- 1.2.0
+- 1.1.3
 
 
 .. toctree::
