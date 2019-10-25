@@ -202,22 +202,15 @@ Reading data with Spark and converting to GeoPandas
 | Polygon         | :heavy_check_mark: |
 | MultiPolygon    | :heavy_check_mark: |
 
-#### Point
+To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> geo_pyspark.sql.types </b> module. Converting works for list or tuple with shapely objects. 
 
+Schema for target table with integer id and geometry type can be defined as follow:
 
 ```python
 
 from pyspark.sql.types import IntegerType, StructField, StructType
-from shapely.geometry import Point
 
 from geo_pyspark.sql.types import GeometryType
-
-
-data = [
-    [1, Point(21.0, 52.0)],
-    [1, Point(23.0, 42.0)],
-    [1, Point(26.0, 32.0)]
-]
 
 schema = StructType(
     [
@@ -225,6 +218,21 @@ schema = StructType(
         StructField("geom", GeometryType(), False)
     ]
 )
+
+```
+### Example usage for Shapely objects
+
+#### Point
+
+```python
+from shapely.geometry import Point
+
+data = [
+    [1, Point(21.0, 52.0)],
+    [1, Point(23.0, 42.0)],
+    [1, Point(26.0, 32.0)]
+]
+
 
 gdf = spark.createDataFrame(
     data,
