@@ -189,8 +189,9 @@ Reading data with Spark and converting to GeoPandas
 <br>
 <br>
 
+## Creating Spark DataFrame based on shapely objects
 
-## Supported Shapely objects
+### Supported Shapely objects
 
 | shapely object  | Available          |
 |-----------------|--------------------|
@@ -200,6 +201,59 @@ Reading data with Spark and converting to GeoPandas
 | MultiLinestring | :heavy_check_mark: |
 | Polygon         | :heavy_check_mark: |
 | MultiPolygon    | :heavy_check_mark: |
+
+#### Point
+
+
+```python
+
+from pyspark.sql.types import IntegerType, StructField, StructType
+from shapely.geometry import Point
+
+from geo_pyspark.sql.types import GeometryType
+
+
+data = [
+    [1, Point(21.0, 52.0)],
+    [1, Point(23.0, 42.0)],
+    [1, Point(26.0, 32.0)]
+]
+
+schema = StructType(
+    [
+        StructField("id", IntegerType(), False),
+        StructField("geom", GeometryType(), False)
+    ]
+)
+
+gdf = spark.createDataFrame(
+    data,
+    schema
+)
+
+gdf.show()
+
+```
+
+```
++---+-------------+
+| id|         geom|
++---+-------------+
+|  1|POINT (21 52)|
+|  1|POINT (23 42)|
+|  1|POINT (26 32)|
++---+-------------+
+```
+
+```python
+gdf.printSchema()
+```
+
+```
+root
+ |-- id: integer (nullable = false)
+ |-- geom: geometry (nullable = false)
+```
 
 ## Supported versions
 
