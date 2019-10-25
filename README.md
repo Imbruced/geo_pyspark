@@ -184,7 +184,7 @@ Reading data with Spark and converting to GeoPandas
 <br>
 <br>
 
-<img src="https://github.com/Imbruced/geo_pyspark/blob/dev/geo_pyspark/docs/poland.png" width="250">
+![poland_image](https://user-images.githubusercontent.com/22958216/67603296-c08b4680-f778-11e9-8cde-d2e14ffbba3b.png)
 
 <br>
 <br>
