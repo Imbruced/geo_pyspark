@@ -221,7 +221,7 @@ schema = StructType(
 
 ```
 
-Also Spark DataFrame with geometry type can be converted to list of shapely objects with <br> collect </br> method.
+Also Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
 
 ### Example usage for Shapely objects
 
