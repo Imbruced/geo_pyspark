@@ -292,7 +292,66 @@ gdf = spark.createDataFrame(
 
 #### LineString
 
+```python3
+
+from shapely.geometry import LineString
+
+line = [(40, 40), (30, 30), (40, 20), (30, 10)]
+
+data = [
+    [1, LineString(line1)]
+]
+
+gdf = spark.createDataFrame(
+    data,
+    schema
+)
+
+gdf.show(1, False)
+
+```
+
+```
+
++---+--------------------------------+
+|id |geom                            |
++---+--------------------------------+
+|1  |LINESTRING (10 10, 20 20, 10 40)|
++---+--------------------------------+
+
+````
+
 #### MultiLineString
+
+```python3
+
+from shapely.geometry import MultiLineString
+
+line1 = [(10, 10), (20, 20), (10, 40)]
+line2 = [(40, 40), (30, 30), (40, 20), (30, 10)]
+
+data = [
+    [1, MultiLineString([line1, line2])]
+]
+
+gdf = spark.createDataFrame(
+    data,
+    schema
+)
+
+gdf.show(1, False)
+
+```
+
+```
+
++---+---------------------------------------------------------------------+
+|id |geom                                                                 |
++---+---------------------------------------------------------------------+
+|1  |MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))|
++---+---------------------------------------------------------------------+
+
+```
 
 #### Polygon
 
@@ -336,6 +395,42 @@ gdf.show(1, False)
 
 #### MultiPolygon
 
+```python3
+
+from shapely.geometry import MultiPolygon
+
+exterior_p1 = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
+interior_p1 = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
+
+exterior_p2 = [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]
+
+polygons = [
+    Polygon(exterior_p1, [interior_p1]),
+    Polygon(exterior_p2)
+]
+
+data = [
+    [1, MultiPolygon(polygons)]
+]
+
+gdf = spark.createDataFrame(
+    data,
+    schema
+)
+
+gdf.show(1, False)
+
+```
+
+```
+
++---+----------------------------------------------------------------------------------------------------------+
+|id |geom                                                                                                      |
++---+----------------------------------------------------------------------------------------------------------+
+|1  |MULTIPOLYGON (((0 0, 0 2, 2 2, 2 0, 0 0), (1 1, 1.5 1, 1.5 1.5, 1 1.5, 1 1)), ((0 0, 0 1, 1 1, 1 0, 0 0)))|
++---+----------------------------------------------------------------------------------------------------------+
+
+```
 
 ## Supported versions
 
