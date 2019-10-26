@@ -1,12 +1,7 @@
 # Welcome to geo_pyspark documentation!
 
 
-Welcome to Documentation.
-Contents:
-
-
-
-## Introduction
+# Introduction
 
 Package is a Python wrapper on scala library GeoSparkSQL. Official repository for GeoSpark can be found at https://github.com/DataSystemsLab/GeoSpark.
 
@@ -14,7 +9,7 @@ Package allow to use all GeoSparkSQL functions and transform it to Python Shapel
 
 
 
-## Installation
+# Installation
 
 
 geo_pyspark depnds on Python packages and Scala libraries. To see all dependencies
@@ -29,7 +24,7 @@ Package needs 3 jar files to work properly:
 
 Where 2.2 is a Spark version and 1.2.0 is GeoSpark version. Jar files are placed in geo_pyspark/jars. For newest GeoSpark release jar files are places in subdirectories named as Spark version. Example, jar files for SPARK 2.4 can be found in directory geo_pyspark/jars/2_4.
 
-For older version please find appropriate jar files in directory geo_pyspark/jars/previous. 
+For older version please find appropriate jar files in directory geo_pyspark/jars/previous.
 
 It is possible to automatically add jar files for newest GeoSpark version. Please use code as follows:
 
@@ -50,7 +45,7 @@ It is possible to automatically add jar files for newest GeoSpark version. Pleas
 
 ```
 
-Function 
+Function
 
 ```python
 
@@ -63,7 +58,7 @@ uses findspark Python package to upload jar files to executor and nodes. To avoi
 
 
 
-### Installing from wheel file
+## Installing from wheel file
 
 
 ```bash
@@ -81,7 +76,7 @@ or
 
 ```
 
-### Installing from source
+## Installing from source
 
 
 ```bash
@@ -91,24 +86,30 @@ or
 ```
 
 
-## Examples
+# Examples
+
+
+## GeoSparkSQL
+
+
+All GeoSparkSQL functions (list depends on GeoSparkSQL version) are available in Python API. For documentation please look at <a href="https://datasystemslab.github.io/GeoSpark/api/sql/GeoSparkSQL-Overview/"> GeoSpark website</a>
+
+For example use GeoSparkSQL for Spatial Join.
+
 
 
 ## Integration with GeoPandas and Shapely
 
 
-geo_pyspark has implemented serializers and deserializers which allows to convert GeoSpark Geometry objects into Shapely BaseGeometry objects. Based on that it is possible to load the data with geopandas from file (look at Fiona possible drivers) and create Spark DataFrame based on GeoDataFrame object. 
+geo_pyspark has implemented serializers and deserializers which allows to convert GeoSpark Geometry objects into Shapely BaseGeometry objects. Based on that it is possible to load the data with geopandas from file (look at Fiona possible drivers) and create Spark DataFrame based on GeoDataFrame object.
 
 Example, loading the data from shapefile using geopandas read_file method and create Spark DataFrame based on GeoDataFrame:
 
 ```python
 
-  import os
-
   import geopandas as gpd
   from pyspark.sql import SparkSession
 
-  from geo_pyspark.data import data_path
   from geo_pyspark.register import GeoSparkRegistrator
 
   spark = SparkSession.builder.\
@@ -143,12 +144,9 @@ Reading data with Spark and converting to GeoPandas
 
 ```python
 
-    import os
-
     import geopandas as gpd
     from pyspark.sql import SparkSession
 
-    from geo_pyspark.data import data_path
     from geo_pyspark.register import GeoSparkRegistrator
 
     spark = SparkSession.builder.\
@@ -160,7 +158,7 @@ Reading data with Spark and converting to GeoPandas
     read.\
     option("delimiter", "|").\
     option("header", "true").\
-    csv(os.path.join(data_path, "counties.csv"))
+    csv("counties.csv")
 
     counties.createOrReplaceTempView("county")
 
@@ -202,7 +200,7 @@ Reading data with Spark and converting to GeoPandas
 | Polygon         | :heavy_check_mark: |
 | MultiPolygon    | :heavy_check_mark: |
 
-To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> geo_pyspark.sql.types </b> module. Converting works for list or tuple with shapely objects. 
+To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> geo_pyspark.sql.types </b> module. Converting works for list or tuple with shapely objects.
 
 Schema for target table with integer id and geometry type can be defined as follow:
 
@@ -265,6 +263,79 @@ root
  |-- id: integer (nullable = false)
  |-- geom: geometry (nullable = false)
 ```
+
+#### MultiPoint
+
+```python3
+
+data = [
+    [1, MultiPoint([[19.511463, 51.765158], [19.446408, 51.779752]])]
+]
+
+gdf = spark.createDataFrame(
+    data,
+    schema
+).show(1, False)
+
+```
+
+```
+
++---+---------------------------------------------------------+
+|id |geom                                                     |
++---+---------------------------------------------------------+
+|1  |MULTIPOINT ((19.511463 51.765158), (19.446408 51.779752))|
++---+---------------------------------------------------------+
+
+
+```
+
+#### LineString
+
+#### MultiLineString
+
+#### Polygon
+
+```python3
+
+from shapely.geometry import Polygon
+
+polygon = Polygon(
+    [
+         [19.51121, 51.76426],
+         [19.51056, 51.76583],
+         [19.51216, 51.76599],
+         [19.51280, 51.76448],
+         [19.51121, 51.76426]
+    ]
+)
+
+data = [
+    [1, polygon]
+]
+
+gdf = spark.createDataFrame(
+    data,
+    schema
+)
+
+gdf.show(1, False)
+
+```
+
+
+```
+
++---+--------------------------------------------------------------------------------------------------------+
+|id |geom                                                                                                    |
++---+--------------------------------------------------------------------------------------------------------+
+|1  |POLYGON ((19.51121 51.76426, 19.51056 51.76583, 19.51216 51.76599, 19.5128 51.76448, 19.51121 51.76426))|
++---+--------------------------------------------------------------------------------------------------------+
+
+```
+
+#### MultiPolygon
+
 
 ## Supported versions
 
