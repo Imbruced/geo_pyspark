@@ -85,9 +85,54 @@ or
 
 ```
 
+# Core Classes and methods.
+
+
+`GeoSparkRegistrator.registerAll(spark: pyspark.sql.SparkSession) -> bool`
+
+This is the core of whole package. Class method registers all GeoSparkSQL functions (available for used GeoSparkSQL version).
+To check available functions please look at GeoSparkSQL section.
+:param spark: pyspark.sql.SparkSession, spark session instance
+
+
+`upload_jars() -> NoReturn`
+
+Function uses `findspark` Python module to upload newest GeoSpark jars to Spark executor and nodes.
+
+`GeometryType()`
+
+Class which handle serialization and deserialization between GeoSpark geometries and Shapely BaseGeometry types.
+
+`KryoSerializer.getName`
+Class property which returns org.apache.spark.serializer.KryoSerializer string, which simplify using GeoSpark Serializers.
+
+`GeoSparkKryoRegistrator.getName`
+Class property which returns org.datasyslab.geospark.serde.GeoSparkKryoRegistrator string, which simplify using GeoSpark Serializers.
+
+
+
+# Writing Application
+
+Use KryoSerializer.getName and GeoSparkKryoRegistrator.getName class properties to reduce memory impact, reffering to  <a href="https://datasystemslab.github.io/GeoSpark/tutorial/sql/"> GeoSpark docs </a>. To do that use spark config as follows:
+
+```python
+
+.config("spark.serializer", KryoSerializer.getName)
+.config("spark.kryo.registrator", GeoSparkKryoRegistrator.getName)
+
+```
+
+If jars was not uploaded manually please use function `upload_jars()`
+
+To turn on GeoSparkSQL function inside pyspark code use GeoSparkRegistrator.registerAll method on existing pyspark.sql.SparkSession instance ex.
+
+`GeoSparkRegistrator.registerAll(spark)`
+
+After that all the functions from GeoSparkSQL will be available, moreover using collect or toPandas methods on Spark DataFrame will return Shapely BaseGeometry objects. Based on GeoPandas DataFrame, Pandas DataFrame with shapely objects or Sequence with shapely objects, Spark DataFrame can be created using spark.createDataFrame method. To specify Schema with geometry inside please use `GeometryType()` instance (look at examples section to see that in practice).
+
+
 
 # Examples
-
 
 ## GeoSparkSQL
 
