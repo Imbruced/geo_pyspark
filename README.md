@@ -103,10 +103,10 @@ Function uses `findspark` Python module to upload newest GeoSpark jars to Spark 
 
 Class which handle serialization and deserialization between GeoSpark geometries and Shapely BaseGeometry types.
 
-`KryoSerializer.getName`
+`KryoSerializer.getName -> str`
 Class property which returns org.apache.spark.serializer.KryoSerializer string, which simplify using GeoSpark Serializers.
 
-`GeoSparkKryoRegistrator.getName`
+`GeoSparkKryoRegistrator.getName -> str`
 Class property which returns org.datasyslab.geospark.serde.GeoSparkKryoRegistrator string, which simplify using GeoSpark Serializers.
 
 
@@ -141,7 +141,99 @@ All GeoSparkSQL functions (list depends on GeoSparkSQL version) are available in
 
 For example use GeoSparkSQL for Spatial Join.
 
+```python3
 
+counties = spark.\
+    read.\
+    option("delimiter", "|").\
+    option("header", "true").\
+    csv("counties.csv")
+
+counties.createOrReplaceTempView("county")
+
+counties_geom = spark.sql(
+      "SELECT county_code, st_geomFromWKT(geom) as geometry from county"
+)
+
+points = gpd.read_file("gis_osm_pois_free_1.shp")
+
+points_geom = spark.createDataFrame(
+    points[["fclass", "geometry"]]
+)
+
+counties_geom.show(5, False)
+
+```
+```
++-----------+--------------------+
+|county_code|            geometry|
++-----------+--------------------+
+|       1815|POLYGON ((21.6942...|
+|       1410|POLYGON ((22.7238...|
+|       1418|POLYGON ((21.1100...|
+|       1425|POLYGON ((20.9891...|
+|       1427|POLYGON ((19.5087...|
++-----------+--------------------+
+```
+```python3
+points_geom.show(5, False)
+```
+```
++---------+-----------------------------+
+|fclass   |geometry                     |
++---------+-----------------------------+
+|camp_site|POINT (15.3393145 52.3504247)|
+|chalet   |POINT (14.8709625 52.691693) |
+|motel    |POINT (15.0946636 52.3130396)|
+|atm      |POINT (15.0732014 52.3141083)|
+|hotel    |POINT (15.0696777 52.3143013)|
++---------+-----------------------------+
+```
+
+```python3
+
+points_geom.createOrReplaceTempView("pois")
+counties_geom.createOrReplaceTempView("counties")
+
+spatial_join_result = spark.sql(
+    """
+        SELECT c.county_code, p.fclass
+        FROM pois AS p, counties AS c
+        WHERE ST_Intersects(p.geometry, c.geometry)
+    """
+)
+
+spatial_join_result.explain()
+
+```
+```
+== Physical Plan ==
+*(2) Project [county_code#230, fclass#239]
++- RangeJoin geometry#240: geometry, geometry#236: geometry, true
+   :- Scan ExistingRDD[fclass#239,geometry#240]
+   +- Project [county_code#230, st_geomfromwkt(geom#232) AS geometry#236]
+      +- *(1) FileScan csv [county_code#230,geom#232] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/home/pkocinski001/Desktop/projects/geo_pyspark_installed/counties.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<county_code:string,geom:string>
+```
+Calculating Number of Pois within counties per fclass.
+
+```python3
+pois_per_county = spatial_join_result.groupBy("county_code", "fclass"). \
+    count()
+
+pois_per_county.show(5, False)
+
+```
+```
++-----------+---------+-----+
+|county_code|fclass   |count|
++-----------+---------+-----+
+|0805       |atm      |6    |
+|0805       |bench    |75   |
+|0803       |museum   |9    |
+|0802       |fast_food|5    |
+|0862       |atm      |20   |
++-----------+---------+-----+
+```
 
 ## Integration with GeoPandas and Shapely
 
