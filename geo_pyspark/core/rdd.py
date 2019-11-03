@@ -92,7 +92,7 @@ class SpatialRDD(ABC):
         return self._srdd.approximateTotalCount()
 
     def boundary(self):
-        raise NotImplementedError()
+        return self._srdd.boundary()
 
     def boundaryEnvelope(self):
         raise NotImplementedError()
