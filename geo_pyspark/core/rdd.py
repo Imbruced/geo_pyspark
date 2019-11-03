@@ -86,7 +86,7 @@ class SpatialRDD(ABC):
         return self._srdd.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode)
 
     def MinimumBoundingRectangle(self):
-        raise NotImplementedError()
+        return self._srdd.MinimumBoundingRectangle()
 
     def approximateTotalCount(self):
         raise NotImplementedError()
