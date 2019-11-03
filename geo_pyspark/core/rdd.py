@@ -101,7 +101,7 @@ class SpatialRDD(ABC):
         raise NotImplementedError()
 
     def countWithoutDuplicates(self):
-        raise NotImplementedError()
+        return self._srdd.countWithoutDuplicates()
 
     def countWithoutDuplicatesSPRDD(self):
         raise NotImplementedError()
