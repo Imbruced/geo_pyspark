@@ -140,11 +140,11 @@ class TestsSerializers(TestCase):
         ).toPandas())
 
     def test_multipolygon_serialization(self):
-        ext = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
-        int = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
+        exterior = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
+        interior = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
 
         polygons = [
-            Polygon(ext, [int]),
+            Polygon(exterior, [interior]),
             Polygon([[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])
         ]
         multipolygon = MultiPolygon(polygons)
@@ -159,7 +159,10 @@ class TestsSerializers(TestCase):
                 t.StructField("geom", GeometryType(), True)
             ]
         )
-
+        spark.createDataFrame(
+            data,
+            schema
+        ).show(1, False)
         spark.createDataFrame(
             data,
             schema

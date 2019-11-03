@@ -9,6 +9,7 @@ descartes="*"
 sphinx="*"
 ipykernel="*"
 jupyter="*"
+toree="*"
 
 [packages]
 findspark="*"
