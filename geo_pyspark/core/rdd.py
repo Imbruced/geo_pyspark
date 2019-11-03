@@ -70,7 +70,7 @@ class SpatialRDD(ABC):
         )
 
     def analyze(self) -> bool:
-        raise NotImplementedError()
+        """
 
         :return: bool,
         """
