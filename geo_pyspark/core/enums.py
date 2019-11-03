@@ -68,4 +68,24 @@ class FileDataSplitter:
 
     @classproperty
     def SEMICOLON(self):
-        return ";"
+        return "SEMICOLON"
+
+
+@attr.s
+class FileSplitterJvm:
+
+    sparkContext = attr.ib(type=SparkContext)
+
+    def __attrs_post_init__(self):
+        self._jvm = self.sparkContext._jvm
+
+    def get_splitter(self, splitter: str):
+        return self.splitter(splitter)
+
+    @property
+    def splitter(self):
+        return self._jvm.org.datasyslab.\
+            geospark.\
+            enums.\
+            FileDataSplitter.\
+            getFileDataSplitter
