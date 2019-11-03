@@ -51,11 +51,39 @@ class SpatialRDDFactory(ABC):
 @attr.s
 class SpatialRDD(ABC):
 
+    sparkContext = attr.ib(type=SparkContext)
+    InputLocation = attr.ib(type=path)
+    Offset = attr.ib(type=int)
+    splitter = attr.ib(type=str)
+    carryInputData = attr.ib(type=bool)
+    partitions = attr.ib(type=int, default=None)
+    newLevel = attr.ib(type=str, default=None)
+    sourceEpsgCRSCode = attr.ib(type=crs, default=None)
+    targetEpsgCode = attr.ib(type=crs, default=None)
+
+    def __attrs_post_init__(self):
+        self._srdd = self.sparkContext._jvm.GeometryRDDFactory.createPointRDD(
+            self.InputLocation,
+            self.Offset,
+            self.splitter,
+            self.carryInputData
+        )
+
     def analyze(self) -> bool:
         raise NotImplementedError()
 
-    def CRSTransform(self):
-        raise NotImplementedError()
+        :return: bool,
+        """
+        return self._srdd.analyze()
+
+    def CRSTransform(self, sourceEpsgCRSCode: crs, targetEpsgCRSCode: crs) -> bool:
+        """
+        Function transforms coordinates from one crs to another one
+        :param sourceEpsgCRSCode: crs,  Cooridnate Reference System to transform from
+        :param targetEpsgCRSCode: crs, Coordinate Reference System to transform to
+        :return: bool, True if transforming was correct
+        """
+        return self._srdd.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode)
 
     def MinimumBoundingRectangle(self):
         raise NotImplementedError()
