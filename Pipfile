@@ -10,6 +10,7 @@ sphinx="*"
 ipykernel="*"
 jupyter="*"
 toree="*"
+pytest="*"
 
 [packages]
 findspark="*"
