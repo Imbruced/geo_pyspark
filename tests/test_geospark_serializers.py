@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from pyspark.sql import SparkSession
 
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
@@ -17,7 +15,7 @@ spark = SparkSession.builder.\
 GeoSparkRegistrator.registerAll(spark)
 
 
-class TestGeometryConvert(TestCase):
+class TestGeometryConvert:
 
     def test_creating_point(self):
         spark.sql("SELECT st_GeomFromWKT('Point(21.0 52.0)')").show()
@@ -26,5 +24,5 @@ class TestGeometryConvert(TestCase):
         kryo_reg = ('spark.kryo.registrator', 'org.datasyslab.geospark.serde.GeoSparkKryoRegistrator')
         serializer = ('spark.serializer', 'org.apache.spark.serializer.KryoSerializer')
         spark_config = spark.sparkContext._conf.getAll()
-        self.assertEqual(kryo_reg in spark_config, True)
-        self.assertEqual(serializer in spark_config, True)
+        assert kryo_reg in spark_config
+        assert serializer in spark_config

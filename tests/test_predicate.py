@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from pyspark.sql import SparkSession
 
 from geo_pyspark.data import csv_point_input_location, csv_point1_input_location, csv_polygon1_input_location
@@ -13,7 +11,7 @@ spark = SparkSession.builder. \
 GeoSparkRegistrator.registerAll(spark)
 
 
-class TestPredicate(TestCase):
+class TestPredicate:
 
     def test_st_contains(self):
         point_csv_df = spark.read. \
@@ -31,7 +29,7 @@ class TestPredicate(TestCase):
         result_df = spark.sql(
             "select * from pointdf where ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)")
         result_df.show()
-        self.assertEqual(result_df.count(), 999)
+        assert result_df.count() == 999
 
     def test_st_intersects(self):
         point_csv_df = spark.read. \
@@ -49,7 +47,7 @@ class TestPredicate(TestCase):
         result_df = spark.sql(
             "select * from pointdf where ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)")
         result_df.show()
-        self.assertEqual(result_df.count(), 999)
+        assert result_df.count() == 999
 
     def test_st_within(self):
         point_csv_df = spark.read. \
@@ -67,7 +65,7 @@ class TestPredicate(TestCase):
         result_df = spark.sql(
             "select * from pointdf where ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))")
         result_df.show()
-        self.assertEqual(result_df.count(), 999)
+        assert result_df.count() == 999
 
     def test_st_equals_for_st_point(self):
         point_df_csv = spark.read.\
@@ -86,7 +84,7 @@ class TestPredicate(TestCase):
         equal_df = spark.sql("select * from pointdf where ST_Equals(pointdf.point, ST_Point(100.1, 200.1)) ")
         equal_df.show()
 
-        self.assertEqual(equal_df.count(), 5, f"Expected 5 value but got {equal_df.count()}")
+        assert equal_df.count() == 5, f"Expected 5 value but got {equal_df.count()}"
 
     def test_st_equals_for_polygon(self):
         polygon_csv_df = spark.read.format("csv").\
@@ -110,7 +108,7 @@ class TestPredicate(TestCase):
             "select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromEnvelope(100.5,200.5,100.01,200.01)) ")
         equal_df_2.show()
 
-        self.assertEqual(equal_df_2.count(), 5, f"Expected 5 value but got {equal_df_2.count()}")
+        assert equal_df_2.count() == 5, f"Expected 5 value but got {equal_df_2.count()}"
 
     def test_st_equals_for_st_point_and_st_polygon(self):
         polygon_csv_df = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
@@ -125,7 +123,7 @@ class TestPredicate(TestCase):
             "select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_Point(91.01,191.01)) ")
         equal_df.show()
 
-        self.assertEqual(equal_df.count(), 0, f"Expected 0 value but got {equal_df.count()}")
+        assert equal_df.count() == 0, f"Expected 0 value but got {equal_df.count()}"
 
     def test_st_equals_for_st_linestring_and_st_polygon(self):
         polygon_csv_df = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
@@ -141,7 +139,7 @@ class TestPredicate(TestCase):
         equal_df = spark.sql(f"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_LineStringFromText(\'{string}\', \',\')) ")
         equal_df.show()
 
-        self.assertEqual(equal_df.count(), 0, f"Expected 0 value but got {equal_df.count()}")
+        assert equal_df.count() == 0, f"Expected 0 value but got {equal_df.count()}"
 
     def test_st_equals_for_st_polygon_from_envelope_and_st_polygon_from_text(self):
         polygon_csv_df = spark.read.format("csv").\
@@ -162,7 +160,7 @@ class TestPredicate(TestCase):
         f"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromText(\'{string}\', \',\')) ")
         equal_df.show()
 
-        self.assertEqual(equal_df.count(), 5, f"Expected 5 value but got {equal_df.count()}")
+        assert equal_df.count() == 5, f"Expected 5 value but got {equal_df.count()}"
 
     def test_st_crosses(self):
         crosses_test_table = spark.sql(
@@ -175,8 +173,8 @@ class TestPredicate(TestCase):
         not_crosses_test_table.createOrReplaceTempView("notCrossesTesttable")
         not_crosses = spark.sql("select(ST_Crosses(a, b)) from notCrossesTesttable")
 
-        self.assertEqual(crosses.take(1)[0][0], True)
-        self.assertEqual(not_crosses.take(1)[0][0], False)
+        assert crosses.take(1)[0][0]
+        assert not not_crosses.take(1)[0][0]
 
     def test_st_touches(self):
         point_csv_df = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
@@ -190,7 +188,7 @@ class TestPredicate(TestCase):
         result_df = spark.sql(
             "select * from pointdf where ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(0.0,99.0,1.1,101.1))")
         result_df.show()
-        self.assertEqual(result_df.count(), 1)
+        assert result_df.count() == 1
 
     def test_st_overlaps(self):
         test_table = spark.sql(
@@ -198,5 +196,5 @@ class TestPredicate(TestCase):
         test_table.createOrReplaceTempView("testtable")
         overlaps = spark.sql("select ST_Overlaps(a,b) from testtable")
         not_overlaps = spark.sql("select ST_Overlaps(c,d) from testtable")
-        self.assertEqual(overlaps.take(1)[0][0], True)
-        self.assertEqual(not_overlaps.take(1)[0][0], False)
+        assert overlaps.take(1)[0][0]
+        assert not not_overlaps.take(1)[0][0]

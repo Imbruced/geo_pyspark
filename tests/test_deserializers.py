@@ -1,5 +1,4 @@
 import os
-from unittest import TestCase
 
 from pyspark.sql import SparkSession
 from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon
@@ -16,7 +15,7 @@ spark = SparkSession.builder.\
 GeoSparkRegistrator.registerAll(spark)
 
 
-class TestGeometryConvert(TestCase):
+class TestGeometryConvert:
 
     def test_register_functions(self):
         df = spark.sql("""SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom""")
@@ -36,7 +35,7 @@ class TestGeometryConvert(TestCase):
 
         geom_area = spark.sql("SELECT st_area(st_geomFromWKT(geom)) as area from counties").collect()[0][0]
         polygon_shapely = spark.sql("SELECT st_geomFromWKT(geom) from counties").collect()[0][0]
-        self.assertEqual(geom_area, polygon_shapely.area)
+        assert geom_area == polygon_shapely.area
 
     def test_polygon_with_holes_deserialization(self):
         geom = spark.sql(
@@ -44,8 +43,8 @@ class TestGeometryConvert(TestCase):
 (20 30, 35 35, 30 20, 20 30))') as geom"""
         ).collect()[0][0]
 
-        self.assertEqual(geom.area, 675.0)
-        self.assertEqual(type(geom), Polygon)
+        assert geom.area == 675.0
+        assert type(geom) == Polygon
 
     def test_multipolygon_with_holes_deserialization(self):
         geom = spark.sql(
@@ -53,9 +52,9 @@ class TestGeometryConvert(TestCase):
 ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),
 (30 20, 20 15, 20 25, 30 20)))')"""
         ).collect()[0][0]
-        self.assertEqual(type(geom), MultiPolygon)
+        assert type(geom) == MultiPolygon
 
-        self.assertEqual(geom.area, 712.5)
+        assert geom.area == 712.5
 
     def test_multipolygon_deserialization(self):
         geom = spark.sql(
@@ -64,30 +63,21 @@ class TestGeometryConvert(TestCase):
 
     def test_point_deserialization(self):
         geom = spark.sql("""SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom""").collect()[0][0]
-        self.assertEqual(
-            geom.wkt,
-            Point(-6.0, 52.0).wkt
-        )
+        assert geom.wkt == Point(-6.0, 52.0).wkt
 
     def test_multipoint_deserialization(self):
         geom = spark.sql("""select st_geomFromWKT('MULTIPOINT(1 2, -2 3)') as geom""").collect()[0][0]
 
-        self.assertEqual(
-            geom.wkt,
-            MultiPoint([(1, 2), (-2, 3)]).wkt
-        )
+        assert geom.wkt == MultiPoint([(1, 2), (-2, 3)]).wkt
 
     def test_linestring_deserialization(self):
         geom = spark.sql(
             """select st_geomFromWKT('LINESTRING (30 10, 10 30, 40 40)')"""
         ).collect()[0][0]
 
-        self.assertEqual(type(geom), LineString)
+        assert type(geom) == LineString
 
-        self.assertEqual(
-            geom.wkt,
-            LineString([(30, 10), (10, 30), (40, 40)]).wkt
-        )
+        assert geom.wkt == LineString([(30, 10), (10, 30), (40, 40)]).wkt
 
     def test_multilinestring_deserialization(self):
         geom = spark.sql(
@@ -95,15 +85,11 @@ class TestGeometryConvert(TestCase):
                         (40 40, 30 30, 40 20, 30 10))') as geom"""
         ).collect()[0][0]
 
-        self.assertEqual(type(geom), MultiLineString)
-
-        self.assertEqual(
-            geom.wkt,
-            MultiLineString([
+        assert type(geom) == MultiLineString
+        assert geom.wkt == MultiLineString([
                 ((10, 10), (20, 20), (10, 40)),
                 ((40, 40), (30, 30), (40, 20), (30, 10))
             ]).wkt
-        )
 
     def test_from_geopandas_convert(self):
         gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))

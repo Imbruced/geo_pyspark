@@ -1,8 +1,8 @@
 from pyspark.sql import SparkSession
 
-from geo_pyspark.core.enums import FileDataSplitter
-from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.SpatialRDD import PolygonRDD
+from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD
+from geo_pyspark.core.enums import FileDataSplitter, GridType
+from geo_pyspark.core.spatialOperator import JoinQuery
 from geo_pyspark.register import upload_jars
 
 upload_jars()
@@ -14,9 +14,9 @@ spark = SparkSession.\
     getOrCreate()
 
 
-class TestSpatialRDD:
+class TestJoinQuery:
 
-    def test_creating_point_rdd(self):
+    def test_spatial_join_query(self):
         point_rdd = PointRDD(
             sparkContext=spark._sc,
             InputLocation="/home/pkocinski001/Desktop/projects/geo_pyspark_installed/points.csv",
@@ -25,11 +25,6 @@ class TestSpatialRDD:
             carryInputData=True
         )
 
-        point_rdd.analyze()
-        cnt = point_rdd.countWithoutDuplicates()
-        assert cnt == 12872, f"Point RDD should have 12872 but found {cnt}"
-
-    def test_creating_polygon_rdd(self):
         polygon_rdd = PolygonRDD(
             sparkContext=spark._sc,
             InputLocation="/home/pkocinski001/Desktop/projects/geo_pyspark_installed/counties_tsv.csv",
@@ -39,8 +34,14 @@ class TestSpatialRDD:
             carryInputData=True
         )
 
-        polygon_rdd.analyze()
+        point_rdd.analyze()
+        point_rdd.spatialPartitioning(GridType.KDBTREE)
+        polygon_rdd.spatialPartitioning(point_rdd.getPartitioner)
+        result = JoinQuery.SpatialJoinQuery(
+            point_rdd,
+            polygon_rdd,
+            True,
+            False
+        )
 
-        cnt = polygon_rdd.countWithoutDuplicates()
-
-        assert cnt == 407, f"Polygon RDD should have 407 but found {cnt}"
+        print(result.count())

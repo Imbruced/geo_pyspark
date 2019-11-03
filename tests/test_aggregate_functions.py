@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from pyspark.sql import SparkSession
 from shapely.geometry import Polygon
 
@@ -15,7 +13,7 @@ spark = SparkSession.builder. \
 GeoSparkRegistrator.registerAll(spark)
 
 
-class TestConstructors(TestCase):
+class TestConstructors:
 
     def test_st_envelope_aggr(self):
         point_csv_df = spark.read.format("csv").\
@@ -38,7 +36,7 @@ class TestConstructors(TestCase):
 
         polygon = Polygon(coordinates)
 
-        self.assertEqual(boundary.take(1)[0][0], polygon)
+        assert boundary.take(1)[0][0] == polygon
 
     def test_st_union_aggr(self):
         polygon_csv_df = spark.read.format("csv").\
@@ -53,5 +51,4 @@ class TestConstructors(TestCase):
         polygon_df.show()
         union = spark.sql("select ST_Union_Aggr(polygondf.polygonshape) from polygondf")
 
-        self.assertEqual(union.take(1)[0][0].area, 10100)
-
+        assert union.take(1)[0][0].area == 10100

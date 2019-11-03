@@ -1,5 +1,4 @@
 import os
-from unittest import TestCase
 
 from pyspark.sql.types import IntegerType
 import geopandas as gpd
@@ -18,7 +17,7 @@ spark = SparkSession.builder.\
 GeoSparkRegistrator.registerAll(spark)
 
 
-class TestsSerializers(TestCase):
+class TestsSerializers:
 
     def test_point_serializer(self):
         data = [
@@ -41,7 +40,7 @@ class TestsSerializers(TestCase):
         distance = spark.sql(
             "select st_distance(geom_from, geom_to) from points"
         ).collect()[0][0]
-        self.assertEqual(distance, 3.0)
+        assert distance == 3.0
 
     def test_multipoint_serializer(self):
 
@@ -64,7 +63,7 @@ class TestsSerializers(TestCase):
             schema
         ).collect()[0][1]
 
-        self.assertEqual(m_point_out, multipoint)
+        assert m_point_out == multipoint
 
     def test_linestring_serialization(self):
         linestring = LineString([(0.0, 1.0), (1, 1), (12.0, 1.0)])
@@ -85,7 +84,7 @@ class TestsSerializers(TestCase):
         ).createOrReplaceTempView("line")
 
         length = spark.sql("select st_length(geom) from line").collect()[0][0]
-        self.assertEqual(length, 12.0)
+        assert length == 12.0
 
     def test_multilinestring_serialization(self):
         multilinestring = MultiLineString([[[0, 1], [1, 1]], [[2, 2], [3, 2]]])
@@ -106,7 +105,7 @@ class TestsSerializers(TestCase):
         ).createOrReplaceTempView("multilinestring")
 
         length = spark.sql("select st_length(geom) from multilinestring").collect()[0][0]
-        self.assertEqual(length, 2.0)
+        assert length == 2.0
 
     def test_polygon_serialization(self):
         ext = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
@@ -131,7 +130,7 @@ class TestsSerializers(TestCase):
         ).createOrReplaceTempView("polygon")
 
         length = spark.sql("select st_area(geom) from polygon").collect()[0][0]
-        self.assertEqual(length, 3.75)
+        assert length == 3.75
 
     def test_geopandas_convertion(self):
         gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))
@@ -168,4 +167,4 @@ class TestsSerializers(TestCase):
             schema
         ).createOrReplaceTempView("polygon")
         length = spark.sql("select st_area(geom) from polygon").collect()[0][0]
-        self.assertEqual(length, 4.75)
+        assert length == 4.75
