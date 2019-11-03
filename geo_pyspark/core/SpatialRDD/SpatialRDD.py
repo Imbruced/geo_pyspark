@@ -2,51 +2,11 @@ from abc import ABC
 
 import attr
 from pyspark import SparkContext
-from pyspark.sql import SparkSession
 
-from geo_pyspark.core.enums import FileSplitterJvm
-
-crs = str
-path = str
-
-
-@attr.s
-class SpatialRDDFactory(ABC):
-
-    sparkContext = attr.ib(type=SparkContext)
-
-    def __attrs_post_init__(self):
-        self._jvm = self.sparkContext._jvm
-
-    def create_point_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.PointRDD"
-        )
-
-    def create_polygon_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.PolygonRDD"
-        )
-
-    def create_linestring_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.LineStringRDD"
-        )
-
-    def create_rectangle_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.RectangleRDD"
-        )
-
-    def create_circle_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.CircleRDD"
-        )
+from geo_pyspark.core.SpatialRDD.SpatialRDDFactory import SpatialRDDFactory
+from geo_pyspark.core.enums.GridType import GridTypeJvm
+from geo_pyspark.core.utils import FileSplitterJvm
+from geo_pyspark.utils.types import path, crs
 
 
 @attr.s
@@ -54,18 +14,22 @@ class SpatialRDD(ABC):
 
     sparkContext = attr.ib(type=SparkContext)
     InputLocation = attr.ib(type=path)
-    Offset = attr.ib(type=int)
     splitter = attr.ib(type=str)
     carryInputData = attr.ib(type=bool)
+    Offset = attr.ib(type=int, default=None)
     partitions = attr.ib(type=int, default=None)
     newLevel = attr.ib(type=str, default=None)
     sourceEpsgCRSCode = attr.ib(type=crs, default=None)
     targetEpsgCode = attr.ib(type=crs, default=None)
+    startingOffset = attr.ib(type=int, default=None)
+    endingOffset = attr.ib(type=int, default=None)
 
     def __attrs_post_init__(self):
         self._jsc = self.sparkContext._jsc
         self.__file_spliter_jvm = FileSplitterJvm(self.sparkContext)
         self.splitter = self.__file_spliter_jvm.get_splitter(self.splitter)
+        self._factory = SpatialRDDFactory(self.sparkContext)
+        self._jvm = self.sparkContext._jvm
 
     def __create_srdd(self):
         raise NotImplementedError()
@@ -128,8 +92,9 @@ class SpatialRDD(ABC):
     def getClass(self):
         raise NotImplementedError()
 
-    def getPartitioner(self):
-        raise NotImplementedError()
+    @property
+    def getPartitioner(self) -> str:
+        return self._srdd.getPartitioner()
 
     def getRawSpatialRDD(self):
         raise NotImplementedError()
@@ -158,8 +123,8 @@ class SpatialRDD(ABC):
     def rawSpatialRDD(self):
         raise NotImplementedError()
 
-    def saveAsGeoJSON(self):
-        raise NotImplementedError()
+    def saveAsGeoJSON(self, path: str):
+        return self._srdd.saveAsGeoJSON(path)
 
     def setRawSpatialRDD(self):
         raise NotImplementedError()
@@ -170,69 +135,12 @@ class SpatialRDD(ABC):
     def spatialPartitionedRDD(self):
         raise NotImplementedError()
 
-    def spatialPartitioning(self):
-        raise NotImplementedError()
-
-
-@attr.s
-class PointRDD(SpatialRDD):
-
-    def __attrs_post_init__(self):
-        super().__attrs_post_init__()
-        self._srdd = self.__create_srdd()
-
-    def __create_srdd(self):
-        PointRDD = SpatialRDDFactory(self.sparkContext).create_point_rdd()
-
-        point_rdd = PointRDD(
-            self._jsc,
-            self.InputLocation,
-            self.Offset,
-            self.splitter,
-            self.carryInputData
+    def spatialPartitioning(self, partitioning: str):
+        if type(partitioning) == str:
+            grid = GridTypeJvm(self._jvm)
+            current_grid_type = grid.get_grid_type(partitioning)
+        else:
+            current_grid_type = partitioning
+        return self._srdd.spatialPartitioning(
+            current_grid_type
         )
-
-        return point_rdd
-
-
-@attr.s
-class PolygonRDD(SpatialRDD):
-
-    def __attrs_post_init__(self):
-        self._srdd = self.__create_srdd()
-
-    def __create_srdd(self):
-        pass
-
-
-@attr.s
-class CircleRDD(SpatialRDD):
-
-    def __attrs_post_init__(self):
-        super().__attrs_post_init__()
-        self._srdd = self.__create_srdd()
-
-    def __create_srdd(self):
-        pass
-
-
-@attr.s
-class RectangleRDD(SpatialRDD):
-
-    def __attrs_post_init__(self):
-        super().__attrs_post_init__()
-        self._srdd = self.__create_srdd()
-
-    def __create_srdd(self):
-        pass
-
-
-@attr.s
-class LineStringRDD(SpatialRDD):
-
-    def __create_srdd(self):
-        pass
-
-    def __attrs_post_init__(self):
-        super().__attrs_post_init__()
-        self._srdd = self.__create_srdd()
