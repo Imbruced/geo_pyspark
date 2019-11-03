@@ -107,7 +107,24 @@ class SpatialRDD(ABC):
 
 @attr.s
 class PointRDD(SpatialRDD):
-    sc = attr.ib(type=SparkContext)
+    pass
 
-    def analyze(self) -> bool:
-        pass
+
+@attr.s
+class PolygonRDD(SpatialRDD):
+    pass
+
+
+@attr.s
+class CircleRDD(SpatialRDD):
+    pass
+
+
+@attr.s
+class RectangleRDD(SpatialRDD):
+    pass
+
+
+@attr.s
+class LineStringRDD(SpatialRDD):
+    pass
