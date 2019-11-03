@@ -89,10 +89,7 @@ class SpatialRDD(ABC):
         return self._srdd.MinimumBoundingRectangle()
 
     def approximateTotalCount(self):
-        raise NotImplementedError()
-
-    def asInstanceOf(self):
-        raise NotImplementedError()
+        return self._srdd.approximateTotalCount()
 
     def boundary(self):
         raise NotImplementedError()
