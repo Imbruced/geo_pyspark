@@ -1,3 +1,6 @@
+import attr
+from pyspark import SparkContext
+
 from geo_pyspark.utils.decorators import classproperty
 
 
@@ -5,63 +8,63 @@ class FileDataSplitter:
 
     @classproperty
     def CSV(self):
-        return ","
+        return "CSV"
 
     @classproperty
     def TSV(self):
-        return "\t"
+        return "TSV"
 
     @classproperty
     def GEOJSON(self):
-        return ""
+        return "GEOJSON"
 
     @classproperty
     def WKT(self):
-        return "\t"
+        return "WKT"
 
     @classproperty
     def WKB(self):
-        return "\t"
+        return "WKB"
 
     @classproperty
     def COMMA(self):
-        return ","
+        return "COMMA"
 
     @classproperty
     def TAB(self):
-        return "\t"
+        return "TAB"
 
     @classproperty
     def QUESTIONMARK(self):
-        return "?"
+        return "QUESTIONMARK"
 
     @classproperty
     def SINGLEQUOTE(self):
-        return "\'"
+        return "SINGLEQUOTE"
 
     @classproperty
     def QUOTE(self):
-        return "\""
+        return "QUOTE"
 
     @classproperty
-    def UNSERSCORE(self):
-        return "_"
+    def UNDERSCORE(self):
+        return "UNDERSCORE"
 
     @classproperty
     def DASH(self):
-        return "-"
+        return "DASH"
 
     @classproperty
     def PERCENT(self):
-        return "%"
+        return "PERCENT"
 
     @classproperty
     def TILDE(self):
-        return "~"
+        return "TILDE"
 
     @classproperty
     def PIPE(self):
-        return "|"
+        return "PIPE"
 
     @classproperty
     def SEMICOLON(self):
