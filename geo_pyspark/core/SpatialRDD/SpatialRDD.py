@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Optional
 
 import attr
 from pyspark import SparkContext
@@ -13,16 +14,16 @@ from geo_pyspark.utils.types import path, crs
 class SpatialRDD(ABC):
 
     sparkContext = attr.ib(type=SparkContext)
-    InputLocation = attr.ib(type=path)
-    splitter = attr.ib(type=str)
-    carryInputData = attr.ib(type=bool)
-    Offset = attr.ib(type=int, default=None)
-    partitions = attr.ib(type=int, default=None)
-    newLevel = attr.ib(type=str, default=None)
+    InputLocation = attr.ib(type=Optional[path], default=None)
+    splitter = attr.ib(type=Optional[str], default=None)
+    carryInputData = attr.ib(type=Optional[bool], default=None)
+    Offset = attr.ib(type=Optional[int], default=None)
+    partitions = attr.ib(type=Optional[int], default=None)
+    newLevel = attr.ib(type=Optional[str], default=None)
     sourceEpsgCRSCode = attr.ib(type=crs, default=None)
-    targetEpsgCode = attr.ib(type=crs, default=None)
-    startingOffset = attr.ib(type=int, default=None)
-    endingOffset = attr.ib(type=int, default=None)
+    targetEpsgCode = attr.ib(type=Optional[crs], default=None)
+    startingOffset = attr.ib(type=Optional[int], default=None)
+    endingOffset = attr.ib(type=Optional[int], default=None)
 
     def __attrs_post_init__(self):
         self._jsc = self.sparkContext._jsc
@@ -30,6 +31,13 @@ class SpatialRDD(ABC):
         self.splitter = self.__file_spliter_jvm.get_splitter(self.splitter)
         self._factory = SpatialRDDFactory(self.sparkContext)
         self._jvm = self.sparkContext._jvm
+
+    @classmethod
+    def from_srdd(cls, sc: SparkContext, jsrdd):
+        instance = cls(sparkContext=sc, InputLocation=None, splitter=None, carryInputData=False)
+        instance._srdd = jsrdd
+
+        return instance
 
     def __create_srdd(self):
         raise NotImplementedError()
@@ -97,7 +105,7 @@ class SpatialRDD(ABC):
         return self._srdd.getPartitioner()
 
     def getRawSpatialRDD(self):
-        raise NotImplementedError()
+        return self._srdd.getRawSpatialRDD()
 
     def getSampleNumber(self):
         raise NotImplementedError()
