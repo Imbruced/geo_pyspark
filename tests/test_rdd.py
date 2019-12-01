@@ -6,7 +6,7 @@ from shapely.geometry import Point
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.core.spatialOperator import range_query, RangeQuery
+from geo_pyspark.core.spatialOperator import range_query, RangeQuery, KNNQuery
 from geo_pyspark.register import upload_jars
 
 upload_jars()
@@ -76,6 +76,18 @@ class TestSpatialRDD:
         for i in range(each_query_loop_times):
             result_size = RangeQuery.SpatialRangeQuery(
                 object_rdd, range_query_window, False, True).count
+
+    def test_knn_query(self):
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False
+        )
+        for i in range(each_query_loop_times):
+            result = KNNQuery.SpatialKnnQuery(object_rdd, knn_query_point, 1000, False)
+
 
 
 
