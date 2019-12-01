@@ -6,6 +6,7 @@ from shapely.geometry import Point
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
 from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.spatialOperator import range_query, RangeQuery
 from geo_pyspark.register import upload_jars
 
 upload_jars()
@@ -55,3 +56,26 @@ class TestSpatialRDD:
         object_rdd_copy = PointRDD()
         object_rdd_copy.rawSpatialRDD = object_rdd.rawSpatialRDD
         object_rdd_copy.analyze()
+
+    def test_spatial_range_query(self):
+        object_rdd = PointRDD(sc, point_rdd_input_location, point_rdd_offset, point_rdd_splitter, False)
+        for i in range(each_query_loop_times):
+            result_size = RangeQuery.SpatialRangeQuery(
+                object_rdd, range_query_window, False, False
+            ).count
+
+    def test_range_query_using_index(self):
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False
+        )
+        object_rdd.buildIndex(point_rdd_index_type, False)
+        for i in range(each_query_loop_times):
+            result_size = RangeQuery.SpatialRangeQuery(
+                object_rdd, range_query_window, False, True).count
+
+
+
