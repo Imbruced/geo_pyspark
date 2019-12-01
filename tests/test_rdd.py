@@ -3,6 +3,7 @@ import os
 from pyspark.sql import SparkSession
 from shapely.geometry import Point
 
+from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import upload_jars
@@ -38,6 +39,19 @@ range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 join_query_partitionin_type = GridType.QUADTREE
 each_query_loop_times = 1
 
+sc = spark.sparkContext
+
 
 class TestSpatialRDD:
-    pass
+
+    def test_empty_constructor_test(self):
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False
+        )
+        object_rdd_copy = PointRDD()
+        object_rdd_copy.rawSpatialRDD = object_rdd.rawSpatialRDD
+        object_rdd_copy.analyze()
