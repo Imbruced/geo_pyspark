@@ -88,6 +88,19 @@ class TestSpatialRDD:
         for i in range(each_query_loop_times):
             result = KNNQuery.SpatialKnnQuery(object_rdd, knn_query_point, 1000, False)
 
+    def test_knn_query_with_index(self):
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False
+        )
+        object_rdd.buildIndex(point_rdd_index_type, False)
+        for i  in range(each_query_loop_times):
+            result = KNNQuery.SpatialKnnQuery(object_rdd, knn_query_point, 1000, True)
+
+
 
 
 
