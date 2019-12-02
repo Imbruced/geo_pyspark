@@ -233,3 +233,32 @@ class TestSpatialRDD:
                 True,
                 False
             ).count()
+
+    def test_spatial_join_query_and_build_index_on_polygons_on_the_fly(self):
+        query_window_rdd = PolygonRDD(
+            sc,
+            polygon_rdd_input_location,
+            polygon_rdd_start_offset,
+            polygon_rdd_end_offset,
+            polygon_rdd_splitter,
+            True
+        )
+
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False
+        )
+        object_rdd.analyze()
+        object_rdd.spatialPartitioning(join_query_partitionin_type)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+
+        for i in range(each_query_loop_times):
+            join_params = JoinParams(False, polygon_rdd_index_type, JoinBuildSide.LEFT)
+            resultSize = JoinQuery.spatialJoin(
+                query_window_rdd,
+                object_rdd,
+                join_params
+            ).count()
