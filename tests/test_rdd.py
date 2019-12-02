@@ -3,7 +3,7 @@ import os
 from pyspark.sql import SparkSession
 from shapely.geometry import Point
 
-from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD
+from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
 from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import range_query, RangeQuery, KNNQuery, JoinQuery
@@ -262,3 +262,23 @@ class TestSpatialRDD:
                 object_rdd,
                 join_params
             ).count()
+
+    def test_distance_join_query(self):
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False
+        )
+        query_window_rdd = CircleRDD(object_rdd, 0.1)
+        object_rdd.analyze()
+        object_rdd.spatialPartitioning(GridType.QUADTREE)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+
+        for i in range(each_query_loop_times):
+            result_size = JoinQuery.DistanceJoinQuery(
+                object_rdd,
+                query_window_rdd,
+                False,
+                True).count()
