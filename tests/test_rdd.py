@@ -340,4 +340,18 @@ class TestSpatialRDD:
             ).count
             i = i + 1
 
-
+    def test_crs_transformed_spatial_range_query(self):
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False,
+            StorageLevel.NONE,
+            "epsg:4326",
+            "epsg:3005"
+        )
+        for i in range(each_query_loop_times):
+            result_size = RangeQuery.SpatialRangeQuery(
+                object_rdd, range_query_window, False, False
+            )
