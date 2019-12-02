@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 
-from geo_pyspark.data import csv_point_input_location, area_lm_point_input_location, mixed_wkt_geometry_input_location, \
+from tests.data import csv_point_input_location, area_lm_point_input_location, mixed_wkt_geometry_input_location, \
     mixed_wkb_geometry_input_location, geojson_input_location
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 

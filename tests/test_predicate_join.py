@@ -2,7 +2,7 @@ from pyspark import Row
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StringType, IntegerType, StructField, DoubleType
 
-from geo_pyspark.data import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location, \
+from tests.data import csv_polygon_input_location, csv_point_input_location, overlap_polygon_input_location, \
     csv_point1_input_location, csv_point2_input_location, csv_polygon1_input_location, csv_polygon2_input_location, \
     csv_polygon1_random_input_location, csv_polygon2_random_input_location
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
