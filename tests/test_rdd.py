@@ -282,3 +282,26 @@ class TestSpatialRDD:
                 query_window_rdd,
                 False,
                 True).count()
+
+    def test_distance_join_query_using_index(self):
+        object_rdd = PointRDD(
+            sc,
+            point_rdd_input_location,
+            point_rdd_offset,
+            point_rdd_splitter,
+            False
+        )
+        query_window_rdd = CircleRDD(object_rdd, 0.1)
+        object_rdd.analyze()
+        object_rdd.spatialPartitioning(GridType.QUADTREE)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+
+        object_rdd.buildIndex(IndexType.RTREE, True)
+
+        for i in range(each_query_loop_times):
+            result_size = JoinQuery.DistanceJoinQuery(
+                object_rdd,
+                query_window_rdd,
+                True,
+                True
+            ).count
