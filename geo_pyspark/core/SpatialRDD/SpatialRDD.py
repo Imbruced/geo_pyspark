@@ -5,7 +5,7 @@ import attr
 from pyspark import SparkContext
 
 from geo_pyspark.core.SpatialRDD.SpatialRDDFactory import SpatialRDDFactory
-from geo_pyspark.core.enums.GridType import GridTypeJvm
+from geo_pyspark.core.enums.grid_type import GridTypeJvm
 from geo_pyspark.core.utils import FileSplitterJvm
 from geo_pyspark.utils.types import path, crs
 
@@ -13,7 +13,7 @@ from geo_pyspark.utils.types import path, crs
 @attr.s
 class SpatialRDD(ABC):
 
-    sparkContext = attr.ib(type=SparkContext)
+    sparkContext = attr.ib(type=Optional[SparkContext], default=None)
     InputLocation = attr.ib(type=Optional[path], default=None)
     splitter = attr.ib(type=Optional[str], default=None)
     carryInputData = attr.ib(type=Optional[bool], default=None)
@@ -129,7 +129,7 @@ class SpatialRDD(ABC):
         raise NotImplementedError()
 
     def rawSpatialRDD(self):
-        raise NotImplementedError()
+        return self._srdd.rawSpatialRDD()
 
     def saveAsGeoJSON(self, path: str):
         return self._srdd.saveAsGeoJSON(path)
