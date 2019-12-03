@@ -1,17 +1,20 @@
+from typing import Optional
+
 import attr
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 
 
 @attr.s
 class PointRDD(SpatialRDD):
+    Offset = attr.ib(default=None, type=Optional[int])
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-        self._srdd = self.__create_srdd()
 
-    def __create_srdd(self):
-        PointRDD = self._factory.create_point_rdd()
+    def srdd_from_attributes(self):
+        PointRDD = SpatialRDDFactory(self.sparkContext).create_point_rdd()
 
         point_rdd = PointRDD(
             self._jsc,

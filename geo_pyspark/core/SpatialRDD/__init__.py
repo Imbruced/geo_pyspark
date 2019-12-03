@@ -1,8 +1,8 @@
-from .PointRDD import PointRDD
-from .CircleRDD import CircleRDD
-from .LineStringRDD import LineStringRDD
-from .PolygonRDD import PolygonRDD
-from .RectangleRDD import RectangleRDD
+from .point_rdd import PointRDD
+from .circle_rdd import CircleRDD
+from .linestring_rdd import LineStringRDD
+from .polygon_rdd import PolygonRDD
+from .rectangle_rdd import RectangleRDD
 
 
 __all__ = [
