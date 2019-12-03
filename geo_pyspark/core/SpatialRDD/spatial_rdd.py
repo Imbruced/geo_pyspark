@@ -4,7 +4,7 @@ from typing import Optional
 import attr
 from pyspark import SparkContext
 
-from geo_pyspark.core.SpatialRDD.SpatialRDDFactory import SpatialRDDFactory
+from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm
 from geo_pyspark.core.utils import FileSplitterJvm
 from geo_pyspark.utils.types import path, crs

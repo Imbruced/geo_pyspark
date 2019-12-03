@@ -1,6 +1,6 @@
 import attr
 
-from geo_pyspark.core.SpatialRDD.SpatialRDD import SpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 @attr.s
