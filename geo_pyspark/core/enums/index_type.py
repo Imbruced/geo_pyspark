@@ -13,3 +13,17 @@ class IndexType:
     @classproperty
     def RTREE(self):
         return "RTREE"
+
+
+@attr.s
+class IndexTypeJvm:
+
+    jvm = attr.ib()
+
+    def get_index_type(self, indexType: str):
+        return self.jvm.org.\
+            datasyslab.\
+            geospark.\
+            enums.\
+            IndexType.\
+            getIndexType(indexType)
