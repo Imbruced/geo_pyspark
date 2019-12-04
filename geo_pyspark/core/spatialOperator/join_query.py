@@ -1,6 +1,6 @@
 import attr
 
-from geo_pyspark.core.SpatialRDD import SpatialRDD
+from geo_pyspark.core.SpatialRDD import spatial_rdd
 from geo_pyspark.core.utils import get_geospark_package_location
 
 
@@ -9,8 +9,8 @@ class JoinQuery:
     @classmethod
     def SpatialJoinQuery(
             cls,
-            spatialRDD: SpatialRDD,
-            queryRDD: SpatialRDD,
+            spatialRDD: spatial_rdd,
+            queryRDD: spatial_rdd,
             useIndex: bool,
             considerBoundaryIntersection: bool
     ):
