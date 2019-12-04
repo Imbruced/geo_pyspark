@@ -4,5 +4,15 @@ import attr
 @attr.s
 class RangeQuery:
 
-    def SpatialRangeQuery(self):
-        pass
+    @classmethod
+    def SpatialRangeQuery(self, spatialRDD, rangeQueryWindow, considerBoundaryIntersection, usingIndex):
+
+        res = spatialRDD.sparkContext._jvm.\
+            org.datasyslab.geospark.spatialOperator.RangeQuery.SpatialRangeQuery(
+            spatialRDD._srdd,
+            rangeQueryWindow.create_java_object(spatialRDD._jvm),
+            considerBoundaryIntersection,
+            usingIndex
+        )
+
+        return res
