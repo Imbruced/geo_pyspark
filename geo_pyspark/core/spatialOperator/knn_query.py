@@ -1,17 +1,23 @@
 import attr
+from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD.abstract import AbstractSpatialRDD
+from geo_pyspark.core.jvm.abstract import JvmObject
+from geo_pyspark.core.jvm.geometry.primitive import JvmCoordinate, JvmPoint
 
 
 @attr.s
 class KNNQuery:
 
     @classmethod
-    def SpatialKnnQuery(self, spatialRDD: AbstractSpatialRDD, originalQueryPoint, k: int,  useIndex: bool):
+    def SpatialKnnQuery(self, spatialRDD: AbstractSpatialRDD, originalQueryPoint: Point, k: int,  useIndex: bool):
+        coordinate = JvmCoordinate(spatialRDD._jvm, 1.0, 1.0).create_jvm_instance()
+        point = JvmPoint(spatialRDD._jvm, coordinate)
+
         res = spatialRDD.sparkContext._jvm.\
             org.datasyslab.geospark.spatialOperator.KNNQuery.SpatialKnnQuery(
             spatialRDD._srdd,
-            originalQueryPoint,
+            point.create_jvm_instance(),
             k,
             useIndex
         )
