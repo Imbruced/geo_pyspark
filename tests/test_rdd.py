@@ -92,11 +92,11 @@ class TestSpatialRDD:
 
     def test_knn_query(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         for i in range(each_query_loop_times):
             result = KNNQuery.SpatialKnnQuery(object_rdd, knn_query_point, 1000, False)
@@ -298,11 +298,11 @@ class TestSpatialRDD:
 
     def test_distance_join_query_using_index(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         query_window_rdd = CircleRDD(object_rdd, 0.1)
         object_rdd.analyze()
