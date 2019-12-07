@@ -8,6 +8,9 @@ class JvmCoordinates(JvmObject):
     x = attr.ib(default=0.0)
     y = attr.ib(default=0.0)
 
+    def create_jvm_instance(self):
+        return 1
+
     @property
     def jvm_reference(self):
         return "com.vividsolutions.jts.geom.Coordinate"
@@ -34,7 +37,7 @@ class JvmEnvelope(JvmObject):
     maxy = attr.ib()
 
     def create_jvm_instance(self):
-        envelope = getattr(self.jvm, self.jvm_reference)
+        envelope = self.get_reference()
         return envelope(self.minx, self.maxx, self.miny, self.maxy)
 
     @property
