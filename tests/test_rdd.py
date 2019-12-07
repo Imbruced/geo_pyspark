@@ -1,5 +1,7 @@
+import logging
 import os
 
+from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 from shapely.geometry import Point
 
@@ -15,7 +17,7 @@ spark = SparkSession.builder.\
     master("local[*]").\
     getOrCreate()
 
-resource_folder = "data"
+resource_folder = "resources"
 
 point_rdd_input_location = os.path.join(resource_folder, "arealm-small.csv")
 
@@ -47,30 +49,37 @@ class TestSpatialRDD:
 
     def test_empty_constructor_test(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
-        object_rdd_copy = PointRDD()
+        object_rdd_copy = PointRDD(sparkContext=spark)
         object_rdd_copy.rawSpatialRDD = object_rdd.rawSpatialRDD
         object_rdd_copy.analyze()
 
     def test_spatial_range_query(self):
-        object_rdd = PointRDD(sc, point_rdd_input_location, point_rdd_offset, point_rdd_splitter, False)
+        object_rdd = PointRDD(
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False)
+
         for i in range(each_query_loop_times):
             result_size = RangeQuery.SpatialRangeQuery(
                 object_rdd, range_query_window, False, False
-            ).count
+            ).count()
+            logging.info(result_size)
 
     def test_range_query_using_index(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         object_rdd.buildIndex(point_rdd_index_type, False)
         for i in range(each_query_loop_times):
@@ -90,11 +99,11 @@ class TestSpatialRDD:
 
     def test_knn_query_with_index(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         object_rdd.buildIndex(point_rdd_index_type, False)
         for i  in range(each_query_loop_times):
@@ -127,19 +136,19 @@ class TestSpatialRDD:
 
     def test_spatial_join_using_index(self):
         query_window = PolygonRDD(
-            sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True
+            sparkContext=sc,
+            InputLocation=polygon_rdd_input_location,
+            startingOffset=polygon_rdd_start_offset,
+            endingOffset=polygon_rdd_end_offset,
+            splitter=polygon_rdd_splitter,
+            carryInputData=True
         )
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -153,19 +162,19 @@ class TestSpatialRDD:
 
     def test_spatial_join_using_index_on_polygons(self):
         query_window = PolygonRDD(
-            sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True
+            sparkContext=sc,
+            InputLocation=polygon_rdd_input_location,
+            startingOffset=polygon_rdd_start_offset,
+            endingOffset=polygon_rdd_end_offset,
+            splitter=polygon_rdd_splitter,
+            carryInputData=True
         )
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -183,19 +192,19 @@ class TestSpatialRDD:
 
     def test_spatial_join_query_using_index_on_polygons(self):
         query_window_rdd = PolygonRDD(
-            sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True
+            sparkContext=sc,
+            InputLocation=polygon_rdd_input_location,
+            startingOffset=polygon_rdd_start_offset,
+            endingOffset=polygon_rdd_end_offset,
+            splitter=polygon_rdd_splitter,
+            carryInputData=True
         )
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -208,19 +217,19 @@ class TestSpatialRDD:
 
     def test_spatial_join_query_and_build_index_on_points_on_the_fly(self):
         query_window = PolygonRDD(
-            sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True
+            sparkContext=sc,
+            InputLocation=polygon_rdd_input_location,
+            startingOffset=polygon_rdd_start_offset,
+            endingOffset=polygon_rdd_end_offset,
+            splitter=polygon_rdd_splitter,
+            carryInputData=True
         )
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -358,14 +367,14 @@ class TestSpatialRDD:
 
     def test_crs_tranformed_spatial_range_query_using_index(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False,
-            StorageLevel.NONE,
-            "epsg:4326",
-            "epsg:3005"
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False,
+            newLevel=StorageLevel.NONE,
+            sourceEpsgCRSCode="epsg:4326",
+            targetEpsgCode="epsg:3005"
         )
         object_rdd.buildIndex(point_rdd_index_type, False)
         for i in range(each_query_loop_times):
