@@ -29,4 +29,4 @@ class TestGeomPrimitives:
 
     def test_jvm_coordinates(self):
         coordinate = JvmCoordinate(spark._jvm, 1.0, 1.0).create_jvm_instance()
-        assert coordinate.toString() == "(1.0, 1.0, NaN)", "Coordinate should has 1.0 as x"
+        assert coordinate.toString() == "(1.0, 1.0, NaN)", "Coordinate should has (1.0, 1.0, NaN) as string rep"
