@@ -13,27 +13,29 @@ class JoinQuery:
             useIndex: bool,
             considerBoundaryIntersection: bool
     ):
-        JvmSpatialJoinQuery(
+        return JvmSpatialJoinQuery(
             spatialRDD._jvm,
             spatialRDD,
             queryRDD,
             useIndex,
             considerBoundaryIntersection
-        )
+        ).SpatialJoinQuery()
 
 
+@attr.s
 class JvmSpatialJoinQuery(JvmObject):
     spatialRDD = attr.ib()
     queryRDD = attr.ib()
     useIndex = attr.ib()
     considerBoundaryIntersection = attr.ib()
 
-    @property
-    def jvm_reference(self):
-        return "org.datasyslab.geospark.spatialOperator.JoinQuery.SpatialJoinQuery"
-
     def create_jvm_instance(self):
-        return self.get_reference()
+        return self.jvm.org.\
+            datasyslab.\
+            geospark.\
+            spatialOperator.\
+            JoinQuery.\
+            SpatialJoinQuery
 
     def SpatialJoinQuery(self):
         spatial_join = self.create_jvm_instance()
