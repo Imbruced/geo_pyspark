@@ -1,4 +1,5 @@
 import os
+import pytest
 
 from pyspark.sql import SparkSession
 from shapely.geometry import Point
@@ -8,6 +9,9 @@ from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import range_query, RangeQuery, KNNQuery, JoinQuery
 from geo_pyspark.register import upload_jars
+import os
+
+os.environ["SPARK_HOME"] = "/home/pawel/Desktop/spark-2.4.4-bin-hadoop2.7"
 
 upload_jars()
 

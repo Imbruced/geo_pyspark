@@ -3,7 +3,7 @@ import os
 import pytest
 from pyspark.sql import SparkSession
 
-from geo_pyspark.core.jvm.geometry.primitive import JvmPoint, JvmEnvelope
+from geo_pyspark.core.jvm.geometry.primitive import JvmEnvelope
 from geo_pyspark.register import upload_jars
 
 
