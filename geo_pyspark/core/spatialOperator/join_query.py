@@ -1,6 +1,8 @@
 import attr
 
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.jvm.abstract import JvmObject
+from geo_pyspark.core.spatialOperator.join_params import JoinParams
 
 
 class JoinQuery:
@@ -24,6 +26,14 @@ class JoinQuery:
             useIndex,
             considerBoundaryIntersection
         ).DistanceJoinQuery()
+
+    @classmethod
+    def spatialJoin(cls, queryWindowRDD: SpatialRDD, objectRDD: SpatialRDD, joinParams: JoinParams):
+        """
+        TODO check if circle rdd works here also
+        """
+
+        return JvmSpatialJoin(queryWindowRDD._jvm, queryWindowRDD, objectRDD, joinParams).spatialJoin()
 
 
 @attr.s
@@ -73,4 +83,28 @@ class JvmDistanceJoinQuery(JvmObject):
             self.queryRDD._srdd,
             self.useIndex,
             self.considerBoundaryIntersection
+        )
+
+
+@attr.s
+class JvmSpatialJoin(JvmObject):
+    queryRDD = attr.ib()
+    objectRDD = attr.ib()
+    joinParams = attr.ib()
+
+    def create_jvm_instance(self):
+        return self.jvm.org.\
+            datasyslab.\
+            geospark.\
+            spatialOperator.\
+            JoinQuery. \
+            spatialJoin
+
+    def spatialJoin(self):
+        spatial_join = self.create_jvm_instance()
+        jvm_join_params = self.joinParams.jvm_instance(self.objectRDD._jvm)
+        return spatial_join(
+            self.queryRDD._srdd,
+            self.objectRDD._srdd,
+            jvm_join_params
         )
