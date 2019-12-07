@@ -8,8 +8,10 @@ from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
 from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
+from geo_pyspark.core.enums.join_build_side import JoinBuildSide
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import range_query, RangeQuery, KNNQuery, JoinQuery
+from geo_pyspark.core.spatialOperator.join_params import JoinParams
 from geo_pyspark.register import upload_jars
 import os
 
@@ -278,11 +280,11 @@ class TestSpatialRDD:
 
     def test_distance_join_query(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         query_window_rdd = CircleRDD(object_rdd, 0.1)
         object_rdd.analyze()
@@ -355,14 +357,14 @@ class TestSpatialRDD:
 
     def test_crs_transformed_spatial_range_query(self):
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False,
-            StorageLevel.NONE,
-            "epsg:4326",
-            "epsg:3005"
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False,
+            newLevel=StorageLevel.DISK_ONLY,
+            sourceEpsgCRSCode="epsg:4326",
+            targetEpsgCode="epsg:3005"
         )
         for i in range(each_query_loop_times):
             result_size = RangeQuery.SpatialRangeQuery(
@@ -376,7 +378,7 @@ class TestSpatialRDD:
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
             carryInputData=False,
-            newLevel=StorageLevel.NONE,
+            newLevel=StorageLevel.DISK_ONLY,
             sourceEpsgCRSCode="epsg:4326",
             targetEpsgCode="epsg:3005"
         )
