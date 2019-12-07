@@ -1,7 +1,6 @@
 import attr
 
-from geo_pyspark.core.SpatialRDD import spatial_rdd
-from geo_pyspark.core.utils import get_geospark_package_location
+from geo_pyspark.core.jvm.abstract import JvmObject
 
 
 class JoinQuery:
@@ -9,20 +8,38 @@ class JoinQuery:
     @classmethod
     def SpatialJoinQuery(
             cls,
-            spatialRDD: spatial_rdd,
-            queryRDD: spatial_rdd,
+            spatialRDD,
+            queryRDD,
             useIndex: bool,
             considerBoundaryIntersection: bool
     ):
-        jvm_join = cls._jvm_spatial_join(spatialRDD._jvm)
-        return jvm_join(
-            spatialRDD._srdd,
-            queryRDD._srdd,
+        JvmSpatialJoinQuery(
+            spatialRDD._jvm,
+            spatialRDD,
+            queryRDD,
             useIndex,
             considerBoundaryIntersection
         )
 
-    @classmethod
-    def _jvm_spatial_join(self, jvm):
-        geospark = get_geospark_package_location(jvm)
-        return geospark.spatialOperator.JoinQuery.SpatialJoinQuery
+
+class JvmSpatialJoinQuery(JvmObject):
+    spatialRDD = attr.ib()
+    queryRDD = attr.ib()
+    useIndex = attr.ib()
+    considerBoundaryIntersection = attr.ib()
+
+    @property
+    def jvm_reference(self):
+        return "org.datasyslab.geospark.spatialOperator.JoinQuery.SpatialJoinQuery"
+
+    def create_jvm_instance(self):
+        return self.get_reference()
+
+    def SpatialJoinQuery(self):
+        spatial_join = self.create_jvm_instance()
+        return spatial_join(
+            self.spatialRDD._srdd,
+            self.queryRDD._srdd,
+            self.useIndex,
+            self.considerBoundaryIntersection
+        )
