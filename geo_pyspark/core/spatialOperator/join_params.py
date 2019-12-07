@@ -6,7 +6,17 @@ from geo_pyspark.core.jvm.abstract import JvmObject
 
 
 @attr.s
-class JoinParams(JvmObject):
+class JoinParams:
+    useIndex = attr.ib(type=bool, default=True)
+    indexType = attr.ib(type=str, default=IndexType.RTREE)
+    joinBuildSide = attr.ib(type=str, default=JoinBuildSide.LEFT)
+
+    def jvm_instance(self, jvm):
+        return JvmJoinParams(jvm, self.useIndex, self.indexType, self.joinBuildSide).jvm_instance
+
+
+@attr.s
+class JvmJoinParams(JvmObject):
     useIndex = attr.ib(type=bool, default=True)
     indexType = attr.ib(type=str, default=IndexType.RTREE)
     joinBuildSide = attr.ib(type=str, default=JoinBuildSide.LEFT)
@@ -17,3 +27,8 @@ class JoinParams(JvmObject):
     @property
     def jvm_reference(self):
         return self.jvm.org.imbruced.geo_pyspark.JoinParams.createJoinParams
+
+    @property
+    def jvm_instance(self):
+        """TODO add lazy property"""
+        return self.create_jvm_instance()
