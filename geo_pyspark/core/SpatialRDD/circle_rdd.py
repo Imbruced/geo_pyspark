@@ -1,14 +1,18 @@
 import attr
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.core.SpatialRDD.abstract import AbstractSpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 
 
 @attr.s
-class CircleRDD(SpatialRDD):
+class CircleRDD(AbstractSpatialRDD):
+    spatialRDD = attr.ib(default=None)
+    radius = attr.ib(type=float, default=None)
 
     def __attrs_post_init__(self):
+        self.sparkContext = self.spatialRDD.sparkContext
         super().__attrs_post_init__()
-        self._srdd = self.__create_srdd()
 
-    def __create_srdd(self):
-        pass
+    def srdd_from_attributes(self):
+        Spatial = SpatialRDDFactory(self.sparkContext).create_circle_rdd()
+        return Spatial(self.spatialRDD._srdd, self.radius)
