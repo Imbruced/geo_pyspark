@@ -25,7 +25,7 @@ class GeometryType(UserDefinedType):
 
     @classmethod
     def module(cls):
-        pass
+        return "geo_pyspark.sql.types"
 
     def needConversion(self):
         return True

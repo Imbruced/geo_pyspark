@@ -23,10 +23,15 @@ class AbstractSpatialRDD(ABC):
     targetEpsgCode = attr.ib(type=Optional[crs], default=None)
 
     def __attrs_post_init__(self):
-        self._jsc = self.sparkContext._jsc
-        self.__file_spliter_jvm = FileSplitterJvm(self.sparkContext)
-        self.splitter = self.__file_spliter_jvm.get_splitter(self.splitter)
-        self._jvm = self.sparkContext._jvm
+        if self.sparkContext is not None:
+            self._jsc = self.sparkContext._jsc
+            self._jvm = self.sparkContext._jvm
+            if self.splitter is not None:
+                self.__file_spliter_jvm = FileSplitterJvm(self.sparkContext)
+                self.splitter = self.__file_spliter_jvm.get_splitter(self.splitter)
+        else:
+            self._jsc = None
+            self._jvm = None
         self._srdd = self.srdd_from_attributes()
 
     def srdd_from_attributes(self):
@@ -106,8 +111,13 @@ class AbstractSpatialRDD(ABC):
     def partitionTree(self):
         raise self._srdd.partitionTree()
 
+    @property
     def rawSpatialRDD(self):
         return self._srdd.rawSpatialRDD()
+
+    @rawSpatialRDD.setter
+    def rawSpatialRDD(self, value):
+        self._srdd.rawSpatialRDD = value
 
     def saveAsGeoJSON(self, path: str):
         return self._srdd.saveAsGeoJSON(path)
