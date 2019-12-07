@@ -4,29 +4,29 @@ from geo_pyspark.core.jvm.abstract import JvmObject
 
 
 @attr.s
-class JvmCoordinates(JvmObject):
+class JvmCoordinate(JvmObject):
     x = attr.ib(default=0.0)
     y = attr.ib(default=0.0)
 
     def create_jvm_instance(self):
-        return 1
+        return self.jvm_reference(self.x, self.y)
 
     @property
     def jvm_reference(self):
-        return "com.vividsolutions.jts.geom.Coordinate"
+        return self.jvm.org.imbruced.geo_pyspark.CoordinateFactory.createCoordinates
 
 
 @attr.s
 class JvmPoint(JvmObject):
-    coordinate = attr.ib(type=JvmCoordinates)
+    coordinate = attr.ib(type=JvmCoordinate)
 
     @property
-    def jvm_object(self):
-        return "com.vividsolutions.jts.geom.geometryFactory.createPoint"
+    def jvm_reference(self):
+        return self.jvm.org.imbruced.geo_pyspark.GeomFactory.createPoint
 
     def create_jvm_instance(self):
 
-        return "geometryFactory.createPoint(new Coordinate(-84.01, 34.01))"
+        return self.jvm_reference(self.coordinate)
 
 
 @attr.s
@@ -37,9 +37,9 @@ class JvmEnvelope(JvmObject):
     maxy = attr.ib()
 
     def create_jvm_instance(self):
-        envelope = self.get_reference()
+        envelope = self.jvm_reference
         return envelope(self.minx, self.maxx, self.miny, self.maxy)
 
     @property
     def jvm_reference(self):
-        return "com.vividsolutions.jts.geom.Envelope"
+        return self.jvm.com.vividsolutions.jts.geom.Envelope
