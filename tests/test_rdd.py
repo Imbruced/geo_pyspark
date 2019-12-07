@@ -249,20 +249,20 @@ class TestSpatialRDD:
 
     def test_spatial_join_query_and_build_index_on_polygons_on_the_fly(self):
         query_window_rdd = PolygonRDD(
-            sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True
+            sparkContext=sc,
+            InputLocation=polygon_rdd_input_location,
+            startingOffset=polygon_rdd_start_offset,
+            endingOffset=polygon_rdd_end_offset,
+            splitter=polygon_rdd_splitter,
+            carryInputData=True
         )
 
         object_rdd = PointRDD(
-            sc,
-            point_rdd_input_location,
-            point_rdd_offset,
-            point_rdd_splitter,
-            False
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
