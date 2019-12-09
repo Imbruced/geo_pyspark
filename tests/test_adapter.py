@@ -1,4 +1,17 @@
 import pytest
+from pyspark.sql import SparkSession
+from geo_pyspark.register import GeoSparkRegistrator
+from geo_pyspark.register import upload_jars
+
+upload_jars()
+
+spark = SparkSession.\
+    builder.\
+    master("local[*]").\
+    getOrCreate()
+
+GeoSparkRegistrator.registerAll(spark)
+
 
 
 class TestAdapter:
@@ -31,4 +44,13 @@ class TestAdapter:
         pass
 
     def test_geojson_to_dataframe(self):
-        pass
+        import org.apache.spark.sql.functions.
+        {callUDF, col}
+        var
+        spatialRDD = new
+        PolygonRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON, true)
+        spatialRDD.analyze()
+        var
+        df = Adapter.toDf(spatialRDD, sparkSession).withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
+        df.show()
+        assert (df.columns(1) == "STATEFP")
