@@ -48,8 +48,15 @@ class TestAdapter:
     def test_read_shapefile_to_dataframe(self):
         pass
 
-    def test_read_geojson_to_dataframe(self):
-        pass
+    def test_read_shapefile_with_missing_to_dataframe(self):
+        spatial_rdd = ShapefileReader.\
+            readToGeometryRDD(spark.sparkContext, shape_file_with_missing_trailing_input_location)
+
+        spatial_rdd.analyze()
+        logging.info(spatial_rdd.fieldNames)
+
+        df = Adapter.toDf(spatial_rdd, spark)
+        df.show()
 
     def test_geojson_to_dataframe(self):
         spatial_rdd = PolygonRDD(
