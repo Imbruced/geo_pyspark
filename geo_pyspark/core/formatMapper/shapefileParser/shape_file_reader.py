@@ -14,7 +14,9 @@ class ShapefileReader:
                 sc._jsc,
                 shapefileInputLocation
         )
-        return SpatialRDD.from_srdd(sc, jsrdd)
+        spatial_rdd = SpatialRDD(sc)
+        spatial_rdd.set_srdd(jsrdd)
+        return  spatial_rdd
 
     @classmethod
     def _create_jsrdd(cls, sc: SparkContext):
