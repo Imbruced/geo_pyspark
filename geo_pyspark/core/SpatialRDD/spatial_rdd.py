@@ -34,4 +34,7 @@ class SpatialRDD(AbstractSpatialRDD):
         super().__attrs_post_init__()
 
     def srdd_from_attributes(self):
-        raise NotImplementedError()
+        pass
+
+    def set_srdd(self, srdd):
+        self._srdd = srdd
