@@ -4,14 +4,16 @@ import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import expr
 
-from geo_pyspark.core.SpatialRDD import PolygonRDD
-from geo_pyspark.core.enums import FileDataSplitter
+from geo_pyspark.core.SpatialRDD import PolygonRDD, CircleRDD
+from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
+from geo_pyspark.core.spatialOperator import JoinQuery
 from geo_pyspark.register import GeoSparkRegistrator
 from geo_pyspark.register import upload_jars
 from geo_pyspark.utils.adapter import Adapter
 from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location
-from tests.data import shape_file_input_location
+from tests.data import shape_file_input_location, area_lm_point_input_location
+from tests.data import mixed_wkt_geometry_input_location
 
 upload_jars()
 
@@ -75,3 +77,44 @@ class TestAdapter:
             withColumn("geometry", expr("ST_GeomFromWKT(geometry)"))
         df.show()
         assert (df.columns[1] == "STATEFP")
+
+    def test_distance_join_result_to_dataframe(self):
+        point_csv_df = spark.\
+            read.\
+            format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").load(
+                area_lm_point_input_location
+        )
+        point_csv_df.createOrReplaceTempView("pointtable")
+        point_df = spark.sql(
+            "select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+
+        point_rdd = Adapter.toSpatialRdd(point_df, "arealandmark")
+        point_rdd.analyze()
+
+        polygon_wkt_df = spark.read.\
+            format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").load(
+                mixed_wkt_geometry_input_location
+        )
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+        polygon_df = spark.\
+            sql("select ST_GeomFromWKT(polygontable._c0) as usacounty from polygontable")
+
+        polygon_rdd = Adapter.toSpatialRdd(polygon_df, "usacounty")
+        polygon_rdd.analyze()
+        circle_rdd = CircleRDD(polygon_rdd, 0.2)
+
+        point_rdd.spatialPartitioning(GridType.QUADTREE)
+        circle_rdd.spatialPartitioning(point_rdd.getPartitioner)
+
+        point_rdd.buildIndex(IndexType.QUADTREE, True)
+
+        join_result_pair_rdd = JoinQuery.\
+            DistanceJoinQueryFlat(point_rdd, circle_rdd, True, True)
+
+        join_result_df = Adapter.toDf(join_result_pair_rdd, spark)
+        join_result_df.show()
