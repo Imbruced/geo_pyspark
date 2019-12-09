@@ -1,7 +1,16 @@
+import logging
+
 import pytest
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
+
+from geo_pyspark.core.SpatialRDD import PolygonRDD
+from geo_pyspark.core.enums import FileDataSplitter
+from geo_pyspark.core.formatMapper.shapefileParser import ShapefileReader
 from geo_pyspark.register import GeoSparkRegistrator
 from geo_pyspark.register import upload_jars
+from geo_pyspark.utils.adapter import Adapter
+from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location
 
 upload_jars()
 
@@ -11,7 +20,6 @@ spark = SparkSession.\
     getOrCreate()
 
 GeoSparkRegistrator.registerAll(spark)
-
 
 
 class TestAdapter:
@@ -44,13 +52,13 @@ class TestAdapter:
         pass
 
     def test_geojson_to_dataframe(self):
-        import org.apache.spark.sql.functions.
-        {callUDF, col}
-        var
-        spatialRDD = new
-        PolygonRDD(sparkSession.sparkContext, geojsonInputLocation, FileDataSplitter.GEOJSON, true)
-        spatialRDD.analyze()
-        var
-        df = Adapter.toDf(spatialRDD, sparkSession).withColumn("geometry", callUDF("ST_GeomFromWKT", col("geometry")))
+        spatial_rdd = PolygonRDD(
+            spark.sparkContext, geojson_input_location, FileDataSplitter.GEOJSON, True
+        )
+
+        spatial_rdd.analyze()
+
+        df = Adapter.toDf(spatial_rdd, spark).\
+            withColumn("geometry", expr("ST_GeomFromWKT(geometry)"))
         df.show()
-        assert (df.columns(1) == "STATEFP")
+        assert (df.columns[1] == "STATEFP")
