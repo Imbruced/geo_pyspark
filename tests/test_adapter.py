@@ -3,4 +3,32 @@ import pytest
 
 class TestAdapter:
 
-    pass
+    def test_read_csv_point_into_spatial_rdd(self):
+        pass
+
+    def test_csv_point_at_different_column_id_into_spatial_rdd(self):
+        pass
+
+    def test_read_csv_point_at_a_different_column_col_name_into_a_spatial_rdd(self):
+        pass
+
+    def test_read_csv_point_into_a_spatial_rdd_by_passing_coordinates(self):
+        pass
+
+    def test_read_csv_point_into_s_spatial_rdd_with_unique_id_by_passing_coordinates(self):
+        pass
+
+    def test_read_mixed_wkt_geometries_into_spatial_rdd(self):
+        pass
+
+    def test_read_mixed_wkt_geometries_into_spatial_rdd_with_unique_id(self):
+        pass
+
+    def test_read_shapefile_to_dataframe(self):
+        pass
+
+    def test_read_geojson_to_dataframe(self):
+        pass
+
+    def test_geojson_to_dataframe(self):
+        pass
