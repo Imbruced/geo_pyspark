@@ -13,8 +13,12 @@ class Adapter:
     """
 
     @classmethod
-    def toDf(cls, spatialRDD: AbstractSpatialRDD, spark: SparkSession, field_names: List[str]) -> DataFrame:
-        pass
+    def toDf(cls, spatialRDD: AbstractSpatialRDD, spark: SparkSession, field_names: List[str] = None) -> DataFrame:
+        if field_names is None:
+            df = spark._jvm.org.datasyslab.geosparksql.utils.Adapter.toDf(
+                spatialRDD._srdd, spark._jsparkSession
+            )
+            return DataFrame(df, spark._jsparkSession.sqlContext())
 
     @classmethod
     def toRdd(cls, data_frame: DataFrame, geometry_col_id: int = None, geometry_field_name: str = None) -> DataFrame:
