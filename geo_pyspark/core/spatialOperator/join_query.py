@@ -35,6 +35,16 @@ class JoinQuery:
 
         return JvmSpatialJoin(queryWindowRDD._jvm, queryWindowRDD, objectRDD, joinParams).spatialJoin()
 
+    @classmethod
+    def DistanceJoinQueryFlat(cls, spatialRDD, queryRDD, useIndex: bool, considerBoundaryIntersection: bool):
+        return JvmDistanceJoinQueryFlat(
+            spatialRDD._jvm,
+            spatialRDD,
+            queryRDD,
+            useIndex,
+            considerBoundaryIntersection
+        ).spatialJoin()
+
 
 @attr.s
 class JvmSpatialJoinQuery(JvmObject):
@@ -59,7 +69,6 @@ class JvmSpatialJoinQuery(JvmObject):
             self.useIndex,
             self.considerBoundaryIntersection
         )
-
 
 @attr.s
 class JvmDistanceJoinQuery(JvmObject):
@@ -107,4 +116,29 @@ class JvmSpatialJoin(JvmObject):
             self.queryRDD._srdd,
             self.objectRDD._srdd,
             jvm_join_params
+        )
+
+
+@attr.s
+class JvmDistanceJoinQueryFlat(JvmObject):
+    spatialRDD = attr.ib()
+    queryRDD = attr.ib()
+    useIndex = attr.ib()
+    considerBoundaryIntersection = attr.ib()
+
+    def create_jvm_instance(self):
+        return self.jvm.org.\
+            datasyslab.\
+            geospark.\
+            spatialOperator.\
+            JoinQuery. \
+            DistanceJoinQueryFlat
+
+    def spatialJoin(self):
+        spatial_join = self.create_jvm_instance()
+        return spatial_join(
+            self.spatialRDD._srdd,
+            self.queryRDD._srdd,
+            self.useIndex,
+            self.considerBoundaryIntersection
         )
