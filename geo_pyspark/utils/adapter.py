@@ -14,10 +14,14 @@ class Adapter:
     """
 
     @classmethod
-    def toDf(cls, spatialRDD: AbstractSpatialRDD, spark: SparkSession, field_names: List[str] = None) -> DataFrame:
-        if field_names is None:
+    def toDf(cls, spatialRDD, spark: SparkSession, field_names: List[str] = None) -> DataFrame:
+        if field_names is None and isinstance(spatialRDD, AbstractSpatialRDD):
             df = spark._jvm.org.datasyslab.geosparksql.utils.Adapter.toDf(
                 spatialRDD._srdd, spark._jsparkSession
+            )
+        else:
+            df = spark._jvm.org.datasyslab.geosparksql.utils.Adapter.toDf(
+                spatialRDD, spark._jsparkSession
             )
             return DataFrame(df, spark._jsparkSession.sqlContext())
 
