@@ -1,6 +1,5 @@
 import logging
 
-import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import expr
 
@@ -115,6 +114,7 @@ class TestAdapter:
 
         join_result_pair_rdd = JoinQuery.\
             DistanceJoinQueryFlat(point_rdd, circle_rdd, True, True)
-
+        #
         join_result_df = Adapter.toDf(join_result_pair_rdd, spark)
+        join_result_df.printSchema()
         join_result_df.show()
