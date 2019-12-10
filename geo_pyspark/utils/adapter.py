@@ -4,6 +4,7 @@ import attr
 from pyspark.sql import DataFrame, SparkSession
 
 from geo_pyspark.core.SpatialRDD.abstract import AbstractSpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 @attr.s
@@ -25,5 +26,11 @@ class Adapter:
         pass
 
     @classmethod
-    def toSpatialRdd(cls) -> AbstractSpatialRDD:
-        pass
+    def toSpatialRdd(cls, df: DataFrame, geometry_field_name: str = None, geometry_col_id: str = None, field_names: List[str] = None) -> AbstractSpatialRDD:
+        if geometry_field_name is not None:
+            spatial_rdd = df._sc._jvm.org.datasyslab.geosparksql.utils.Adapter.toSpatialRdd(
+                df._jdf, geometry_field_name
+            )
+            python_rdd = SpatialRDD(df._sc)
+            python_rdd.set_srdd(spatial_rdd)
+            return python_rdd
