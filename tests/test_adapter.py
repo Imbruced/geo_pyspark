@@ -14,6 +14,8 @@ from tests.data import geojson_input_location, shape_file_with_missing_trailing_
 from tests.data import shape_file_input_location, area_lm_point_input_location
 from tests.data import mixed_wkt_geometry_input_location
 
+from pyspark import RDD
+
 upload_jars()
 
 spark = SparkSession.\
@@ -27,7 +29,22 @@ GeoSparkRegistrator.registerAll(spark)
 class TestAdapter:
 
     def test_read_csv_point_into_spatial_rdd(self):
-        pass
+        df = spark.read.\
+            format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").\
+            load(area_lm_point_input_location)
+
+        df.show()
+        df.createOrReplaceTempView("inputtable")
+
+        spatial_df = spark.sql("select ST_PointFromText(inputtable._c0,\",\") as arealandmark from inputtable")
+        spatial_df.show()
+        spatial_df.printSchema()
+
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "arealandmark")
+        spatial_rdd.analyze()
+        Adapter.toDf(spatial_rdd, spark).show()
 
     def test_csv_point_at_different_column_id_into_spatial_rdd(self):
         pass
@@ -115,6 +132,8 @@ class TestAdapter:
         join_result_pair_rdd = JoinQuery.\
             DistanceJoinQueryFlat(point_rdd, circle_rdd, True, True)
         #
+        print("S")
         join_result_df = Adapter.toDf(join_result_pair_rdd, spark)
         join_result_df.printSchema()
         join_result_df.show()
+
