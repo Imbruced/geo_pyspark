@@ -47,7 +47,25 @@ class TestAdapter:
         Adapter.toDf(spatial_rdd, spark).show()
 
     def test_csv_point_at_different_column_id_into_spatial_rdd(self):
-        pass
+        df = spark.\
+            read.\
+            format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").load(area_lm_point_input_location)
+        df.show()
+        df.createOrReplaceTempView("inputtable")
+        spatial_df = spark.sql(
+            "select \'123\', \'456\', ST_PointFromText(inputtable._c0,\",\") as arealandmark, \'789\' from inputtable")
+        spatial_df.show()
+        spatial_df.printSchema()
+        print("S")
+        spatial_rdd = Adapter.toSpatialRdd(df=spatial_df, geometry_col_id=2)
+        # spatial_rdd.analyze()
+        # new_df = Adapter.toDf(spatial_rdd, spark)
+        # new_df.show()
+        # schema_names = [str(el.name) for el in new_df.schema]
+        # schema_string = "\t".join(schema_names)
+        # assert schema_string == "geometry\t123\t456\t789"
 
     def test_read_csv_point_at_a_different_column_col_name_into_a_spatial_rdd(self):
         pass
