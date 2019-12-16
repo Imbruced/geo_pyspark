@@ -2,18 +2,28 @@ from abc import ABC
 from typing import Optional
 
 import attr
-from pyspark import SparkContext
+from pyspark import SparkContext, RDD
 
 from geo_pyspark.core.enums.grid_type import GridTypeJvm
 from geo_pyspark.core.enums.index_type import IndexTypeJvm
 from geo_pyspark.core.utils import FileSplitterJvm
+from geo_pyspark.sql.geometry import GeometryFactory
+from geo_pyspark.utils.serde import GeoSparkPickler
 from geo_pyspark.utils.types import crs, path
 
 
 @attr.s
 class AbstractSpatialRDD(ABC):
 
+    sparkContext = attr.ib(type=Optional[SparkContext], default=None)
+
     def __attrs_post_init__(self):
+        if self.sparkContext is not None:
+            self._jsc = self.sparkContext._jsc
+            self._jvm = self.sparkContext._jvm
+        else:
+            self._jsc = None
+            self._jvm = None
         self._srdd = self.srdd_from_attributes()
 
     def srdd_from_attributes(self):
@@ -70,7 +80,13 @@ class AbstractSpatialRDD(ABC):
         return self._srdd.getPartitioner()
 
     def getRawSpatialRDD(self):
-        return self._srdd.getRawSpatialRDD()
+        spatial_rdd  = self._jvm.org.imbruced.geo_pyspark.GeoSerializer.serialize(
+            self._srdd.getRawSpatialRDD()
+        )
+
+        rdd = RDD(spatial_rdd, self.sparkContext, GeoSparkPickler())
+
+        return rdd.map(lambda x: GeometryFactory.geometry_from_bytes(x))
 
     def getSampleNumber(self):
         return self._srdd.getSampleNumber()
