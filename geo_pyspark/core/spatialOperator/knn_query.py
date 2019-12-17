@@ -14,8 +14,7 @@ class KNNQuery:
         coordinate = JvmCoordinate(spatialRDD._jvm, 1.0, 1.0).create_jvm_instance()
         point = JvmPoint(spatialRDD._jvm, coordinate)
 
-        res = spatialRDD.sparkContext._jvm.\
-            org.datasyslab.geospark.spatialOperator.KNNQuery.SpatialKnnQuery(
+        res = spatialRDD.sparkContext._jvm.KNNQuery.SpatialKnnQuery(
             spatialRDD._srdd,
             point.create_jvm_instance(),
             k,

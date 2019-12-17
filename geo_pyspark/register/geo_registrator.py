@@ -24,9 +24,20 @@ class GeoSparkRegistrator:
 
     @classmethod
     def register(cls, spark: SparkSession):
-        spark._jvm. \
-            org. \
-            imbruced. \
-            geo_pyspark. \
-            GeoSparkWrapper. \
-            registerAll()
+        spark._jvm.registerAll()
+
+
+class PackageImporter:
+
+    @staticmethod
+    def import_jvm_lib(jvm, jvm_libs: List[jvm_import]) -> bool:
+        """
+        Imports all the specified methods and functions in jvm
+        :param jvm: Jvm gateway from py4j
+        :param jvm_libs: List[str] of class, object function which to import
+        :return:
+        """
+        for lib in jvm_libs:
+            java_import(jvm, lib)
+
+        return True
