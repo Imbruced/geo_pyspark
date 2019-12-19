@@ -1,3 +1,5 @@
+import pickle
+
 from pyspark.sql import SparkSession
 
 from tests.data import csv_point_input_location, csv_point1_input_location, csv_polygon1_input_location
@@ -10,6 +12,7 @@ spark = SparkSession.builder. \
 
 GeoSparkRegistrator.registerAll(spark)
 
+pickle
 
 class TestPredicate:
 

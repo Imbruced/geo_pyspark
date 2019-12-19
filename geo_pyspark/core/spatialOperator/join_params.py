@@ -1,4 +1,5 @@
 import attr
+from pyspark import SparkContext
 
 from geo_pyspark.core.enums import IndexType
 from geo_pyspark.core.enums.join_build_side import JoinBuildSide
@@ -26,9 +27,10 @@ class JvmJoinParams(JvmObject):
 
     @property
     def jvm_reference(self):
-        return self.jvm.org.imbruced.geo_pyspark.JoinParams.createJoinParams
+        return self.jvm.JoinParams.createJoinParams
 
     @property
     def jvm_instance(self):
         """TODO add lazy property"""
         return self.create_jvm_instance()
+

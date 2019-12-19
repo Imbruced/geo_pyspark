@@ -1,4 +1,5 @@
 import attr
+from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.jvm.abstract import JvmObject

@@ -80,7 +80,7 @@ class AbstractSpatialRDD(ABC):
         return self._srdd.getPartitioner()
 
     def getRawSpatialRDD(self):
-        spatial_rdd  = self._jvm.org.imbruced.geo_pyspark.GeoSerializer.serialize(
+        spatial_rdd  = self._jvm.GeoSerializer.serialize(
             self._srdd.getRawSpatialRDD()
         )
 

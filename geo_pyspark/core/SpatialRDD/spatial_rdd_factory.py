@@ -13,31 +13,16 @@ class SpatialRDDFactory(ABC):
         self._jvm = self.sparkContext._jvm
 
     def create_point_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.PointRDD"
-        )
+        return self._jvm.PointRDD
 
     def create_polygon_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.PolygonRDD"
-        )
+        return self._jvm.PolygonRDD
 
     def create_linestring_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.LineStringRDD"
-        )
+        return self._jvm.LineStringRDD
 
     def create_rectangle_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.RectangleRDD"
-        )
+        return self._jvm.RectangleRDD
 
     def create_circle_rdd(self):
-        return getattr(
-            self._jvm,
-            "org.datasyslab.geospark.spatialRDD.CircleRDD"
-        )
+        return self._jvm.CircleRDD

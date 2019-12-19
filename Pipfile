@@ -16,7 +16,9 @@ pytest="*"
 findspark="*"
 pandas="*"
 geopandas="==0.5.0"
-pyspark="==2.3.2"
+pyspark="==2.4.4"
+jupyter = "*"
+toree = "*"
 
 [requires]
 python_version = "3.6"

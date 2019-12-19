@@ -1,14 +1,29 @@
+from typing import Optional
+
 import attr
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 
 
 @attr.s
 class LineStringRDD(SpatialRDD):
+    startingOffset = attr.ib(default=None, type=Optional[int])
+    endingOffset = attr.ib(default=None, type=Optional[int])
 
-    def __create_srdd(self):
-        pass
+    def srdd_from_attributes(self):
+        LineStringRDD = SpatialRDDFactory(self.sparkContext).create_linestring_rdd()
+
+        linestring_rdd = LineStringRDD(
+            self._jsc,
+            self.InputLocation,
+            self.startingOffset,
+            self.endingOffset,
+            self.splitter,
+            self.carryInputData
+        )
+
+        return linestring_rdd
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-        self._srdd = self.__create_srdd()

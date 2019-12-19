@@ -8,6 +8,7 @@ from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 class CircleRDD(AbstractSpatialRDD):
     spatialRDD = attr.ib(default=None)
     radius = attr.ib(type=float, default=None)
+    sparkContext = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         self.sparkContext = self.spatialRDD.sparkContext

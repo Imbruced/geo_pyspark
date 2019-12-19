@@ -8,7 +8,7 @@ class JvmCoordinate(JvmObject):
     x = attr.ib(default=0.0)
     y = attr.ib(default=0.0)
 
-    def create_jvm_instance(self):
+    def _create_jvm_instance(self):
         return self.jvm.createCoordinates(self.x, self.y)
 
 
@@ -16,7 +16,7 @@ class JvmCoordinate(JvmObject):
 class JvmPoint(JvmObject):
     coordinate = attr.ib(type=JvmCoordinate)
 
-    def create_jvm_instance(self):
+    def _create_jvm_instance(self):
 
         return self.jvm.GeomFactory.createPoint(self.coordinate)
 
@@ -28,5 +28,5 @@ class JvmEnvelope(JvmObject):
     miny = attr.ib()
     maxy = attr.ib()
 
-    def create_jvm_instance(self):
+    def _create_jvm_instance(self):
         return self.jvm.Envelope(self.minx, self.maxx, self.miny, self.maxy)

@@ -11,15 +11,32 @@ class KNNQuery:
 
     @classmethod
     def SpatialKnnQuery(self, spatialRDD: AbstractSpatialRDD, originalQueryPoint: Point, k: int,  useIndex: bool):
-        coordinate = JvmCoordinate(spatialRDD._jvm, 1.0, 1.0).create_jvm_instance()
-        point = JvmPoint(spatialRDD._jvm, coordinate)
+        """
 
-        res = spatialRDD.sparkContext._jvm.KNNQuery.SpatialKnnQuery(
-            spatialRDD._srdd,
-            point.create_jvm_instance(),
-            k,
-            useIndex
+        :param spatialRDD: spatialRDD
+        :param originalQueryPoint: shapely.geometry.Point
+        :param k: int
+        :param useIndex: bool
+        :return: pyspark.RDD
+        """
+
+        coordinate = JvmCoordinate(
+            spatialRDD._jvm,
+            originalQueryPoint.x,
+            originalQueryPoint.y
         )
+
+        point = JvmPoint(spatialRDD._jvm, coordinate.jvm_instance)
+        jvm_point = point.jvm_instance
+
+        jvm_knn = JvmKNNQuery(
+            spatialRDD.sparkContext._jvm,
+            spatialRDD._srdd,
+            jvm_point,
+            k,
+            useIndex)
+
+        res = jvm_knn.SpatialKnnQuery()
 
         return res
 
@@ -31,19 +48,11 @@ class JvmKNNQuery(JvmObject):
     k = attr.ib()
     useIndex = attr.ib()
 
-    def create_jvm_instance(self):
-        return self.jvm.org.\
-            datasyslab.\
-            geospark.\
-            spatialOperator.\
-            KNNQuery.\
-            SpatialKnnQuery
-
     def SpatialKnnQuery(self):
-        spatial_knn_query = self.create_jvm_instance()
-        return spatial_knn_query(
-            self.spatialRDD._srdd,
-            self.queryRDD._srdd,
-            self.useIndex,
-            self.considerBoundaryIntersection
+        knn_neighbours = self.jvm.KNNQuery.SpatialKnnQuery(
+                self.spatialRDD._srdd,
+                self.originalQueryPoint,
+                self.k,
+                self.useIndex
         )
+        return knn_neighbours
