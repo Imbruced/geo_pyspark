@@ -3,7 +3,7 @@ package org.imbruced.geo_pyspark
 import org.apache.spark.sql.SparkSession
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
 
-object GeoSparkWrapper extends App{
+object GeoSparkWrapper {
 
   def registerAll: Unit ={
     val spark: SparkSession = SparkSession.
