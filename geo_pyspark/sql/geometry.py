@@ -16,8 +16,7 @@ from geo_pyspark.utils.parsers import MultiPointParser, PolygonParser, PolyLineP
 class GeometryFactory:
 
     @classmethod
-    def geometry_from_bytes(cls, bytes: bytearray) -> BaseGeometry:
-        bin_parser = BinaryParser(bytes)
+    def geometry_from_bytes(cls, bin_parser: BinaryParser) -> BaseGeometry:
         g_type = bin_parser.read_byte()
         gm_type = bin_parser.read_byte()
         if GeomEnum.has_value(gm_type):
