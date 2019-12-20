@@ -6,7 +6,7 @@ import org.datasyslab.geosparksql.utils.GeometrySerializer
 
 object GeoSerializerNoUserAttributes extends SpatialRDDSerializer{
   def serializeToPython(spatialRDD: JavaRDD[Geometry]): JavaRDD[Array[Byte]] = {
-    spatialRDD.rdd.map[Array[Byte]](geom => GeometrySerializer.serialize(geom)).toJavaRDD()
+     spatialRDD.rdd.map[Array[Byte]](geom => Array(0.toByte) ++GeometrySerializer.serialize(geom)).toJavaRDD()
   }
 
   def serializeToPythonHashSet(spatialRDD: JavaPairRDD[Geometry, java.util.HashSet[Geometry]]): JavaRDD[Array[Byte]] = {
@@ -14,8 +14,8 @@ object GeoSerializerNoUserAttributes extends SpatialRDDSerializer{
       pairRDD => {
         val rightGeometry = pairRDD._2
         val leftGeometry = pairRDD._1
-        GeometrySerializer.serialize(leftGeometry.asInstanceOf[Geometry]) ++
-        Array(10.toFloat.toByte) ++ Array(pairRDD._2.size.toByte) ++ Array(10.toFloat.toByte) ++
+        Array(1.toByte) ++ GeometrySerializer.serialize(leftGeometry.asInstanceOf[Geometry]) ++
+        Array(1.toByte) ++ Array(pairRDD._2.toArray.length.toByte) ++
         rightGeometry.toArray.flatMap(geom => GeometrySerializer.serialize(geom.asInstanceOf[Geometry]) ++ Array(10.toFloat.toByte))
       }
     )
@@ -23,7 +23,7 @@ object GeoSerializerNoUserAttributes extends SpatialRDDSerializer{
 
   def serializeToPython(spatialRDD: JavaPairRDD[Geometry, Geometry]): JavaRDD[Array[Byte]] = {
     spatialRDD.rdd.map[Array[Byte]](pairRDD =>
-      GeometrySerializer.serialize(pairRDD._1) ++ Array(10.toFloat.toByte) ++ GeometrySerializer.serialize(pairRDD._2)
+      Array(1.toByte) ++ GeometrySerializer.serialize(pairRDD._1) ++ Array(0.toByte) ++ GeometrySerializer.serialize(pairRDD._2)
     ).toJavaRDD()
   }
 
