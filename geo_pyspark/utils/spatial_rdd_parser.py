@@ -12,12 +12,16 @@ class SpatialRDDParser(GeometryParser):
 
     @classmethod
     def deserialize(cls, bin_parser: BinaryParser):
-        is_pair_rdd = bin_parser.read_int()
+        print("S")
+        is_pair_rdd = bin_parser.read_byte()
         left_geom = GeometryFactory.geometry_from_bytes(bin_parser)
-
+        print("s")
         if is_pair_rdd:
-            if bin_parser.read_int():
-                geometry_numbers = bin_parser.read_double()
+            is_hash_set = bin_parser.read_byte()
+
+            print("S")
+            if is_hash_set:
+                geometry_numbers = bin_parser.read_int()
                 right_geom = []
 
                 for right_geometry_number in range(geometry_numbers):
