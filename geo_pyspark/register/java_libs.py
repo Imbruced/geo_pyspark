@@ -8,7 +8,7 @@ GEOSPARK_IMPORTS = [
     "org.datasyslab.geospark.spatialOperator.RangeQuery",
     "org.imbruced.geo_pyspark.GeomFactory",
     "com.vividsolutions.jts.geom.Envelope",
-    "org.imbruced.geo_pyspark.GeoSerializer",
+    "org.imbruced.geo_pyspark.serializers.GeoSerializerNoUserAttributes",
     "org.datasyslab.geospark.spatialRDD.PointRDD",
     "org.datasyslab.geospark.spatialRDD.PolygonRDD",
     "org.datasyslab.geospark.spatialRDD.CircleRDD",
