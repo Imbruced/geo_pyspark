@@ -87,7 +87,7 @@ class PointParser(GeometryParser):
             add_shape_geometry_metadata(GeomEnum.point.value, binary_buffer)
             binary_buffer.put_double(obj.x)
             binary_buffer.put_double(obj.y)
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
@@ -96,6 +96,7 @@ class PointParser(GeometryParser):
     def deserialize(cls, parser: BinaryParser) -> Point:
         x = parser.read_double()
         y = parser.read_double()
+        parser.read_int()
         return Point(x, y)
 
 
@@ -128,7 +129,7 @@ class LineStringParser(GeometryParser):
 
             put_coordinates(obj.coords, binary_buffer)
 
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
@@ -162,7 +163,7 @@ class MultiLineStringParser(GeometryParser):
             for geom in obj.geoms:
                 put_coordinates(geom.coords, binary_buffer)
 
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
@@ -201,7 +202,7 @@ class PolyLineParser(GeometryParser):
             line = MultiLineString(lines)
         else:
             raise InvalidGeometryException("Invalid geometry")
-
+        parser.read_int()
         return line
 
 
@@ -232,7 +233,7 @@ class PolygonParser(GeometryParser):
                 coordinates = reverse_linear_ring(ring)
                 put_coordinates(coordinates, binary_buffer)
 
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
 
         else:
             raise TypeError(f"Need a {cls.name} instance")
@@ -273,6 +274,8 @@ class PolygonParser(GeometryParser):
             geometry = Polygon(shell, holes)
             polygons.append(geometry)
 
+        parser.read_int()
+
         if polygons.__len__() == 1:
             return polygons[0]
 
@@ -307,10 +310,7 @@ class MultiPolygonParser(GeometryParser):
                     coordinates = reverse_linear_ring(ring)
                     put_coordinates(coordinates, binary_buffer)
 
-            binary_buffer.put_byte(1)
-            binary_buffer.put_byte(3)
-            binary_buffer.put_byte(1)
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
@@ -333,7 +333,7 @@ class MultiPointParser(GeometryParser):
             for point in obj.geoms:
                 binary_buffer.put_double(point.x)
                 binary_buffer.put_double(point.y)
-            binary_buffer.put_byte(-127)
+            binary_buffer.put_int(-2130640127)
         else:
             raise TypeError(f"Need a {cls.name} instance")
         return binary_buffer.byte_array
@@ -345,5 +345,5 @@ class MultiPointParser(GeometryParser):
         number_of_points = parser.read_int()
 
         coordinates = read_coordinates(parser, number_of_points)
-
+        parser.read_int()
         return MultiPoint(coordinates)
