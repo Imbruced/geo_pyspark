@@ -85,13 +85,8 @@ class AbstractSpatialRDD(ABC):
         return self._srdd.getPartitioner()
 
     def getRawSpatialRDD(self):
-        spatial_rdd  = self._jvm.GeoSerializer.serialize(
-            self._srdd.getRawSpatialRDD()
-        )
-
-        rdd = RDD(spatial_rdd, self.sparkContext, GeoSparkPickler())
-
-        return rdd.map(lambda x: GeometryFactory.geometry_from_bytes(x))
+        serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(self._srdd.getRawSpatialRDD())
+        return RDD(serialized_spatial_rdd, self.sparkContext, GeoSparkPickler())
 
     def getSampleNumber(self):
         return self._srdd.getSampleNumber()
@@ -117,11 +112,7 @@ class AbstractSpatialRDD(ABC):
 
     @property
     def rawSpatialRDD(self):
-        return self._srdd.rawSpatialRDD()
-
-    @rawSpatialRDD.setter
-    def rawSpatialRDD(self, value):
-        self._srdd.rawSpatialRDD = value
+        return self.getRawSpatialRDD()
 
     def saveAsGeoJSON(self, path: str):
         return self._srdd.saveAsGeoJSON(path)
