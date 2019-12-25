@@ -6,11 +6,15 @@ import attr
 DOUBLE_SIZE = 8
 INT_SIZE = 4
 BYTE_SIZE = 1
+CHAR_SIZE = 1
+BOOLEAN_SIZE = 1
 
 size_dict = {
     "d": DOUBLE_SIZE,
     "i": INT_SIZE,
-    "b": BYTE_SIZE
+    "b": BYTE_SIZE,
+    "s": CHAR_SIZE,
+    "?": BOOLEAN_SIZE
 }
 
 
@@ -37,6 +41,26 @@ class BinaryParser:
         data = self.unpack("b", self.bytes)
         self.current_index = self.current_index + BYTE_SIZE
         return data
+
+    def read_char(self):
+        data = self.unpack("c", self.bytes)
+        self.current_index = self.current_index + CHAR_SIZE
+        return data
+
+    def read_boolean(self):
+        data = self.unpack("?", self.bytes)
+        self.current_index = self.current_index + BOOLEAN_SIZE
+        return data
+
+    def read_string(self, length: int, encoding: str = "utf8"):
+        string = self.bytes[self.current_index: length]
+        self.current_index = length
+
+        try:
+            encoded_string = string.decode(encoding, "ignore")
+        except UnicodeEncodeError:
+            raise UnicodeEncodeError(f"Can not encode user data {string}")
+        return encoded_string
 
     def unpack(self, tp: str, bytes: bytearray):
         max_index = self.current_index + size_dict[tp]
