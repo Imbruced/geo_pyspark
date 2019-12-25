@@ -6,30 +6,47 @@ import com.vividsolutions.jts.geom.Geometry
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 
+import scala.annotation.tailrec
+
 object GeoSerializerData {
   def serializeToPython(spatialRDD: JavaRDD[Geometry]): JavaRDD[Array[Byte]] = {
 
     spatialRDD.rdd.map[Array[Byte]](geom =>{
-      val userDataLength: Int = geom.getUserData.asInstanceOf[String].length
       val userDataLengthArray = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
       val sizeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+      val serializedGeom = GeometrySerializer.serialize(geom)
 
-      userDataLengthArray.putInt(userDataLength)
+      userDataLengthArray.putInt(serializedGeom.length+4)
 
       sizeBuffer.putInt(0)
 
-      userDataLengthArray.array() ++ GeometrySerializer.serialize(geom) ++ sizeBuffer.array()
+      userDataLengthArray.array() ++ serializedGeom ++ sizeBuffer.array()
     }
 
 
     ).toJavaRDD()
   }
 
-  private def serializeMultipleGeom(geom: Geometry): Array[Byte] = {
-    val userDataLengthArrayRight = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-    userDataLengthArrayRight.putInt(geom.getUserData.toString.length)
-    userDataLengthArrayRight.array() ++ GeometrySerializer.serialize(geom)
+  def serializeMultipleGeom(originIndex: Int, geometries: Array[Geometry]): Array[Byte] = {
+
+    @tailrec
+    def accumulate(startingIndex: Int, accumByteArray: Array[Byte], indexData: Int): Array[Byte] = {
+      if (geometries.length <= indexData) accumByteArray
+      else{
+        val userDataLengthArrayRight = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+        val serializedGeom =  GeometrySerializer.serialize(geometries(indexData))
+        val userDataLength = serializedGeom.length + startingIndex + 4
+        userDataLengthArrayRight.putInt(userDataLength)
+        println(userDataLength)
+        accumulate(userDataLength, accumByteArray ++ userDataLengthArrayRight.array() ++ serializedGeom, indexData+1)
+      }
+
+    }
+
+    accumulate(originIndex, Array(), 0)
+
   }
+
   def serializeToPythonHashSet(spatialRDD: JavaPairRDD[Geometry, java.util.HashSet[Geometry]]): JavaRDD[Array[Byte]] = {
 
     spatialRDD.rdd.map[Array[Byte]](
@@ -37,16 +54,16 @@ object GeoSerializerData {
         val rightGeometry = pairRDD._2
         val leftGeometry = pairRDD._1
         val sizeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-        val userDataLength: Int = leftGeometry.asInstanceOf[Geometry].getUserData.asInstanceOf[String].length
         val userDataLengthArray = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+        val serializedGeom = GeometrySerializer.serialize(leftGeometry.asInstanceOf[Geometry])
+        val userDataLength = serializedGeom.length+4
 
         userDataLengthArray.putInt(userDataLength)
 
         sizeBuffer.putInt(rightGeometry.toArray.length)
-        userDataLengthArray.array() ++ GeometrySerializer.serialize(leftGeometry.asInstanceOf[Geometry]) ++
+        userDataLengthArray.array() ++ serializedGeom ++
           sizeBuffer.array() ++
-          rightGeometry.toArray.flatMap(geom =>serializeMultipleGeom(geom.asInstanceOf[Geometry])
-          )
+          serializeMultipleGeom(userDataLength+4, rightGeometry.toArray().map(geometry => geometry.asInstanceOf[Geometry]))
       }
     )
   }
