@@ -9,9 +9,11 @@ GEOSPARK_IMPORTS = [
     "org.imbruced.geo_pyspark.GeomFactory",
     "com.vividsolutions.jts.geom.Envelope",
     "org.imbruced.geo_pyspark.serializers.GeoSerializerNoUserAttributes",
+    "org.imbruced.geo_pyspark.serializers.GeoSerializerData",
     "org.datasyslab.geospark.spatialRDD.PointRDD",
     "org.datasyslab.geospark.spatialRDD.PolygonRDD",
     "org.datasyslab.geospark.spatialRDD.CircleRDD",
     "org.datasyslab.geospark.spatialRDD.LineStringRDD",
-    "org.datasyslab.geospark.spatialRDD.RectangleRDD"
+    "org.datasyslab.geospark.spatialRDD.RectangleRDD",
+    "org.datasyslab.geospark.enums.FileDataSplitter"
 ]
