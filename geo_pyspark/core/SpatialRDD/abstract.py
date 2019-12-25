@@ -7,6 +7,7 @@ from pyspark import SparkContext, RDD
 
 from geo_pyspark.core.enums.grid_type import GridTypeJvm
 from geo_pyspark.core.enums.index_type import IndexTypeJvm
+from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.utils import FileSplitterJvm
 from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.serde import GeoSparkPickler
@@ -58,7 +59,8 @@ class AbstractSpatialRDD(ABC):
 
     @property
     def boundaryEnvelope(self):
-        raise self._srdd.boundaryEnvelope()
+        java_boundary_envelope = get_field(self._srdd, "boundaryEnvelope")
+        return Envelope.from_jvm_instance(java_boundary_envelope)
 
     def buildIndex(self, indexType: str, buildIndexOnSpatialPartitionedRDD: bool):
         return self._srdd.buildIndex(
