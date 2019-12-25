@@ -12,3 +12,12 @@ class Envelope:
         return jvm.com.vividsolutions.jts.geom.Envelope(
             self.minx, self.maxx, self.miny, self.maxy
         )
+
+    @classmethod
+    def from_jvm_instance(cls, java_obj):
+        return cls(
+            minx=java_obj.getMinX(),
+            maxx=java_obj.getMaxX(),
+            miny=java_obj.getMinY(),
+            maxy=java_obj.getMaxY(),
+        )
