@@ -96,7 +96,11 @@ class PointParser(GeometryParser):
     def deserialize(cls, parser: BinaryParser) -> Point:
         x = parser.read_double()
         y = parser.read_double()
-        parser.read_int()
+        has_user_data = parser.read_boolean()
+        if has_user_data:
+            for _ in range(2):
+                parser.read_byte()
+
         return Point(x, y)
 
 
@@ -202,7 +206,12 @@ class PolyLineParser(GeometryParser):
             line = MultiLineString(lines)
         else:
             raise InvalidGeometryException("Invalid geometry")
-        parser.read_int()
+        has_user_data = parser.read_boolean()
+        if has_user_data:
+            parser.read_byte()
+            parser.read_byte()
+            parser.read_byte()
+
         return line
 
 
@@ -274,7 +283,10 @@ class PolygonParser(GeometryParser):
             geometry = Polygon(shell, holes)
             polygons.append(geometry)
 
-        parser.read_int()
+        has_user_data = parser.read_boolean()
+        if has_user_data:
+            parser.read_byte()
+            parser.read_byte()
 
         if polygons.__len__() == 1:
             return polygons[0]
@@ -345,5 +357,5 @@ class MultiPointParser(GeometryParser):
         number_of_points = parser.read_int()
 
         coordinates = read_coordinates(parser, number_of_points)
-        parser.read_int()
+        has_user_data = parser.read_boolean()
         return MultiPoint(coordinates)
