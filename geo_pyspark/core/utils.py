@@ -17,11 +17,7 @@ class FileSplitterJvm:
 
     @property
     def splitter(self):
-        return self._jvm.org.datasyslab.\
-            geospark.\
-            enums.\
-            FileDataSplitter.\
-            getFileDataSplitter
+        return self._jvm.FileDataSplitter.getFileDataSplitter
 
 
 def get_geospark_package_location(jvm):
