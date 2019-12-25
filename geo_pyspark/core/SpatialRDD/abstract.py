@@ -2,6 +2,7 @@ from abc import ABC
 from typing import Optional
 
 import attr
+from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
 
 from geo_pyspark.core.enums.grid_type import GridTypeJvm
@@ -50,7 +51,7 @@ class AbstractSpatialRDD(ABC):
 
     @property
     def approximateTotalCount(self):
-        return self._srdd.approximateTotalCount()
+        return get_field(self._srdd, "approximateTotalCount")
 
     def boundary(self):
         return self._srdd.boundary()
