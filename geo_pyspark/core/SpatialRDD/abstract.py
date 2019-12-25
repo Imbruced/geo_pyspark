@@ -48,12 +48,14 @@ class AbstractSpatialRDD(ABC):
     def MinimumBoundingRectangle(self):
         return self._srdd.MinimumBoundingRectangle()
 
+    @property
     def approximateTotalCount(self):
         return self._srdd.approximateTotalCount()
 
     def boundary(self):
         return self._srdd.boundary()
 
+    @property
     def boundaryEnvelope(self):
         raise self._srdd.boundaryEnvelope()
 
@@ -100,6 +102,7 @@ class AbstractSpatialRDD(ABC):
     def grids(self):
         return self._srdd.grids()
 
+    @property
     def indexedRDD(self):
         return self._srdd.indexedRDD()
 
