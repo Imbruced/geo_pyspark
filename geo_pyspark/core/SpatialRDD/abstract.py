@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Optional
+from typing import Optional, List
 
 import attr
 from py4j.java_gateway import get_field
@@ -8,10 +8,8 @@ from pyspark import SparkContext, RDD
 from geo_pyspark.core.enums.grid_type import GridTypeJvm
 from geo_pyspark.core.enums.index_type import IndexTypeJvm
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.core.utils import FileSplitterJvm
-from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.serde import GeoSparkPickler
-from geo_pyspark.utils.types import crs, path
+from geo_pyspark.utils.types import crs
 
 
 @attr.s
@@ -97,8 +95,14 @@ class AbstractSpatialRDD(ABC):
     def getTargetEpsggCode(self):
         return self._srdd.getTargetEpsgCode()
 
-    def grids(self):
-        return self._srdd.grids()
+    @property
+    def grids(self) -> List[Envelope]:
+        jvm_grids = get_field(self._srdd, "grids")
+        number_of_grids = jvm_grids.size()
+
+        envelopes = [Envelope.from_jvm_instance(jvm_grids[index]) for index in range(number_of_grids)]
+
+        return envelopes
 
     @property
     def indexedRDD(self):
