@@ -118,6 +118,11 @@ class AbstractSpatialRDD(ABC):
     def rawSpatialRDD(self):
         return self.getRawSpatialRDD()
 
+    @rawSpatialRDD.setter
+    def rawSpatialRDD(self, value):
+        self._srdd = value._srdd
+        self.sparkContext = value.sparkContext
+
     def saveAsGeoJSON(self, path: str):
         return self._srdd.saveAsGeoJSON(path)
 
