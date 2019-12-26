@@ -98,7 +98,7 @@ class PointParser(GeometryParser):
         y = parser.read_double()
         has_user_data = parser.read_boolean()
         if has_user_data:
-            for _ in range(2):
+            for _ in range(3):
                 parser.read_byte()
 
         return Point(x, y)
@@ -285,6 +285,7 @@ class PolygonParser(GeometryParser):
 
         has_user_data = parser.read_boolean()
         if has_user_data:
+            parser.read_byte()
             parser.read_byte()
             parser.read_byte()
 
