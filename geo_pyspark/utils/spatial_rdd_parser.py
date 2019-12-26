@@ -1,9 +1,11 @@
 import attr
+from pyspark import SparkContext
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.abstract_parser import AbstractSpatialRDDParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
+import marshal
 
 
 @attr.s
@@ -16,29 +18,26 @@ class SpatialPairRDDParserNonUserData(AbstractSpatialRDDParser):
         left_geom = GeometryFactory.geometry_from_bytes(bin_parser)
         if user_data_length > 0:
             user_data = bin_parser.read_string(user_data_length)
-            left_geom = [left_geom, *user_data.split("\t")]
+            left_geom_data = GeoData(geom=left_geom, userData=user_data)
+
         else:
-            bin_parser.read_byte()
+            left_geom_data = GeoData(geom=left_geom, userData="")
 
         geometry_numbers = bin_parser.read_int()
 
-        right_geom = []
-
-        if geometry_numbers > 1:
-            print("s")
+        right_geoms = []
 
         for right_geometry_number in range(geometry_numbers):
             user_data_length = bin_parser.read_int()
-            right_geom_data = GeometryFactory.geometry_from_bytes(bin_parser)
+            right_geom = GeometryFactory.geometry_from_bytes(bin_parser)
             if user_data_length > 0:
                 user_data = bin_parser.read_string(user_data_length)
-                right_geom.append([right_geom_data, *user_data.split("\t")])
+                right_geom_data = GeoData(geom=right_geom, userData=user_data)
             else:
-                bin_parser.read_byte()
-                right_geom.append(right_geom_data)
+                right_geom_data = GeoData(geom=right_geom, userData="")
+            right_geoms.append(right_geom_data)
 
-
-        deserialized_data = [left_geom, right_geom]
+        deserialized_data = [left_geom_data, right_geoms] if right_geoms else left_geom_data
 
         return deserialized_data
 
@@ -48,22 +47,9 @@ class SpatialPairRDDParserNonUserData(AbstractSpatialRDDParser):
 
 
 @attr.s
-class SpatialPairRDDParserUserData(AbstractSpatialRDDParser):
-    pass
+class GeoData:
+    geom = attr.ib(type=BaseGeometry)
+    userData = attr.ib(type=str)
 
-
-
-@attr.s
-class SpatialRDDParser(AbstractSpatialRDDParser):
-
-    @classmethod
-    def deserialize(cls, bin_parser: BinaryParser):
-        left_geom = GeometryFactory.geometry_from_bytes(bin_parser)
-
-        return left_geom
-
-    @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: BinaryBuffer):
-        raise NotImplementedError("Currently this operation is not supported")
-
-
+    def getUserData(self):
+        return self.userData
