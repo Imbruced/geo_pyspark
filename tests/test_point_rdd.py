@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 from py4j.java_gateway import get_field
 
 from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.enums import IndexType
+from geo_pyspark.core.enums import IndexType, GridType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 
@@ -82,7 +82,21 @@ class TestPointRDD:
         spatial_rdd_copy.analyze()
 
     def test_equal_partitioning(self):
-        pass
+        spatial_rdd = PointRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            Offset=offset,
+            splitter=splitter,
+            carryInputData=False,
+            partitions=10,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(GridType.EQUALGRID)
+
+        for envelope in spatial_rdd.grids:
+            print("PointRDD spatial partitioning grids: " + str(envelope))
+        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
 
     def test_hilbert_curve_spatial_partitioning(self):
         pass
