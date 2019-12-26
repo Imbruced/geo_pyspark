@@ -53,8 +53,8 @@ class BinaryParser:
         return data
 
     def read_string(self, length: int, encoding: str = "utf8"):
-        string = self.bytes[self.current_index: length]
-        self.current_index = length
+        string = self.bytes[self.current_index: self.current_index+length]
+        self.current_index += length
 
         try:
             encoded_string = string.decode(encoding, "ignore")
