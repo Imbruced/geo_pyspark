@@ -70,7 +70,7 @@ class AbstractSpatialRDD(ABC):
         return self._srdd.countWithoutDuplicates()
 
     def countWithoutDuplicatesSPRDD(self):
-        raise self._countWithoutDuplicatesSPRDD()
+        return self._srdd.countWithoutDuplicatesSPRDD()
 
     def fieldNames(self):
         raise self._fieldNames()
