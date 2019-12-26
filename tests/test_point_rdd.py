@@ -1,12 +1,16 @@
 import pytest
-from pyspark import StorageLevel
+from pyspark import StorageLevel, SparkContext
 from pyspark.sql import SparkSession
+from py4j.java_gateway import get_field
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import IndexType
+from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 
+import pyspark
 upload_jars()
+
 
 spark = SparkSession.\
     builder.\
@@ -18,7 +22,7 @@ GeoSparkRegistrator.\
 
 sc = spark.sparkContext
 
-inputLocation = "arealm-small.csv"
+inputLocation = "resources/arealm-small.csv"
 queryWindowSet = "zcta510-small.csv"
 offset = 1
 splitter = "csv"
@@ -28,7 +32,12 @@ numPartitions = 11
 distance = 0.01
 queryPolygonSet = "primaryroads-polygon.csv"
 inputCount = 3000
-inputBoundary = -173.120769, -84.965961, 30.244859, 71.355134
+inputBoundary = Envelope(
+    minx=-173.120769,
+    maxx=-84.965961,
+    miny=30.244859,
+    maxy=71.355134
+)
 rectangleMatchCount = 103
 rectangleMatchWithOriginalDuplicatesCount = 103
 polygonMatchCount = 472
@@ -47,15 +56,30 @@ class TestPointRDD:
             partitions=numPartitions,
             newLevel=StorageLevel.MEMORY_ONLY
         )
+
+        spatial_rdd.analyze()
         assert inputCount == spatial_rdd.approximateTotalCount
         assert inputBoundary == spatial_rdd.boundaryEnvelope
-        assert spatial_rdd.rawSpatialRDD.take(9).get(0).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2")
-        assert spatial_rdd.rawSpatialRDD.take(9).get(2).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2")
-        assert spatial_rdd.rawSpatialRDD.take(9).get(4).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2")
-        assert spatial_rdd.rawSpatialRDD.take(9).get(8).getUserData().equals("testattribute0\ttestattribute1\ttestattribute2")
+        spatial_rdd.rawSpatialRDD.take(9)[0].getUserData()
+        assert spatial_rdd.rawSpatialRDD.take(9)[0].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
+        assert spatial_rdd.rawSpatialRDD.take(9)[2].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
+        assert spatial_rdd.rawSpatialRDD.take(9)[4].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
+        assert spatial_rdd.rawSpatialRDD.take(9)[8].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
 
     def test_empty_constructor(self):
-        pass
+        spatial_rdd = PointRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            Offset=offset,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=numPartitions,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.buildIndex(IndexType.RTREE, False)
+        spatial_rdd_copy = PointRDD()
+        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
+        spatial_rdd_copy.analyze()
 
     def test_equal_partitioning(self):
         pass
