@@ -3,6 +3,7 @@ from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import PolygonRDD
+from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
 
@@ -54,3 +55,147 @@ class TestPolygonRDD:
 
         assert inputCount == spatial_rdd.approximateTotalCount
         assert inputBoundary == spatial_rdd.boundaryEnvelope
+
+    def test_empty_constructor(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=numPartitions,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(gridType)
+        spatial_rdd.buildIndex(IndexType.RTREE, True)
+        spatial_rdd_copy = PolygonRDD()
+        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
+        spatial_rdd_copy.analyze()
+
+    def test_geojson_constructor(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocationGeojson,
+            splitter=FileDataSplitter.GEOJSON,
+            carryInputData=True,
+            partitions=4,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        assert spatial_rdd.approximateTotalCount == 1001
+        assert spatial_rdd.boundaryEnvelope is not None
+        assert spatial_rdd.rawSpatialRDD.take(1)[0].getUserData() == "01\t077\t011501\t5\t1500000US010770115015\t010770115015\t5\tBG\t6844991\t32636"
+        assert spatial_rdd.rawSpatialRDD.take(2)[1].getUserData() == "01\t045\t021102\t4\t1500000US010450211024\t010450211024\t4\tBG\t11360854\t0"
+        assert spatial_rdd.fieldNames == ["STATEFP", "COUNTYFP", "TRACTCE", "BLKGRPCE", "AFFGEOID", "GEOID", "NAME", "LSAD", "ALAND", "AWATER"]
+
+    def test_wkt_constructor(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocationWkt,
+            splitter=FileDataSplitter.WKT,
+            carryInputData=True,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        spatial_rdd.analyze()
+        assert spatial_rdd.approximateTotalCount == 103
+        assert spatial_rdd.boundaryEnvelope is not None
+        assert spatial_rdd.rawSpatialRDD.take(1)[0].getUserData() == "31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168"
+
+    def test_wkb_constructor(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocationWkb,
+            splitter=FileDataSplitter.WKB,
+            carryInputData=True,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        assert spatial_rdd.approximateTotalCount == 103
+        assert spatial_rdd.boundaryEnvelope is not None
+        assert spatial_rdd.rawSpatialRDD.take(1)[0].getUserData() == "31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168"
+
+    def test_hilbert_curve_spatial_partitioning(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=10,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(GridType.HILBERT)
+
+        for envelope in spatial_rdd.grids:
+            print(envelope)
+
+    def test_r_tree_spatial_partitioning(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=10,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(GridType.RTREE)
+
+        for envelope in spatial_rdd.grids:
+            print(envelope)
+
+    def test_voronoi_spatial_partitioning(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=10,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(GridType.VORONOI)
+
+        for envelope in spatial_rdd.grids:
+            print(envelope)
+
+    def test_build_index_without_set_grid(self):
+        spatial_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=numPartitions,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        spatial_rdd.buildIndex(IndexType.RTREE, False)
+
+    def test_build_rtree_index(self):
+        pass
+        # TODO add test
+
+    def test_build_quad_tree_index(self):
+        pass
+        # TODO add test
+
+    def test_mbr(self):
+        polygon_rdd = PolygonRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=numPartitions,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        rectangle_rdd = polygon_rdd.MinimumBoundingRectangle()
+
+        result = rectangle_rdd.rawSpatialRDD.collect()
+
+        for el in result:
+            print(el.geom.wkt)
+        print(result)
+        assert result.__len__() > -1
