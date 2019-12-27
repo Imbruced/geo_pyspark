@@ -8,17 +8,14 @@ from pyspark import SparkContext
 class FileSplitterJvm:
 
     sparkContext = attr.ib(type=SparkContext)
+    name = attr.ib(type=str)
 
     def __attrs_post_init__(self):
         self._jvm = self.sparkContext._jvm
 
-    def get_splitter(self, splitter: Optional[str]):
-        return self.splitter(splitter) if splitter is not None else None
+    def get_splitter(self):
+        return self.splitter(self.name) if self.name is not None else None
 
     @property
     def splitter(self):
         return self._jvm.FileDataSplitter.getFileDataSplitter
-
-
-def get_geospark_package_location(jvm):
-    return jvm.org.datasyslab.geospark
