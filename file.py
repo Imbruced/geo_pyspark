@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from py4j.java_gateway import get_field
 from pyspark import RDD
 from pyspark.serializers import AutoBatchedSerializer, CloudPickleSerializer, FramedSerializer, PickleSerializer
 from pyspark.sql import SparkSession
@@ -18,6 +19,7 @@ import pytest
 
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
+from pyspark import SparkContext
 from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
@@ -30,8 +32,6 @@ from geo_pyspark.register import upload_jars
 import os
 from geo_pyspark.register import GeoSparkRegistrator
 
-os.environ["SPARK_HOME"] = "/home/pawel/Desktop/spark-2.4.4-bin-hadoop2.7"
-
 upload_jars()
 
 
@@ -41,9 +41,9 @@ spark = SparkSession.builder.\
 
 GeoSparkRegistrator.registerAll(spark)
 
-resource_folder = "/home/pawel/Desktop/geo_pyspark/tests/resources"
+resource_folder = "/home/pkocinski001/Desktop/projects/geo_pyspark/tests/resources"
 
-point_rdd_input_location = os.path.join(resource_folder, "arealm-small.csv")
+point_rdd_input_location = os.path.join(resource_folder, "arealm.csv")
 
 point_rdd_splitter = FileDataSplitter.CSV
 
@@ -71,30 +71,38 @@ sc = spark.sparkContext
 object_rdd = PointRDD(
     sparkContext=sc,
     InputLocation=point_rdd_input_location,
-    Offset=point_rdd_offset,
+    Offset=0,
     splitter=point_rdd_splitter,
     carryInputData=False
 )
 
-geo_json_input_location = "/home/pawel/Desktop/projects/GeoSpark/sql/src/test/resources/testPolygon.json"
-spatial_rdd = PolygonRDD(spark.sparkContext, geo_json_input_location, FileDataSplitter.GEOJSON, False)
+geo_json_input_location = "/home/pkocinski001/Desktop/projects/GeoSpark/sql/src/test/resources/testPolygon.json"
+spatial_rdd = PolygonRDD(
+    spark.sparkContext,
+    geo_json_input_location,
+    FileDataSplitter.GEOJSON,
+    True
+)
 
 object_rdd.analyze()
 object_rdd.spatialPartitioning(join_query_partitionin_type)
 spatial_rdd.spatialPartitioning(object_rdd.getPartitioner)
 
-
 result_size = JoinQuery.SpatialJoinQuery(
     object_rdd,
     spatial_rdd,
     False,
-    True)
+    False)
 
 from pyspark import RDD
 from geo_pyspark.utils.serde import GeoSparkPickler
 
-python_rdd = RDD(spark._jvm.GeoSerializerNoUserAttributes.serializeToPythonHashSet(result_size),
-    spark._sc, GeoSparkPickler(False, False)).collect()
+python_rdd = RDD(spark._jvm.GeoSerializerData.serializeToPython(spatial_rdd._srdd.getRawSpatialRDD()),
+    spark._sc, GeoSparkPickler())
 
-for el in python_rdd:
-    print(el)
+spatial_rdd.analyze()
+spatial_rdd.spatialPartitioning(GridType.EQUALGRID)
+field = get_field(spatial_rdd._srdd, "grids")
+
+data = python_rdd.collect()[0]
+print(data)
