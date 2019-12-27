@@ -18,6 +18,7 @@ class SpatialRDD(AbstractSpatialRDD):
     newLevel = attr.ib(type=Optional[str], default=None)
     sourceEpsgCRSCode = attr.ib(type=crs, default=None)
     targetEpsgCode = attr.ib(type=Optional[crs], default=None)
+    spatialRDD = attr.ib(type=Optional['SpatialRDD'], default=None)
 
     def __attrs_post_init__(self):
         if self.sparkContext is not None:
@@ -25,16 +26,13 @@ class SpatialRDD(AbstractSpatialRDD):
             self._jvm = self.sparkContext._jvm
 
             if self.splitter is not None:
-                self.__file_spliter_jvm = FileSplitterJvm(self.sparkContext)
-                self.splitter = self.__file_spliter_jvm.get_splitter(self.splitter)
+                self.__file_spliter_jvm = FileSplitterJvm(self.sparkContext, self.splitter)
+                self.splitter = self.__file_spliter_jvm.get_splitter()
         else:
             self._jsc = None
             self._jvm = None
 
+        if self.spatialRDD is not None:
+            self._srdd = self.spatialRDD._srdd
+
         super().__attrs_post_init__()
-
-    def srdd_from_attributes(self):
-        pass
-
-    def set_srdd(self, srdd):
-        self._srdd = srdd

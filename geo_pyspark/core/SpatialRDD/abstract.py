@@ -24,10 +24,6 @@ class AbstractSpatialRDD(ABC):
         else:
             self._jsc = None
             self._jvm = None
-        self._srdd = self.srdd_from_attributes()
-
-    def srdd_from_attributes(self):
-        raise NotImplementedError("SpatialRDD instance has to implement srdd_from_attributes")
 
     def analyze(self) -> bool:
         """
@@ -46,7 +42,7 @@ class AbstractSpatialRDD(ABC):
         return self._srdd.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode)
 
     def MinimumBoundingRectangle(self):
-        return self._srdd.MinimumBoundingRectangle()
+        raise NotImplementedError()
 
     @property
     def approximateTotalCount(self):
