@@ -15,15 +15,18 @@ class PolygonRDD(SpatialRDD):
         super().__attrs_post_init__()
 
     def srdd_from_attributes(self):
-        PolygonRDD = SpatialRDDFactory(self.sparkContext).create_polygon_rdd()
+        if all([self.sparkContext]):
+            PolygonRDD = SpatialRDDFactory(self.sparkContext).create_polygon_rdd()
 
-        polygon_rdd = PolygonRDD(
-            self._jsc,
-            self.InputLocation,
-            self.startingOffset,
-            self.endingOffset,
-            self.splitter,
-            self.carryInputData
-        )
+            polygon_rdd = PolygonRDD(
+                self._jsc,
+                self.InputLocation,
+                self.startingOffset,
+                self.endingOffset,
+                self.splitter,
+                self.carryInputData
+            )
+        else:
+            polygon_rdd = None
 
         return polygon_rdd
