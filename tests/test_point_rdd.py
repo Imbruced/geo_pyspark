@@ -1,14 +1,12 @@
 import pytest
-from pyspark import StorageLevel, SparkContext
+from pyspark import StorageLevel
 from pyspark.sql import SparkSession
-from py4j.java_gateway import get_field
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import IndexType, GridType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 
-import pyspark
 upload_jars()
 
 
@@ -99,21 +97,61 @@ class TestPointRDD:
         assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
 
     def test_hilbert_curve_spatial_partitioning(self):
-        pass
+        spatial_rdd = PointRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            Offset=offset,
+            splitter=splitter,
+            carryInputData=False,
+            partitions=10,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(GridType.HILBERT)
+
+        for envelope in spatial_rdd.grids:
+            print(envelope)
+        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
 
     def test_r_tree_spatial_partitioning(self):
-        pass
+        spatial_rdd = PointRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            Offset=offset,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=10,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(GridType.RTREE)
+
+        for envelope in spatial_rdd.grids:
+            print(envelope)
+
+        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
 
     def test_voronoi_spatial_partitioning(self):
-        pass
+        spatial_rdd = PointRDD(
+            sparkContext=sc,
+            InputLocation=inputLocation,
+            Offset=offset,
+            splitter=splitter,
+            carryInputData=False,
+            partitions=10,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        spatial_rdd.analyze()
+        spatial_rdd.spatialPartitioning(GridType.VORONOI)
+
+        for envelope in spatial_rdd.grids:
+            print(envelope)
+
+        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
 
     def test_build_index_without_set_grid(self):
-        pass
-
-    def test_build_r_tree_index(self):
-        pass
-
-    def test_build_quadtree_index(self):
         spatial_rdd = PointRDD(
             sparkContext=sc,
             InputLocation=inputLocation,
@@ -122,10 +160,28 @@ class TestPointRDD:
             carryInputData=True,
             partitions=numPartitions,
             newLevel=StorageLevel.MEMORY_ONLY
-
         )
+        spatial_rdd.buildIndex(IndexType.RTREE, False)
 
-        spatial_rdd.spatialPartitioning(gridType)
-        spatial_rdd.buildIndex(IndexType.QUADTREE, True)
+    def test_build_r_tree_index(self):
+        pass
+        # TODO Add indexedRDD
 
-        spatial_rdd.indexedRDD()
+    def test_build_quadtree_index(self):
+        pass
+        # TODO Add indexedRDD
+        # spatial_rdd = PointRDD(
+        #     sparkContext=sc,
+        #     InputLocation=inputLocation,
+        #     Offset=offset,
+        #     splitter=splitter,
+        #     carryInputData=True,
+        #     partitions=numPartitions,
+        #     newLevel=StorageLevel.MEMORY_ONLY
+        #
+        # )
+        #
+        # spatial_rdd.spatialPartitioning(gridType)
+        # spatial_rdd.buildIndex(IndexType.QUADTREE, True)
+        #
+        # spatial_rdd.indexedRDD()
