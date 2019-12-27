@@ -2,6 +2,7 @@ import struct
 from typing import List, Union
 
 import attr
+from pyspark import SparkContext
 
 DOUBLE_SIZE = 8
 INT_SIZE = 4
@@ -61,6 +62,19 @@ class BinaryParser:
         except UnicodeEncodeError:
             raise UnicodeEncodeError(f"Can not encode user data {string}")
         return encoded_string
+
+    def read_kryo_string(self, length: int, sc: SparkContext) -> str:
+        array_length = length - self.current_index
+        byte_array = sc._gateway.new_array(sc._jvm.Byte, array_length)
+
+        for index, bt in enumerate(self.bytes[self.current_index: length]):
+            byte_array[index] = self.bytes[self.current_index+index]
+        decoded_string = sc._jvm.org.imbruced.geo_pyspark.serializers.GeoSerializerData.deserializeUserData(
+            byte_array
+        )
+        self.current_index = length
+        return decoded_string
+
 
     def unpack(self, tp: str, bytes: bytearray):
         max_index = self.current_index + size_dict[tp]
