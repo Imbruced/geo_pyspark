@@ -72,8 +72,9 @@ class AbstractSpatialRDD(ABC):
     def countWithoutDuplicatesSPRDD(self):
         return self._srdd.countWithoutDuplicatesSPRDD()
 
+    @property
     def fieldNames(self):
-        raise self._fieldNames()
+        return list(get_field(self._srdd, "fieldNames"))
 
     def getCRStransformation(self):
         raise self.getCRSTransformation()
