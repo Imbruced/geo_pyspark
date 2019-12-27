@@ -1,9 +1,14 @@
 package org.imbruced.geo_pyspark.serializers
 
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 import java.nio.{ByteBuffer, ByteOrder}
 
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.io.Input
 import com.vividsolutions.jts.geom.Geometry
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
+import org.datasyslab.geospark.geometryObjects.GeometrySerde
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 
 import scala.annotation.tailrec
@@ -12,15 +17,18 @@ object GeoSerializerData {
   def serializeToPython(spatialRDD: JavaRDD[Geometry]): JavaRDD[Array[Byte]] = {
 
     spatialRDD.rdd.map[Array[Byte]](geom =>{
-      val userDataLengthArray = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
       val sizeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+      val userData = geom.getUserData
+      geom.setUserData("")
       val serializedGeom = GeometrySerializer.serialize(geom)
+      val userDataBinary = userData.asInstanceOf[String].getBytes(StandardCharsets.UTF_8)
 
-      userDataLengthArray.putInt(serializedGeom.length+4)
+      val userDataLengthArray = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+      userDataLengthArray.putInt(userDataBinary.length)
 
       sizeBuffer.putInt(0)
 
-      userDataLengthArray.array() ++ serializedGeom ++ sizeBuffer.array()
+      userDataLengthArray.array() ++ serializedGeom ++ userDataBinary ++ sizeBuffer.array()
     }
 
 
@@ -72,5 +80,12 @@ object GeoSerializerData {
     spatialRDD.rdd.map[Array[Byte]](pairRDD =>
       Array(1.toByte) ++ GeometrySerializer.serialize(pairRDD._1) ++ Array(0.toByte) ++ GeometrySerializer.serialize(pairRDD._2)
     ).toJavaRDD()
+  }
+
+  def deserializeUserData(userData: Array[java.lang.Byte]): String = {
+    val in = new ByteArrayInputStream(userData.map(x=> x.toByte))
+    val kryo2 = new Kryo()
+    val input = new Input(in)
+    kryo2.readObject(input, "".getClass)
   }
 }
