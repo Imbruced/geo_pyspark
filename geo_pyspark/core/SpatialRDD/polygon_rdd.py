@@ -30,3 +30,11 @@ class PolygonRDD(SpatialRDD):
             polygon_rdd = None
 
         return polygon_rdd
+
+    def MinimumBoundingRectangle(self):
+        from geo_pyspark.core.SpatialRDD import RectangleRDD
+        rectangle_rdd = RectangleRDD(
+            spatialRDD=self,
+            sparkContext=self.sparkContext
+        )
+        return rectangle_rdd
