@@ -1,10 +1,8 @@
-from typing import List
-
 import attr
 from pyspark.sql import SparkSession
 from py4j.java_gateway import java_import
 
-from geo_pyspark.register.java_libs import GEOSPARK_IMPORTS
+from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.prep import assign_all
 
 assign_all()
@@ -24,7 +22,7 @@ class GeoSparkRegistrator:
         :return: bool, True if registration was correct.
         """
         spark.sql("SELECT 1 as geom").count()
-        PackageImporter.import_jvm_lib(spark._jvm, GEOSPARK_IMPORTS)
+        PackageImporter.import_jvm_lib(spark._jvm)
         cls.register(spark)
         return True
 
@@ -36,14 +34,15 @@ class GeoSparkRegistrator:
 class PackageImporter:
 
     @staticmethod
-    def import_jvm_lib(jvm, jvm_libs: List[jvm_import]) -> bool:
+    def import_jvm_lib(jvm) -> bool:
+        from geo_pyspark.core.utils import ImportedJvmLib
         """
         Imports all the specified methods and functions in jvm
         :param jvm: Jvm gateway from py4j
-        :param jvm_libs: List[str] of class, object function which to import
         :return:
         """
-        for lib in jvm_libs:
-            java_import(jvm, lib)
+        for lib in GeoSparkLib:
+            java_import(jvm, lib.value)
+            ImportedJvmLib.import_lib(lib)
 
         return True
