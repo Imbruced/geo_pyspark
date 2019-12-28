@@ -128,6 +128,12 @@ class AbstractSpatialRDD(ABC):
     def saveAsGeoJSON(self, path: str):
         return self._srdd.saveAsGeoJSON(path)
 
+    def saveAsWKB(self, path: str):
+        return self._srdd.saveAsWKB(path)
+
+    def saveAsWKT(self, path: str):
+        return self._srdd.saveAsWKT(path)
+
     def setRawSpatialRDD(self):
         raise self._setRawSpatialRDD()
 
