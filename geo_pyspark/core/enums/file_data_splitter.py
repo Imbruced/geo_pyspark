@@ -1,3 +1,9 @@
+import attr
+from pyspark import SparkContext
+
+from geo_pyspark.core.jvm.abstract import JvmObject
+from geo_pyspark.core.utils import require
+from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import classproperty
 
 
@@ -66,3 +72,17 @@ class FileDataSplitter:
     @classproperty
     def SEMICOLON(self):
         return "SEMICOLON"
+
+
+@attr.s
+class FileSplitterJvm(JvmObject):
+
+    name = attr.ib(type=str)
+
+    def _create_jvm_instance(self):
+        return self.splitter(self.name) if self.name is not None else None
+
+    @property
+    @require([GeoSparkLib.FileDataSplitter])
+    def splitter(self):
+        return self.jvm.FileDataSplitter.getFileDataSplitter
