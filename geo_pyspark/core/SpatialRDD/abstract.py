@@ -70,7 +70,11 @@ class AbstractSpatialRDD(ABC):
 
     @property
     def fieldNames(self):
-        return list(get_field(self._srdd, "fieldNames"))
+        try:
+            field_names = list(get_field(self._srdd, "fieldNames"))
+        except TypeError:
+            field_names = []
+        return field_names
 
     def getCRStransformation(self):
         raise self.getCRSTransformation()
@@ -116,9 +120,10 @@ class AbstractSpatialRDD(ABC):
         return self.getRawSpatialRDD()
 
     @rawSpatialRDD.setter
-    def rawSpatialRDD(self, value):
-        self._srdd = value._srdd
-        self.sparkContext = value.sparkContext
+    def rawSpatialRDD(self, spatial_rdd: 'SpatialRDD'):
+        self._srdd = spatial_rdd._srdd
+        self.sparkContext = spatial_rdd.sparkContext
+        self._jvm = spatial_rdd._jvm
 
     def saveAsGeoJSON(self, path: str):
         return self._srdd.saveAsGeoJSON(path)
