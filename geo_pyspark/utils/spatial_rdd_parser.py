@@ -1,11 +1,9 @@
 import attr
-from pyspark import SparkContext
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.abstract_parser import AbstractSpatialRDDParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
-import marshal
 
 
 @attr.s
