@@ -11,9 +11,9 @@ class CircleRDD(AbstractSpatialRDD):
     sparkContext = attr.ib(default=None)
 
     def __attrs_post_init__(self):
-        self.sparkContext = self.spatialRDD.sparkContext
         super().__attrs_post_init__()
 
-    def srdd_from_attributes(self):
-        Spatial = SpatialRDDFactory(self.sparkContext).create_circle_rdd()
-        return Spatial(self.spatialRDD._srdd, self.radius)
+        if self.spatialRDD is not None:
+            self.sparkContext = self.spatialRDD.sparkContext
+            Spatial = SpatialRDDFactory(self.sparkContext).create_circle_rdd()
+            self._srdd = Spatial(self.spatialRDD._srdd, self.radius)

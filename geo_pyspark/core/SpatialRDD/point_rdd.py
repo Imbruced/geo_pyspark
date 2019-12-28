@@ -12,19 +12,14 @@ class PointRDD(SpatialRDD):
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-
-    def srdd_from_attributes(self):
-
-        if self.InputLocation is not None and self.splitter is not None:
+        if self.InputLocation is not None and self.splitter is not None and self.sparkContext is not None:
             Spatial = SpatialRDDFactory(self.sparkContext).create_point_rdd()
-            point_rdd = Spatial(
+            self._srdd = Spatial(
                 self._jsc,
                 self.InputLocation,
                 self.Offset,
-                self.splitter,
+                self._jvm_splitter,
                 self.carryInputData
             )
         else:
-            point_rdd = None
-
-        return point_rdd
+            self._srdd = None

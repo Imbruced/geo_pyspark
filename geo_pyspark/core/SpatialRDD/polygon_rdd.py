@@ -13,12 +13,10 @@ class PolygonRDD(SpatialRDD):
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-
-    def srdd_from_attributes(self):
         if all([self.sparkContext]):
             PolygonRDD = SpatialRDDFactory(self.sparkContext).create_polygon_rdd()
 
-            polygon_rdd = PolygonRDD(
+            self._srdd = PolygonRDD(
                 self._jsc,
                 self.InputLocation,
                 self.startingOffset,
@@ -27,9 +25,7 @@ class PolygonRDD(SpatialRDD):
                 self.carryInputData
             )
         else:
-            polygon_rdd = None
-
-        return polygon_rdd
+            self._srdd = None
 
     def MinimumBoundingRectangle(self):
         from geo_pyspark.core.SpatialRDD import RectangleRDD
