@@ -12,11 +12,13 @@ class RectangleRDD(SpatialRDD):
 
     def __attrs_post_init__(self):
         from geo_pyspark.core.SpatialRDD import PolygonRDD
+        from geo_pyspark.core.SpatialRDD import LineStringRDD
+
         super().__attrs_post_init__()
         arguments = self.sparkContext, self.InputLocation, self.Offset, self.splitter, self.carryInputData, self.partitions
         arguments_is_none = [arg is not None for arg in arguments]
 
-        if isinstance(self.spatialRDD, PolygonRDD):
+        if isinstance(self.spatialRDD, PolygonRDD) or isinstance(self.spatialRDD, LineStringRDD):
             self._srdd = self.spatialRDD._srdd.MinimumBoundingRectangle()
         elif all(arguments_is_none):
             rectangle_rdd = SpatialRDDFactory(self.sparkContext).\
