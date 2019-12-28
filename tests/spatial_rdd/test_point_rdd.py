@@ -5,7 +5,9 @@ from pyspark.sql import SparkSession
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import IndexType, GridType
 from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.utils import ImportedJvmLib
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+from geo_pyspark.register.java_libs import GeoSparkLib
 
 upload_jars()
 
@@ -63,6 +65,11 @@ class TestPointRDD:
         assert spatial_rdd.rawSpatialRDD.take(9)[2].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
         assert spatial_rdd.rawSpatialRDD.take(9)[4].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
         assert spatial_rdd.rawSpatialRDD.take(9)[8].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
+
+        print(ImportedJvmLib._imported_libs)
+        print(ImportedJvmLib.has_library(GeoSparkLib.Adapter))
+        print(ImportedJvmLib.has_library("s"))
+
 
     def test_empty_constructor(self):
         spatial_rdd = PointRDD(
