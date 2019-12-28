@@ -27,3 +27,12 @@ class LineStringRDD(SpatialRDD):
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
+        self._srdd = self.srdd_from_attributes()
+
+    def MinimumBoundingRectangle(self):
+        from geo_pyspark.core.SpatialRDD import RectangleRDD
+        rectangle_rdd = RectangleRDD(
+            spatialRDD=self,
+            sparkContext=self.sparkContext
+        )
+        return rectangle_rdd
