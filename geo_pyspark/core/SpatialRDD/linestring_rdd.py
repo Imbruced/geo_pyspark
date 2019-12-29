@@ -21,7 +21,7 @@ class LineStringRDD(SpatialRDD):
                 self.InputLocation,
                 self.startingOffset,
                 self.endingOffset,
-                self.splitter,
+                self._jvm_splitter,
                 self.carryInputData
             )
         else:
