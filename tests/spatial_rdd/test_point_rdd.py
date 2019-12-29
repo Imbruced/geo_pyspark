@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
@@ -8,6 +10,7 @@ from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.utils import ImportedJvmLib
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 from geo_pyspark.register.java_libs import GeoSparkLib
+from tests.utils import tests_path
 
 upload_jars()
 
@@ -22,8 +25,8 @@ GeoSparkRegistrator.\
 
 sc = spark.sparkContext
 
-inputLocation = "resources/arealm-small.csv"
-queryWindowSet = "zcta510-small.csv"
+inputLocation = os.path.join(tests_path, "resources/arealm-small.csv")
+queryWindowSet = os.path.join("zcta510-small.csv")
 offset = 1
 splitter = "csv"
 gridType = "rtree"

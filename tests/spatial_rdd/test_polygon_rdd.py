@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
@@ -6,6 +8,7 @@ from geo_pyspark.core.SpatialRDD import PolygonRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.utils import tests_path
 
 upload_jars()
 
@@ -19,18 +22,18 @@ GeoSparkRegistrator.\
 
 sc = spark.sparkContext
 
-inputLocation = "resources/primaryroads-polygon.csv"
-queryWindowSet = "resources/zcta510-small.csv"
+inputLocation = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
 offset = 0
 splitter = "csv"
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 5
 distance = 0.01
-queryPolygonSet = "resources/primaryroads-polygon.csv"
-inputLocationGeojson = "resources/testPolygon.json"
-inputLocationWkt = "resources/county_small.tsv"
-inputLocationWkb = "resources/county_small_wkb.tsv"
+queryPolygonSet = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+inputLocationGeojson = os.path.join(tests_path, "resources/testPolygon.json")
+inputLocationWkt = os.path.join(tests_path, "resources/county_small.tsv")
+inputLocationWkb = os.path.join(tests_path, "resources/county_small_wkb.tsv")
 inputCount = 3000
 inputBoundary = Envelope(minx=-158.104182, maxx=-66.03575, miny=17.986328, maxy=48.645133)
 containsMatchCount = 6941
