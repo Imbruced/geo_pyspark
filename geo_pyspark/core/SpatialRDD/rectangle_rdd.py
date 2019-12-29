@@ -27,7 +27,7 @@ class RectangleRDD(SpatialRDD):
                     self._jsc,
                     self.InputLocation,
                     self.Offset,
-                    self.splitter,
+                    self._jvm_splitter,
                     self.carryInputData,
                     self.partitions
             )
