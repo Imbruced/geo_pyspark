@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
@@ -6,6 +8,7 @@ from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.enums import IndexType, GridType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.utils import tests_path
 
 upload_jars()
 
@@ -20,15 +23,15 @@ GeoSparkRegistrator.\
 sc = spark.sparkContext
 
 
-inputLocation = "resources/zcta510-small.csv"
-queryWindowSet = "resources/zcta510-small.csv"
+inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
+queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
 offset = 0
 splitter = "csv"
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 11
 distance = 0.001
-queryPolygonSet = "resources/primaryroads-polygon.csv"
+queryPolygonSet = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 inputCount = 3000
 inputBoundary = Envelope(minx=-171.090042, maxx=145.830505, miny=-14.373765, maxy=49.00127)
 matchCount = 17599
