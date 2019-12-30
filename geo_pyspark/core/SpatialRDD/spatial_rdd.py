@@ -27,7 +27,7 @@ class SpatialRDD:
 
     def analyze(self) -> bool:
         """
-
+        Analyze SpatialRDD
         :return: bool,
         """
         return self._srdd.analyze()
@@ -52,7 +52,7 @@ class SpatialRDD:
         """
         return get_field(self._srdd, "approximateTotalCount")
 
-    def boundary(self):
+    def boundary(self) -> Envelope:
         """
 
         :return:
@@ -63,7 +63,7 @@ class SpatialRDD:
         return envelope
 
     @property
-    def boundaryEnvelope(self):
+    def boundaryEnvelope(self) -> Envelope:
         """
 
         :return:
@@ -71,7 +71,7 @@ class SpatialRDD:
         java_boundary_envelope = get_field(self._srdd, "boundaryEnvelope")
         return Envelope.from_jvm_instance(java_boundary_envelope)
 
-    def buildIndex(self, indexType: str, buildIndexOnSpatialPartitionedRDD: bool):
+    def buildIndex(self, indexType: str, buildIndexOnSpatialPartitionedRDD: bool) -> bool:
         """
 
         :param indexType:
@@ -83,14 +83,14 @@ class SpatialRDD:
             buildIndexOnSpatialPartitionedRDD
         )
 
-    def countWithoutDuplicates(self):
+    def countWithoutDuplicates(self) -> int:
         """
 
         :return:
         """
         return self._srdd.countWithoutDuplicates()
 
-    def countWithoutDuplicatesSPRDD(self):
+    def countWithoutDuplicatesSPRDD(self) -> int:
         """
 
         :return:
@@ -98,7 +98,7 @@ class SpatialRDD:
         return self._srdd.countWithoutDuplicatesSPRDD()
 
     @property
-    def fieldNames(self):
+    def fieldNames(self) -> List[str]:
         """
 
         :return:
@@ -142,21 +142,24 @@ class SpatialRDD:
     def getSourceEpsgCode(self) -> str:
         """
         Function which returns source EPSG code when it is assigned. If not an empty String is returned.
-        :return:
+        :return: str, source epsg code.
         """
         return self._srdd.getSourceEpsgCode()
 
     def getTargetEpsgCode(self) -> str:
         """
         Function which returns target EPSG code when it is assigned. If not an empty String is returned.
-        :return:
+        :return: str, target epsg code.
         """
         return self._srdd.getTargetEpgsgCode()
 
     @property
     def grids(self) -> List[Envelope]:
         """
+        Returns grids for SpatialRDD, it is a list of Envelopes.
 
+        >> spatial_rdd.grids
+        >> [Envelope(minx=10.0, maxx=12.0, miny=10.0, maxy=12.0)]
         :return:
         """
         jvm_grids = get_field(self._srdd, "grids")
