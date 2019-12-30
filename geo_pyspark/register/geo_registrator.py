@@ -28,7 +28,7 @@ class GeoSparkRegistrator:
 
     @classmethod
     def register(cls, spark: SparkSession):
-        spark._jvm.GeoSparkWrapper.registerAll()
+        return spark._jvm.GeoSparkSQLRegistrator.registerAll(spark._jsparkSession)
 
 
 class PackageImporter:
