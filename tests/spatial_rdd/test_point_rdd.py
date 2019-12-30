@@ -69,11 +69,6 @@ class TestPointRDD:
         assert spatial_rdd.rawSpatialRDD.take(9)[4].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
         assert spatial_rdd.rawSpatialRDD.take(9)[8].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
 
-        print(ImportedJvmLib._imported_libs)
-        print(ImportedJvmLib.has_library(GeoSparkLib.Adapter))
-        print(ImportedJvmLib.has_library("s"))
-
-
     def test_empty_constructor(self):
         spatial_rdd = PointRDD(
             sparkContext=sc,
