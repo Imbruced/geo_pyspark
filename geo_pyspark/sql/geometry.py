@@ -10,6 +10,7 @@ from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 from geo_pyspark.utils.decorators import classproperty
 from geo_pyspark.utils.parsers import MultiPointParser, PolygonParser, PolyLineParser, PointParser, UndefinedParser, \
     MultiLineStringParser, LineStringParser, MultiPolygonParser
+from geo_pyspark.utils.prep import assign_all
 
 
 @attr.s
@@ -17,6 +18,7 @@ class GeometryFactory:
 
     @classmethod
     def geometry_from_bytes(cls, bin_parser: BinaryParser) -> BaseGeometry:
+        assign_all()
         g_type = bin_parser.read_byte()
         gm_type = bin_parser.read_byte()
         if GeomEnum.has_value(gm_type):
