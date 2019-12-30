@@ -15,10 +15,14 @@ object GeoSerializerData {
   def serializeToPython(spatialRDD: JavaRDD[Geometry]): JavaRDD[Array[Byte]] = {
 
     spatialRDD.rdd.map[Array[Byte]](geom =>{
+      val typeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+
+      typeBuffer.putInt(0)
+
       val sizeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
       sizeBuffer.putInt(0)
 
-      serializeGeomToPython(geom) ++ sizeBuffer.array()
+      typeBuffer.array() ++ serializeGeomToPython(geom) ++ sizeBuffer.array()
     }
 
 
@@ -45,9 +49,12 @@ object GeoSerializerData {
         val rightGeometry = pairRDD._2
         val leftGeometry = pairRDD._1
         val sizeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+        val typeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+
+        typeBuffer.putInt(1)
         sizeBuffer.putInt(rightGeometry.toArray.length)
 
-        serializeGeomToPython(leftGeometry) ++
+        typeBuffer.array() ++ serializeGeomToPython(leftGeometry) ++
           sizeBuffer.array() ++
           rightGeometry.toArray().flatMap(geometry => serializeGeomToPython(geometry.asInstanceOf[Geometry]))
       }
@@ -59,8 +66,11 @@ object GeoSerializerData {
       val leftGeometry = pairRDD._1
       val rightGeometry = pairRDD._2
       val sizeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+      val typeBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+
+      typeBuffer.putInt(2)
       sizeBuffer.putInt(1)
-      serializeGeomToPython(leftGeometry) ++ sizeBuffer.array() ++ serializeGeomToPython(rightGeometry)
+      typeBuffer.array() ++ serializeGeomToPython(leftGeometry) ++ sizeBuffer.array() ++ serializeGeomToPython(rightGeometry)
     }
     ).toJavaRDD()
   }
