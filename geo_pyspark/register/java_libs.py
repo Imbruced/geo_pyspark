@@ -20,3 +20,4 @@ class GeoSparkLib(Enum):
     FileDataSplitter = "org.datasyslab.geospark.enums.FileDataSplitter"
     GeoJsonReader = "org.datasyslab.geospark.formatMapper.GeoJsonReader"
     ShapeFileReader = "org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader"
+    GeoSparkSQLRegistrator = "org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator"
