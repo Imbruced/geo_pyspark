@@ -1,7 +1,6 @@
 import attr
 from shapely.geometry.base import BaseGeometry
 
-from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.abstract_parser import AbstractSpatialRDDParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 
@@ -12,6 +11,8 @@ class SpatialPairRDDParserNonUserData(AbstractSpatialRDDParser):
 
     @classmethod
     def deserialize(cls, bin_parser: BinaryParser):
+        from geo_pyspark.sql.geometry import GeometryFactory
+
         user_data_length = bin_parser.read_int()
         left_geom = GeometryFactory.geometry_from_bytes(bin_parser)
         if user_data_length > 0:
