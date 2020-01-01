@@ -1,19 +1,52 @@
-import attr
+from pyspark import SparkContext
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD, RectangleRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, MultipleMeta
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 
 
-@attr.s
-class CircleRDD(SpatialRDD):
-    spatialRDD = attr.ib(default=None)
-    radius = attr.ib(type=float, default=None)
-    sparkContext = attr.ib(default=None)
+class CircleRDD(SpatialRDD, metaclass=MultipleMeta):
 
-    def __attrs_post_init__(self):
-        super().__attrs_post_init__()
+    def __init__(self, spatialRDD: SpatialRDD, Radius: float):
+        """
 
-        if self.spatialRDD is not None:
-            self.sparkContext = self.spatialRDD.sparkContext
-            Spatial = SpatialRDDFactory(self.sparkContext).create_circle_rdd()
-            self._srdd = Spatial(self.spatialRDD._srdd, self.radius)
+        :param spatialRDD:
+        :param Radius:
+        """
+        super().__init__(spatialRDD._sc)
+        circle_rdd = self._create_jvm_circle_rdd(self._sc)
+        self._srdd = circle_rdd(
+            spatialRDD._srdd.rawSpatialRDD(),
+            Radius
+        )
+
+    def getCenterPointAsSpatialRDD(self) -> PointRDD:
+        srdd = self._srdd.getCenterPointAsSpatialRDD()
+        point_rdd = PointRDD()
+        point_rdd.set_srdd(srdd)
+        return point_rdd
+
+    def getCenterPolygonAsSpatialRDD(self):
+        srdd = self._srdd.getCenterPolygonAsSpatialRDD()
+        polygon_rdd = PolygonRDD()
+        polygon_rdd.set_srdd(srdd)
+        return polygon_rdd
+
+    def getCenterLineStringRDDAsSpatialRDD(self):
+        srdd = self._srdd.getCenterPolygonAsSpatialRDD()
+        linestring_rdd = LineStringRDD()
+        linestring_rdd.set_srdd(srdd)
+        return linestring_rdd
+
+    def getCenterRectangleRDDAsSpatialRDD(self):
+        srdd = self._srdd.getCenterLineStringRDDAsSpatialRDD()
+        rectangle_rdd = RectangleRDD()
+        rectangle_rdd.set_srdd(srdd)
+        return rectangle_rdd
+
+    def _create_jvm_circle_rdd(self, sc: SparkContext):
+        spatial_factory = SpatialRDDFactory(sc)
+        return spatial_factory.create_circle_rdd()
+
+    def MinimumBoundingRectangle(self):
+        raise NotImplementedError("CircleRDD has not MinimumBoundingRectangle method.")
