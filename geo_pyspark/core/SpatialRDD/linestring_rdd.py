@@ -1,48 +1,364 @@
-from typing import Optional
+from pyspark import SparkContext, StorageLevel
 
-import attr
-from pyspark import SparkContext
-
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, MultipleMeta
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
+from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm
-from geo_pyspark.utils.types import path, crs
 
 
-@attr.s
-class LineStringRDD(SpatialRDD):
-    sparkContext = attr.ib(type=Optional[SparkContext], default=None)
-    InputLocation = attr.ib(type=Optional[path], default=None)
-    splitter = attr.ib(type=Optional[str], default=None)
-    carryInputData = attr.ib(type=Optional[bool], default=None)
-    partitions = attr.ib(type=Optional[int], default=None)
-    newLevel = attr.ib(type=Optional[str], default=None)
-    sourceEpsgCRSCode = attr.ib(type=crs, default=None)
-    targetEpsgCode = attr.ib(type=Optional[crs], default=None)
-    spatialRDD = attr.ib(type=Optional['SpatialRDD'], default=None)
-    startingOffset = attr.ib(default=None, type=Optional[int])
-    endingOffset = attr.ib(default=None, type=Optional[int])
+class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
 
-    def __attrs_post_init__(self):
-        if self.spatialRDD is not None:
-            self._srdd = self.spatialRDD._srdd
-        if self.splitter is not None and self.sparkContext is not None:
-            self._jvm_splitter = FileSplitterJvm(self.sparkContext._jvm, self.splitter).jvm_instance
+    def __init__(self):
+        self._srdd = None
 
-        super().__attrs_post_init__()
-        if self.sparkContext is not None:
-            LineStringRDD = SpatialRDDFactory(self.sparkContext).create_linestring_rdd()
+    def __init__(self, spatialRDD: SpatialRDD):
+        """
 
-            self._srdd = LineStringRDD(
-                self._jsc,
-                self.InputLocation,
-                self.startingOffset,
-                self.endingOffset,
-                self._jvm_splitter,
-                self.carryInputData
-            )
-        else:
-            self._srdd = None
+        :param spatialRDD:
+        """
+        super().__init__()
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD())
+
+    def __init__(self, spatialRDD: SpatialRDD, sourceEpsgCode: str, targetEpsgCode: str):
+        """
+
+        :param spatialRDD:
+        :param sourceEpsgCode:
+        :param targetEpsgCode:
+        """
+        super().__init__(spatialRDD._sc)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD(), sourceEpsgCode, targetEpsgCode)
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
+                 splitter: FileDataSplitter,  carryInputData: bool, partitions: int):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param startOffset:
+        :param endOffset:
+        :param splitter:
+        :param carryInputData:
+        :param partitions:
+        """
+
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            startOffset,
+            endOffset,
+            jvm_splitter,
+            carryInputData,
+            partitions
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
+                 splitter: FileDataSplitter, carryInputData: bool):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param startOffset:
+        :param endOffset:
+        :param splitter:
+        :param carryInputData:
+        """
+
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            startOffset,
+            endOffset,
+            jvm_splitter,
+            carryInputData,
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
+                 partitions: int):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param splitter:
+        :param carryInputData:
+        :param partitions:
+        """
+
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            jvm_splitter,
+            carryInputData,
+            partitions
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param splitter:
+        :param carryInputData:
+        """
+
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            jvm_splitter,
+            carryInputData
+        )
+
+    def __init__(self, spatialRDD: SpatialRDD, newLevel: StorageLevel):
+        """
+
+        :param spatialRDD:
+        :param newLevel:
+        """
+        super().__init__()
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD(), newLevel)
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
+                 splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel):
+
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param startOffset:
+        :param endOffset:
+        :param splitter:
+        :param carryInputData:
+        :param partitions:
+        :param newLevel:
+        """
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            startOffset,
+            endOffset,
+            jvm_splitter,
+            carryInputData,
+            partitions,
+            newLevel
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
+                 splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param startOffset:
+        :param endOffset:
+        :param splitter:
+        :param carryInputData:
+        :param newLevel:
+        """
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            startOffset,
+            endOffset,
+            jvm_splitter,
+            carryInputData,
+            newLevel
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
+                 carryInputData: bool, partitions: int, newLevel: StorageLevel):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param splitter:
+        :param carryInputData:
+        :param partitions:
+        :param newLevel:
+        """
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            jvm_splitter,
+            carryInputData,
+            partitions,
+            jvm_splitter,
+            newLevel
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
+                newLevel: StorageLevel):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param splitter:
+        :param carryInputData:
+        :param newLevel:
+        """
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            jvm_splitter,
+            carryInputData,
+            newLevel
+        )
+
+    def __init__(self, spatialRDD: SpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+        """
+
+        :param spatialRDD:
+        :param newLevel:
+        :param sourceEpsgCRSCode:
+        :param targetEpsgCode:
+        """
+        super().__init__()
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD(), newLevel, sourceEpsgCRSCode, targetEpsgCode)
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
+                 splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel,
+                 sourceEpsgCRSCode: str, targetEpsgCode: str):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param startOffset:
+        :param endOffset:
+        :param splitter:
+        :param carryInputData:
+        :param partitions:
+        :param newLevel:
+        :param sourceEpsgCRSCode:
+        :param targetEpsgCode:
+        """
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            startOffset,
+            endOffset,
+            jvm_splitter,
+            carryInputData,
+            partitions,
+            sourceEpsgCRSCode,
+            targetEpsgCode
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
+                 splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel, sourceEpsgCRSCode: str,
+                 targetEpsgCode: str):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param startOffset:
+        :param endOffset:
+        :param splitter:
+        :param carryInputData:
+        :param newLevel:
+        :param sourceEpsgCRSCode:
+        :param targetEpsgCode:
+        """
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            startOffset,
+            endOffset,
+            jvm_splitter,
+            carryInputData,
+            newLevel,
+            sourceEpsgCRSCode,
+            targetEpsgCode
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
+                 partitions: int, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param splitter:
+        :param carryInputData:
+        :param partitions:
+        :param newLevel:
+        :param sourceEpsgCRSCode:
+        :param targetEpsgCode:
+        """
+
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            jvm_splitter,
+            carryInputData,
+            partitions,
+            newLevel,
+            sourceEpsgCRSCode,
+            targetEpsgCode
+        )
+
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
+                 newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+        """
+
+        :param sparkContext:
+        :param InputLocation:
+        :param splitter:
+        :param carryInputData:
+        :param newLevel:
+        :param sourceEpsgCRSCode:
+        :param targetEpsgCode:
+        """
+        super().__init__(sparkContext)
+        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        self._srdd = jvm_point_rdd(
+            self._jsc,
+            InputLocation,
+            jvm_splitter,
+            carryInputData,
+            newLevel,
+            sourceEpsgCRSCode,
+            targetEpsgCode
+        )
+
+    def _create_jvm_linestring_rdd(self, sc: SparkContext):
+        spatial_factory = SpatialRDDFactory(sc)
+        return spatial_factory.create_linestring_rdd()
 
     def MinimumBoundingRectangle(self):
         from geo_pyspark.core.SpatialRDD import RectangleRDD
