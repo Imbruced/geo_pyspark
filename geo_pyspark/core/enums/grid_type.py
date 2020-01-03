@@ -1,45 +1,40 @@
+from enum import Enum
+
 import attr
-from pyspark import SparkContext
 
-from geo_pyspark.utils.decorators import classproperty
+from geo_pyspark.core.jvm.abstract import JvmObject
+from geo_pyspark.core.utils import require
+from geo_pyspark.register.java_libs import GeoSparkLib
 
 
-class GridType:
+class GridType(Enum):
 
-    @classproperty
-    def EQUALGRID(self):
-        return "EQUALGRID"
+    EQUALGRID = "EQUALGRID"
+    HILBERT = "HILBERT"
+    RTREE = "RTREE"
+    VORONOI = "VORONOI"
+    QUADTREE = "QUADTREE"
+    KDBTREE = "KDBTREE"
 
-    @classproperty
-    def HILBERT(self):
-        return "HILBERT"
-
-    @classproperty
-    def RTREE(self):
-        return "RTREE"
-
-    @classproperty
-    def VORONOI(self):
-        return "VORONOI"
-
-    @classproperty
-    def QUADTREE(self):
-        return "QUADTREE"
-
-    @classproperty
-    def KDBTREE(self):
-        return "KDBTREE"
+    @classmethod
+    def from_str(cls, grid: str) -> 'GridType':
+        try:
+            grid = getattr(cls, grid)
+        except AttributeError:
+            raise AttributeError(f"{cls.__class__.__name__} has no {grid} attribute")
+        return grid
 
 
 @attr.s
-class GridTypeJvm:
+class GridTypeJvm(JvmObject):
 
-    jvm = attr.ib()
+    grid = attr.ib(type=GridType)
 
-    def get_grid_type(self, grid_type: str):
-        return self.jvm.org.\
-            datasyslab.\
-            geospark.\
-            enums.\
-            GridType.\
-            getGridType(grid_type)
+    def _create_jvm_instance(self):
+        print(self.grid.value)
+        return self.jvm_grid(self.grid.value) if self.grid.value is not None else None
+
+    @property
+    @require([GeoSparkLib.GridType])
+    def jvm_grid(self):
+        return self.jvm.GridType.getGridType
