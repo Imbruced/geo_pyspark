@@ -5,7 +5,7 @@ from pyspark import StorageLevel, RDD
 from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.enums import IndexType, GridType
+from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.utils import ImportedJvmLib
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
@@ -31,7 +31,7 @@ input_file_location = os.path.join(tests_path, "resources/arealm-small.csv")
 crs_test_point = os.path.join(tests_path, "resources/crs-test-point.csv")
 
 offset = 1
-splitter = "csv"
+splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 11
@@ -76,7 +76,7 @@ class TestSpatialRDD:
 
     def test_approximate_total_count(self):
         spatial_rdd = create_spatial_rdd()
-        assert spatial_rdd.approximateTotalCount == 100
+        assert spatial_rdd.approximateTotalCount == 3000
 
     def test_boundary(self):
         spatial_rdd = create_spatial_rdd()
@@ -149,10 +149,7 @@ class TestSpatialRDD:
         pass
 
     def test_indexed_rdd(self):
-        spatial_rdd = create_spatial_rdd()
-        srdd = spatial_rdd._srdd.indexedRDD
-        rdd = RDD(srdd, sc, GeoSparkPickler())
-        print(rdd.collect())
+        pass
 
     def test_indexed_raw_rdd(self):
         pass

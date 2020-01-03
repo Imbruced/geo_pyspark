@@ -31,59 +31,66 @@ class TestGeoJsonReader:
 
     def test_read_to_geometry_rdd(self):
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
-            inputPath=geo_json_geom_with_feature_property
+            sc,
+            geo_json_geom_with_feature_property
         )
 
         assert geo_json_rdd.rawSpatialRDD.count() == 1001
 
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
-            inputPath=geo_json_geom_without_feature_property
+            sc,
+            geo_json_geom_without_feature_property
         )
 
         assert geo_json_rdd.rawSpatialRDD.count() == 10
 
     def test_read_to_valid_geometry_rdd(self):
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
-            inputPath=geo_json_geom_with_feature_property,
-            allowInvalidGeometries=True,
-            skipSyntaticallyInvalidGeometries=False
+            sc,
+            geo_json_geom_with_feature_property,
+            True,
+            False
         )
 
         assert geo_json_rdd.rawSpatialRDD.count() == 1001
 
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
-            inputPath=geo_json_geom_without_feature_property,
-            allowInvalidGeometries=True,
-            skipSyntaticallyInvalidGeometries=False
+            sc,
+            geo_json_geom_without_feature_property,
+            True,
+            False
         )
 
         assert geo_json_rdd.rawSpatialRDD.count() == 10
 
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
-            inputPath=geo_json_with_invalid_geometries,
-            allowInvalidGeometries=False,
-            skipSyntaticallyInvalidGeometries=False
+            sc,
+            geo_json_with_invalid_geometries,
+            False,
+            False
         )
 
         assert geo_json_rdd.rawSpatialRDD.count() == 2
 
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
-            inputPath=geo_json_with_invalid_geometries
+            sc,
+            geo_json_with_invalid_geometries
         )
         assert geo_json_rdd.rawSpatialRDD.count() == 3
 
     def test_read_to_include_id_rdd(self):
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
+            sc,
+            geo_json_contains_id,
+            True,
+            False
+        )
+
+        geo_json_rdd = GeoJsonReader.readToGeometryRDD(
+            sc=sc,
             inputPath=geo_json_contains_id,
             allowInvalidGeometries=True,
-            skipSyntaticallyInvalidGeometries=False
+            skipSyntacticallyInvalidGeometries=False
         )
 
         assert geo_json_rdd.rawSpatialRDD.count() == 1
@@ -91,9 +98,10 @@ class TestGeoJsonReader:
 
     def test_read_to_geometry_rdd_invalid_syntax(self):
         geojson_rdd = GeoJsonReader.readToGeometryRDD(
-            sparkContext=sc,
-            inputPath=geo_json_with_invalid_geom_with_feature_property,
-            allowInvalidGeometries=False,
-            skipSyntaticallyInvalidGeometries=True
+            sc,
+            geo_json_with_invalid_geom_with_feature_property,
+            False,
+            True
         )
+
         assert geojson_rdd.rawSpatialRDD.count() == 1

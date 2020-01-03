@@ -5,7 +5,7 @@ from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import LineStringRDD
-from geo_pyspark.core.enums import IndexType, GridType
+from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
 from tests.utils import tests_path
@@ -25,7 +25,7 @@ sc = spark.sparkContext
 inputLocation = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
 offset = 0
-splitter = "csv"
+splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 5
@@ -68,8 +68,7 @@ class TestLineStringRDD:
         spatial_rdd.spatialPartitioning(gridType)
         spatial_rdd.buildIndex(IndexType.RTREE, True)
         spatial_rdd_copy = LineStringRDD()
-        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
-        spatial_rdd_copy.indexedRawRDD = spatial_rdd.indexedRawRDD
+        spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
     def test_hilbert_curve_spatial_partitioning(self):

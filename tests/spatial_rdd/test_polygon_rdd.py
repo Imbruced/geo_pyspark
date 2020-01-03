@@ -25,7 +25,7 @@ sc = spark.sparkContext
 inputLocation = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
 offset = 0
-splitter = "csv"
+splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 5
@@ -153,7 +153,7 @@ class TestPolygonRDD:
         spatial_rdd = PolygonRDD(
             sparkContext=sc,
             InputLocation=inputLocation,
-            splitter=splitter,
+            splitter=FileDataSplitter.CSV,
             carryInputData=True,
             partitions=10,
             newLevel=StorageLevel.MEMORY_ONLY
@@ -166,9 +166,9 @@ class TestPolygonRDD:
 
     def test_build_index_without_set_grid(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
-            InputLocation=inputLocation,
-            splitter=splitter,
+            sc,
+            inputLocation,
+            FileDataSplitter.CSV,
             carryInputData=True,
             partitions=numPartitions,
             newLevel=StorageLevel.MEMORY_ONLY
@@ -188,10 +188,9 @@ class TestPolygonRDD:
         polygon_rdd = PolygonRDD(
             sparkContext=sc,
             InputLocation=inputLocation,
-            splitter=splitter,
+            splitter=FileDataSplitter.CSV,
             carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=numPartitions
         )
 
         rectangle_rdd = polygon_rdd.MinimumBoundingRectangle()

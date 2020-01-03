@@ -5,7 +5,7 @@ from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
-from geo_pyspark.core.enums import IndexType, GridType
+from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
 from tests.utils import tests_path
@@ -26,7 +26,7 @@ sc = spark.sparkContext
 inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
 offset = 0
-splitter = "csv"
+splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 11
@@ -49,6 +49,21 @@ class TestRectangleRDD:
             carryInputData=True,
             partitions=numPartitions,
             newLevel=StorageLevel.MEMORY_ONLY
+        )
+
+        spatial_rdd.analyze()
+
+        assert inputCount == spatial_rdd.approximateTotalCount
+        assert inputBoundary == spatial_rdd.boundaryEnvelope
+
+        spatial_rdd = RectangleRDD(
+            sc,
+            inputLocation,
+            offset,
+            splitter,
+            True,
+            numPartitions,
+            StorageLevel.MEMORY_ONLY
         )
 
         spatial_rdd.analyze()

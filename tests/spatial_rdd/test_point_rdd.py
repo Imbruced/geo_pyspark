@@ -5,11 +5,9 @@ from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.enums import IndexType, GridType
+from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.core.utils import ImportedJvmLib
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
-from geo_pyspark.register.java_libs import GeoSparkLib
 from tests.utils import tests_path
 
 upload_jars()
@@ -28,7 +26,7 @@ sc = spark.sparkContext
 inputLocation = os.path.join(tests_path, "resources/arealm-small.csv")
 queryWindowSet = os.path.join("zcta510-small.csv")
 offset = 1
-splitter = "csv"
+splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 11
@@ -51,13 +49,12 @@ class TestPointRDD:
 
     def test_constructor(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
-            InputLocation=inputLocation,
-            Offset=offset,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            sc,
+            inputLocation,
+            offset,
+            splitter,
+            True,
+            numPartitions
         )
 
         spatial_rdd.analyze()
@@ -81,7 +78,7 @@ class TestPointRDD:
         )
         spatial_rdd.buildIndex(IndexType.RTREE, False)
         spatial_rdd_copy = PointRDD()
-        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
+        spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
     def test_equal_partitioning(self):
