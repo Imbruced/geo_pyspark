@@ -1,10 +1,10 @@
-from typing import Optional, List, Iterable, Callable, TypeVar
+from typing import List, Iterable, Callable, TypeVar
 
 import attr
-from pyspark import SparkContext
+from pyspark import StorageLevel
 
+from geo_pyspark.core.jvm.abstract import JvmObject
 from geo_pyspark.register.java_libs import GeoSparkLib
-from geo_pyspark.utils.decorators import classproperty
 
 
 T = TypeVar('T')
@@ -44,8 +44,20 @@ def require(library_names: List[GeoSparkLib]):
             if first_not_fulfill_value == -1:
                 return func(*args, **kwargs)
             else:
-                raise ModuleNotFoundError(f"Did not found {has_all_libs[first_not_fulfill_value]}, make sure that was correctly imported via py4j")
+                raise ModuleNotFoundError(f"Did not found {has_all_libs[first_not_fulfill_value]}, make sure that was correctly imported via py4j"
+                                          f"Did you use GeoSparkRegistrator.registerAll ? ")
         return run_function
     return wrapper
 
 
+@attr.s
+class JvmStorageLevel(JvmObject):
+    storage_level = attr.ib(type=StorageLevel)
+
+    @require([GeoSparkLib.StorageLevel])
+    def _create_jvm_instance(self):
+        return self.jvm.StorageLevel.apply(
+            self.storage_level.useDisk, self.storage_level.useMemory,
+            self.storage_level.useOffHeap, self.storage_level.deserialized,
+            self.storage_level.replication
+        )
