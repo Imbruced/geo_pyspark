@@ -2,14 +2,18 @@ import attr
 from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geo_pyspark.core.jvm.abstract import JvmObject
 from geo_pyspark.core.jvm.geometry.primitive import JvmCoordinate, JvmPoint
+from geo_pyspark.core.utils import require
+from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.binary_parser import BinaryParser
+from geo_pyspark.utils.spatial_rdd_parser import SpatialPairRDDParserNonUserData
 
 
 @attr.s
 class KNNQuery:
 
     @classmethod
+    @require([GeoSparkLib.KNNQuery])
     def SpatialKnnQuery(self, spatialRDD: SpatialRDD, originalQueryPoint: Point, k: int,  useIndex: bool):
         """
 
@@ -20,39 +24,23 @@ class KNNQuery:
         :return: pyspark.RDD
         """
 
-        coordinate = JvmCoordinate(
-            spatialRDD._jvm,
-            originalQueryPoint.x,
-            originalQueryPoint.y
-        )
+        jvm = spatialRDD._jvm
+        sc = spatialRDD._sc
+
+        coordinate = JvmCoordinate(jvm, originalQueryPoint.x, originalQueryPoint.y)
 
         point = JvmPoint(spatialRDD._jvm, coordinate.jvm_instance)
         jvm_point = point.jvm_instance
 
-        jvm_knn = JvmKNNQuery(
-            spatialRDD.sparkContext._jvm,
-            spatialRDD._srdd,
-            jvm_point,
-            k,
-            useIndex)
 
-        res = jvm_knn.SpatialKnnQuery()
+        knn_neighbours = jvm.KNNQuery.SpatialKnnQuery(spatialRDD._srdd, jvm_point, k, useIndex)
 
-        return res
+        srdd = jvm.GeoSerializerData.serializeToPython(knn_neighbours)
 
+        geoms_data = []
+        for arr in srdd:
+            binary_parser = BinaryParser(arr)
+            geom = SpatialPairRDDParserNonUserData.deserialize(binary_parser)
+            geoms_data.append(geom)
 
-@attr.s
-class JvmKNNQuery(JvmObject):
-    spatialRDD = attr.ib()
-    originalQueryPoint = attr.ib()
-    k = attr.ib()
-    useIndex = attr.ib()
-
-    def SpatialKnnQuery(self):
-        knn_neighbours = self.jvm.KNNQuery.SpatialKnnQuery(
-                self.spatialRDD._srdd,
-                self.originalQueryPoint,
-                self.k,
-                self.useIndex
-        )
-        return knn_neighbours
+        return geoms_data

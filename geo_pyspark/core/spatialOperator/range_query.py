@@ -1,18 +1,40 @@
-import attr
+from pyspark import RDD
+
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.utils import require
+from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.meta import MultipleMeta
+from geo_pyspark.utils.serde import GeoSparkPickler
 
 
-@attr.s
-class RangeQuery:
+class RangeQuery(metaclass=MultipleMeta):
 
     @classmethod
-    def SpatialRangeQuery(self, spatialRDD, rangeQueryWindow, considerBoundaryIntersection, usingIndex):
+    @require([GeoSparkLib.RangeQuery])
+    def SpatialRangeQuery(self, spatialRDD: SpatialRDD, rangeQueryWindow: Envelope, considerBoundaryIntersection: bool, usingIndex: bool):
+        """
 
-        res = spatialRDD.sparkContext._jvm.\
+        :param spatialRDD:
+        :param rangeQueryWindow:
+        :param considerBoundaryIntersection:
+        :param usingIndex:
+        :return:
+        """
+
+        jvm = spatialRDD._jvm
+        sc = spatialRDD._sc
+
+        jvm_envelope = rangeQueryWindow.create_java_object(jvm)
+
+        srdd = jvm.\
             RangeQuery.SpatialRangeQuery(
             spatialRDD._srdd,
-            rangeQueryWindow.create_java_object(spatialRDD._jvm),
+            jvm_envelope,
             considerBoundaryIntersection,
             usingIndex
         )
 
-        return res
+        serlialized = jvm.GeoSerializerData.serializeToPython(srdd)
+
+        return RDD(serlialized, sc, GeoSparkPickler())
