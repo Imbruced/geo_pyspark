@@ -21,3 +21,7 @@ class GeoSparkLib(Enum):
     GeoJsonReader = "org.datasyslab.geospark.formatMapper.GeoJsonReader"
     ShapeFileReader = "org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader"
     GeoSparkSQLRegistrator = "org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator"
+    StorageLevel = "org.apache.spark.storage.StorageLevel"
+    GridType = "org.datasyslab.geospark.enums.GridType"
+    IndexType = "org.datasyslab.geospark.enums.IndexType"
+
