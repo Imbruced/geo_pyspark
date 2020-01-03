@@ -1,35 +1,37 @@
 from pyspark import SparkContext, StorageLevel
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, MultipleMeta
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmLineStringRDD, JvmRectangleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm
+from geo_pyspark.core.utils import JvmStorageLevel
+from geo_pyspark.utils.meta import MultipleMeta
 
 
 class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self):
+        super().__init__()
         self._srdd = None
 
-    def __init__(self, spatialRDD: SpatialRDD):
+    def __init__(self, jvmSpatialRDD: JvmLineStringRDD):
         """
 
         :param spatialRDD:
         """
         super().__init__()
-        jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
-        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD())
+        self._srdd = jvmSpatialRDD.srdd
 
-    def __init__(self, spatialRDD: SpatialRDD, sourceEpsgCode: str, targetEpsgCode: str):
+    def __init__(self, jvmSpatialRDD: JvmLineStringRDD, sourceEpsgCode: str, targetEpsgCode: str):
         """
 
         :param spatialRDD:
         :param sourceEpsgCode:
         :param targetEpsgCode:
         """
-        super().__init__(spatialRDD._sc)
+        super().__init__(jvmSpatialRDD.sc)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
-        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD(), sourceEpsgCode, targetEpsgCode)
+        self._srdd = jvm_point_rdd(jvmSpatialRDD.srdd.getRawSpatialRDD(), sourceEpsgCode, targetEpsgCode)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
                  splitter: FileDataSplitter,  carryInputData: bool, partitions: int):
@@ -122,15 +124,16 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             carryInputData
         )
 
-    def __init__(self, spatialRDD: SpatialRDD, newLevel: StorageLevel):
+    def __init__(self, jvmSpatialRDD: JvmLineStringRDD, newLevel: StorageLevel):
         """
 
         :param spatialRDD:
         :param newLevel:
         """
-        super().__init__()
+        super().__init__(jvmSpatialRDD.sc)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
-        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD(), newLevel)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+        self._srdd = jvm_point_rdd(jvmSpatialRDD.srdd.getRawSpatialRDD(), new_level_jvm)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
                  splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel):
@@ -149,6 +152,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
@@ -157,7 +161,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             jvm_splitter,
             carryInputData,
             partitions,
-            newLevel
+            new_level_jvm
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
@@ -175,6 +179,8 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
@@ -182,7 +188,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             endOffset,
             jvm_splitter,
             carryInputData,
-            newLevel
+            new_level_jvm
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
@@ -199,14 +205,14 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
             jvm_splitter,
             carryInputData,
             partitions,
-            jvm_splitter,
-            newLevel
+            new_level_jvm
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
@@ -222,15 +228,17 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
             jvm_splitter,
             carryInputData,
-            newLevel
+            new_level_jvm
         )
 
-    def __init__(self, spatialRDD: SpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+    def __init__(self, jvmSpatialRDD: JvmLineStringRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
         :param spatialRDD:
@@ -240,7 +248,9 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         """
         super().__init__()
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
-        self._srdd = jvm_point_rdd(spatialRDD._srdd.rawSpatialRDD(), newLevel, sourceEpsgCRSCode, targetEpsgCode)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
+        self._srdd = jvm_point_rdd(jvmSpatialRDD.srdd.getRawSpatialRDD(), new_level_jvm, sourceEpsgCRSCode, targetEpsgCode)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
                  splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel,
@@ -261,6 +271,9 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
@@ -269,6 +282,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             jvm_splitter,
             carryInputData,
             partitions,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
@@ -291,6 +305,8 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
@@ -298,7 +314,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             endOffset,
             jvm_splitter,
             carryInputData,
-            newLevel,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
@@ -320,13 +336,15 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
             jvm_splitter,
             carryInputData,
             partitions,
-            newLevel,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
@@ -346,12 +364,14 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_point_rdd = self._create_jvm_linestring_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
         self._srdd = jvm_point_rdd(
             self._jsc,
             InputLocation,
             jvm_splitter,
             carryInputData,
-            newLevel,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
@@ -362,8 +382,12 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def MinimumBoundingRectangle(self):
         from geo_pyspark.core.SpatialRDD import RectangleRDD
-        rectangle_rdd = RectangleRDD(
-            spatialRDD=self,
-            sparkContext=self.sparkContext
+        rectangle_rdd = RectangleRDD()
+        rectangle_rdd.rawJvmSpatialRDD = JvmRectangleRDD(
+            self._srdd.MinimumBoundingRectangle(),
+            self._sc
         )
         return rectangle_rdd
+
+    def getRawJvmSpatialRDD(self) -> JvmLineStringRDD:
+        return JvmLineStringRDD(self._srdd, self._sc)

@@ -1,8 +1,10 @@
 from pyspark import SparkContext, StorageLevel
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, MultipleMeta
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmPolygonRDD, JvmRectangleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
+from geo_pyspark.core.utils import JvmStorageLevel
+from geo_pyspark.utils.meta import MultipleMeta
 
 
 class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
@@ -10,41 +12,43 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self):
         super().__init__()
 
-    def __init__(self, rawSpatialRDD: SpatialRDD):
+    def __init__(self, jvmSpatialRDD: JvmPolygonRDD):
         """
 
         :param rawSpatialRDD:
         """
-        super().__init__(rawSpatialRDD._sc)
-        self._srdd = rawSpatialRDD._srdd
+        super().__init__(jvmSpatialRDD.sc)
+        self._srdd = jvmSpatialRDD.srdd
 
-    def __init__(self, rawSpatialRDD: SpatialRDD, sourceEpsgCode: str, targetEpsgCode: str):
+    def __init__(self, jvmSpatialRDD: JvmPolygonRDD, sourceEpsgCode: str, targetEpsgCode: str):
         """
 
         :param rawSpatialRDD:
         :param sourceEpsgCode: str, the source epsg CRS code
         :param targetEpsgCode: str, the target epsg code
         """
-        super().__init__(rawSpatialRDD._sc)
-        jvm_polygon_rdd = self._create_jvm_polygon_rdd(rawSpatialRDD._sc)
+        super().__init__(jvmSpatialRDD.sc)
+        jvm_polygon_rdd = self._create_jvm_polygon_rdd(jvmSpatialRDD.sc)
 
         self._srdd = jvm_polygon_rdd(
-            rawSpatialRDD._srdd.rawSpatialRDD(),
+            jvmSpatialRDD.srdd.getRawSpatialRDD(),
             sourceEpsgCode,
             targetEpsgCode
         )
 
-    def __init__(self, rawSpatialRDD: SpatialRDD, newLevel: StorageLevel):
+    def __init__(self, jvmSpatialRDD: JvmPolygonRDD, newLevel: StorageLevel):
         """
 
         :param rawSpatialRDD:
         :param newLevel:
         """
-        super().__init__(rawSpatialRDD._sc)
-        jvm_polygon_rdd = self._create_jvm_polygon_rdd(rawSpatialRDD._sc)
+        super().__init__(jvmSpatialRDD.sc)
+        jvm_polygon_rdd = self._create_jvm_polygon_rdd(jvmSpatialRDD.sc)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+
         self._srdd = jvm_polygon_rdd(
-            rawSpatialRDD._srdd.rawSpatialRDD(),
-            newLevel
+            jvmSpatialRDD.srdd.getRawSpatialRDD(),
+            new_level_jvm
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
@@ -156,6 +160,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
@@ -165,7 +170,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
             jvm_splitter.jvm_instance,
             carryInputData,
             partitions,
-            newLevel
+            new_level_jvm
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
@@ -184,6 +189,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
@@ -192,7 +198,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
             endOffset,
             jvm_splitter.jvm_instance,
             carryInputData,
-            newLevel
+            new_level_jvm
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str,
@@ -210,6 +216,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
@@ -217,7 +224,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
             jvm_splitter.jvm_instance,
             carryInputData,
             partitions,
-            newLevel
+            new_level_jvm
         )
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str,
@@ -233,16 +240,17 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
             InputLocation,
             jvm_splitter.jvm_instance,
             carryInputData,
-            newLevel
+            new_level_jvm
         )
 
-    def __init__(self, rawSpatialRDD: SpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+    def __init__(self, jvmSpatialRDD: JvmPolygonRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
         :param rawSpatialRDD:
@@ -251,11 +259,11 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         :param targetEpsgCode: str, the target epsg code
         """
 
-        super().__init__(rawSpatialRDD._sc)
+        super().__init__(jvmSpatialRDD.sc)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
 
         self._srdd = jvm_polygon_rdd(
-            rawSpatialRDD._srdd.rawSpatialRDD(),
+            jvmSpatialRDD.srdd.getRawSpatialRDD(),
             newLevel,
             sourceEpsgCRSCode,
             targetEpsgCode
@@ -280,22 +288,21 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
 
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
-        jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
             InputLocation,
             startOffset,
             endOffset,
-            jvm_splitter.jvm_instance,
+            jvm_splitter,
             carryInputData,
             partitions,
-            newLevel,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
-
-
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
             splitter: FileDataSplitter, carryInputData: bool, newLevel: StorageLevel, sourceEpsgCRSCode: str,
@@ -314,16 +321,17 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         """
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
-        jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
             InputLocation,
             startOffset,
             endOffset,
-            jvm_splitter.jvm_instance,
+            jvm_splitter,
             carryInputData,
-            newLevel,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
@@ -344,6 +352,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
@@ -351,7 +360,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
             jvm_splitter.jvm_instance,
             carryInputData,
             partitions,
-            newLevel,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
@@ -371,22 +380,24 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_polygon_rdd = self._create_jvm_polygon_rdd(self._sc)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
             self._jsc,
             InputLocation,
             jvm_splitter.jvm_instance,
             carryInputData,
-            newLevel,
+            new_level_jvm,
             sourceEpsgCRSCode,
             targetEpsgCode
         )
 
     def MinimumBoundingRectangle(self):
         from geo_pyspark.core.SpatialRDD import RectangleRDD
-        rectangle_rdd = RectangleRDD(
-            spatialRDD=self,
-            sparkContext=self._sc
+        rectangle_rdd = RectangleRDD()
+        rectangle_rdd.rawJvmSpatialRDD = JvmRectangleRDD(
+            self._srdd.MinimumBoundingRectangle(),
+            self._sc
         )
         return rectangle_rdd
 
@@ -397,3 +408,6 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         jvm_polygon_rdd = spatial_factory.create_polygon_rdd()
 
         return jvm_polygon_rdd
+
+    def getRawJvmSpatialRDD(self) -> JvmPolygonRDD:
+        return JvmPolygonRDD(self._srdd)
