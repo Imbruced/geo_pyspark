@@ -9,7 +9,7 @@ class JvmCoordinate(JvmObject):
     y = attr.ib(default=0.0)
 
     def _create_jvm_instance(self):
-        return self.jvm.createCoordinates(self.x, self.y)
+        return self.jvm.CoordinateFactory.createCoordinates(self.x, self.y)
 
 
 @attr.s
