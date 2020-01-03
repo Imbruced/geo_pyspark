@@ -16,18 +16,6 @@ PARSERS = {
 }
 
 
-@attr.s
-class CarryUserData:
-    left = attr.ib(default=False, type=bool)
-    right = attr.ib(default=False, type=bool)
-
-
-@attr.s
-class SpatialRDDType:
-    is_pair = attr.ib(default=False, type=bool)
-    has_hashset = attr.ib(default=False, type=bool)
-
-
 class Serializer(ABC):
 
     @classproperty
@@ -65,3 +53,4 @@ class GeoSparkPickler(PickleSerializer):
 
     def get_parser(self, number: int):
         return PARSERS[number]
+
