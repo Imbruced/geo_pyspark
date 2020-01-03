@@ -1,29 +1,35 @@
+from enum import Enum
+
 import attr
 
-from geo_pyspark.utils.decorators import classproperty
+from geo_pyspark.core.jvm.abstract import JvmObject
+from geo_pyspark.core.utils import require
+from geo_pyspark.register.java_libs import GeoSparkLib
+
+
+class IndexType(Enum):
+
+    QUADTREE = "QUADTREE"
+    RTREE = "RTREE"
+
+    @classmethod
+    def from_string(cls, index: str):
+        try:
+            index_type = getattr(cls, index)
+        except AttributeError:
+            raise AttributeError(f"Can not found {index}")
+        return index_type
 
 
 @attr.s
-class IndexType:
+class IndexTypeJvm(JvmObject):
 
-    @classproperty
-    def QUADTREE(self):
-        return "QUADTREE"
+    index_type = attr.ib(type=IndexType)
 
-    @classproperty
-    def RTREE(self):
-        return "RTREE"
+    def _create_jvm_instance(self):
+        return self.jvm_index(self.index_type.value) if self.index_type.value is not None else None
 
-
-@attr.s
-class IndexTypeJvm:
-
-    jvm = attr.ib()
-
-    def get_index_type(self, indexType: str):
-        return self.jvm.org.\
-            datasyslab.\
-            geospark.\
-            enums.\
-            IndexType.\
-            getIndexType(indexType)
+    @property
+    @require([GeoSparkLib.FileDataSplitter])
+    def jvm_index(self):
+        return self.jvm.IndexType.getIndexType
