@@ -1,29 +1,92 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import attr
 from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
 
-from geo_pyspark.core.enums.grid_type import GridTypeJvm
-from geo_pyspark.core.enums.index_type import IndexTypeJvm
+from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
+from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.utils.serde import GeoSparkPickler
 from geo_pyspark.utils.types import crs
 
 
 @attr.s
+class SpatialPartitioner:
+    name = attr.ib()
+    jvm_partitioner = attr.ib()
+
+    @classmethod
+    def from_java_class_name(cls, jvm_partitioner):
+        jvm_full_name = jvm_partitioner.toString()
+        full_class_name = jvm_full_name.split("@")[0]
+        partitioner = full_class_name.split(".")[-1]
+
+        return cls(partitioner, jvm_partitioner)
+
+
+class SpatialValidator:
+
+    def __call__(self, instance, attribute, value):
+        value_type = instance.java_class_name
+        instance_type = instance.__class__.__name__.replace("Jvm", "")
+        if value_type != instance_type:
+            raise ValueError("Value should be an instance of ")
+
+
+@attr.s
+class JvmSpatialRDD:
+    srdd = attr.ib(validator=[SpatialValidator()])
+    sc = attr.ib(type=SparkContext)
+
+    @property
+    def java_class_name(self) -> Optional[str]:
+        class_name = self.srdd.getClass().toString()
+        try:
+            cls_name = class_name.split(".")[-1]
+        except IndexError:
+            cls_name = None
+        except TypeError:
+            cls_name = None
+
+        return cls_name
+
+
+@attr.s
+class JvmPolygonRDD(JvmSpatialRDD):
+    pass
+
+
+@attr.s
+class JvmPointRDD(JvmSpatialRDD):
+    pass
+
+
+@attr.s
+class JvmLineStringRDD(JvmSpatialRDD):
+    pass
+
+
+@attr.s
+class JvmRectangleRDD(JvmSpatialRDD):
+    pass
+
+
+@attr.s
+class JvmCircleRDD(JvmSpatialRDD):
+    pass
+
+
 class SpatialRDD:
 
-    sparkContext = attr.ib(type=Optional[SparkContext], default=None)
-
-    def __attrs_post_init__(self):
+    def __init__(self, sparkContext: Optional[SparkContext] = None):
+        self._sc = sparkContext
         self._srdd = None
-        if self.sparkContext is not None:
-            self._jsc = self.sparkContext._jsc
-            self._jvm = self.sparkContext._jvm
-        else:
-            self._jsc = None
-            self._jvm = None
+        self._jvm = None
+        self._jsc = None
+        if self._sc is not None:
+            self._jsc = self._sc._jsc
+            self._jvm = self._sc._jvm
 
     def analyze(self) -> bool:
         """
@@ -71,15 +134,21 @@ class SpatialRDD:
         java_boundary_envelope = get_field(self._srdd, "boundaryEnvelope")
         return Envelope.from_jvm_instance(java_boundary_envelope)
 
-    def buildIndex(self, indexType: str, buildIndexOnSpatialPartitionedRDD: bool) -> bool:
+    def buildIndex(self, indexType: Union[str, IndexType], buildIndexOnSpatialPartitionedRDD: bool) -> bool:
         """
 
         :param indexType:
         :param buildIndexOnSpatialPartitionedRDD:
         :return:
         """
+        if type(indexType) == str:
+            index_type = IndexTypeJvm(self._jvm, IndexType.from_string(indexType))
+        elif type(indexType) == IndexType:
+            index_type = IndexTypeJvm(self._jvm, indexType)
+        else:
+            raise TypeError("indexType should be str or IndexType")
         return self._srdd.buildIndex(
-            IndexTypeJvm(self._jvm).get_index_type(indexType),
+            index_type.jvm_instance,
             buildIndexOnSpatialPartitionedRDD
         )
 
@@ -117,12 +186,12 @@ class SpatialRDD:
         raise self.getCRSTransformation()
 
     @property
-    def getPartitioner(self) -> str:
+    def getPartitioner(self) -> SpatialPartitioner:
         """
 
         :return:
         """
-        return self._srdd.getPartitioner()
+        return SpatialPartitioner.from_java_class_name(self._srdd.getPartitioner())
 
     def getRawSpatialRDD(self):
         """
@@ -130,7 +199,7 @@ class SpatialRDD:
         :return:
         """
         serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(self._srdd.getRawSpatialRDD())
-        return RDD(serialized_spatial_rdd, self.sparkContext, GeoSparkPickler())
+        return RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler())
 
     def getSampleNumber(self):
         """
@@ -184,12 +253,15 @@ class SpatialRDD:
         """
         return self._srdd.indexedRawRDD()
 
+    @property
     def partitionTree(self):
+        """TODO add python wrapper for partitionTree based on name"""
         """
 
         :return:
         """
-        raise self._srdd.partitionTree()
+
+        return get_field(self._srdd, "partitionTree")
 
     @property
     def rawSpatialRDD(self):
@@ -202,7 +274,7 @@ class SpatialRDD:
     @rawSpatialRDD.setter
     def rawSpatialRDD(self, spatial_rdd: 'SpatialRDD'):
         self._srdd = spatial_rdd._srdd
-        self.sparkContext = spatial_rdd.sparkContext
+        self._sc = spatial_rdd._sc
         self._jvm = spatial_rdd._jvm
 
     def saveAsGeoJSON(self, path: str):
@@ -234,7 +306,7 @@ class SpatialRDD:
 
         :return:
         """
-        raise self._setRawSpatialRDD()
+        raise self._srdd.setRawSpatialRDD()
 
     def setSampleNumber(self):
         """
@@ -248,23 +320,46 @@ class SpatialRDD:
 
         :return:
         """
-        raise self._spatialPartitionedRDD()
+        raise self._srdd.spatialPartitionedRDD()
 
-    def spatialPartitioning(self, partitioning: str):
+    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner]) -> bool:
         """
 
         :param partitioning:
         :return:
         """
+        print("s")
         if type(partitioning) == str:
-            grid = GridTypeJvm(self._jvm)
-            current_grid_type = grid.get_grid_type(partitioning)
+            grid = GridTypeJvm(self._jvm, GridType.from_str(partitioning)).jvm_instance
+        elif type(partitioning) == GridType:
+            grid = GridTypeJvm(self._jvm, partitioning).jvm_instance
+        elif type(partitioning) == SpatialPartitioner:
+            grid = partitioning.jvm_partitioner
         else:
-            current_grid_type = partitioning
+            raise TypeError("Grid does not have correct type")
         return self._srdd.spatialPartitioning(
-            current_grid_type
+            grid
         )
 
     def set_srdd(self, srdd):
         self._srdd = srdd
 
+    def get_srdd(self):
+        return self._srdd
+
+    def getRawJvmSpatialRDD(self) -> JvmSpatialRDD:
+        raise NotImplementedError("SpatialRDD does not implement getRawJvmSpatialRDD")
+
+    @property
+    def rawJvmSpatialRDD(self) -> JvmSpatialRDD:
+        return self.getRawJvmSpatialRDD()
+
+    @rawJvmSpatialRDD.setter
+    def rawJvmSpatialRDD(self, value: JvmSpatialRDD):
+        if value.java_class_name != self.__class__.__name__:
+            raise TypeError(f"value should be type {self.__class__.__name__} but {value.java_class_name} was found")
+
+        self._sc = value.sc
+        self._jvm = self._sc._jvm
+        self._jsc = self._sc._jsc
+        self._srdd = value.srdd
