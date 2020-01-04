@@ -1,47 +1,99 @@
-from typing import List, Optional
+from typing import List
 
 import attr
+from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession
 
-from geo_pyspark.core.SpatialRDD.abstract import AbstractSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.utils.meta import MultipleMeta
 
 
-@attr.s
-class Adapter:
+class Adapter(metaclass=MultipleMeta):
     """
     Class which allow to convert between Spark DataFrame and SpatialRDD and reverse.
     """
 
     @classmethod
-    def toDf(cls, spatialRDD, spark: SparkSession, field_names: List[str] = None) -> DataFrame:
-        if field_names is None and isinstance(spatialRDD, AbstractSpatialRDD):
-            df = spark._jvm.org.datasyslab.geosparksql.utils.Adapter.toDf(
-                spatialRDD._srdd, spark._jsparkSession
-            )
-        else:
-            df = spark._jvm.org.datasyslab.geosparksql.utils.Adapter.toDf(
-                spatialRDD, spark._jsparkSession
-            )
-        return DataFrame(df, spark._jsparkSession.sqlContext())
+    def toSpatialRdd(cls, dataFrame: DataFrame, geometryFieldName: str) -> SpatialRDD:
+        """
 
-    @classmethod
-    def toRdd(cls, data_frame: DataFrame, geometry_col_id: int = None, geometry_field_name: str = None) -> DataFrame:
+        :param dataFrame:
+        :param geometryFieldName:
+        :return:
+        """
         pass
 
     @classmethod
-    def toSpatialRdd(cls, df: DataFrame, geometry_field_name: Optional[str] = None, geometry_col_id: Optional[int] = None, field_names: List[str] = None) -> AbstractSpatialRDD:
-        if geometry_field_name is not None:
-            spatial_rdd = df._sc._jvm.org.datasyslab.geosparksql.utils.Adapter.toSpatialRdd(
-                df._jdf, geometry_field_name
-            )
-            python_rdd = SpatialRDD(df._sc)
-            python_rdd.set_srdd(spatial_rdd)
-        elif geometry_col_id is not None:
-            spatial_rdd = df._sc._jvm.org.datasyslab.geosparksql.utils.Adapter.toSpatialRdd(
-                df._jdf, geometry_col_id
-            )
-            python_rdd = SpatialRDD(df._sc)
-            python_rdd.set_srdd(spatial_rdd)
+    def toSpatialRdd(cls, dataFrame: DataFrame, geometryColId: int) -> SpatialRDD:
+        """
 
-        return python_rdd
+        :param dataFrame:
+        :param geometryColId:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def toSpatialRdd(cls, dataFrame: DataFrame, geometryColId: int, fieldNames: List[str]) -> SpatialRDD:
+        """
+
+        :param dataFrame:
+        :param geometryColId:
+        :param fieldNames:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def toSpatialRdd(cls, dataFrame: DataFrame, geometryFieldName: str, fieldNames: List[str]) -> SpatialRDD:
+        """
+
+        :param dataFrame:
+        :param geometryFieldName:
+        :param fieldNames:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def toDf(cls, spatialRDD: SpatialRDD, fieldNames: List[str], sparkSession: SparkSession) -> DataFrame:
+        """
+
+        :param spatialRDD:
+        :param fieldNames:
+        :param sparkSession:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def toDf(cls, spatialRDD: SpatialRDD, sparkSession: SparkSession) -> DataFrame:
+        """
+
+        :param spatialRDD:
+        :param sparkSession:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def toDf(cls, spatialPairRDD: RDD, sparkSession: SparkSession):
+        """
+
+        :param spatialPairRDD:
+        :param sparkSession:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def toDf(cls, spatialPairRDD: RDD, leftFieldnames: List[str], rightFieldNames: List[str], sparkSession: SparkSession):
+        """
+
+        :param spatialPairRDD:
+        :param leftFieldnames:
+        :param rightFieldNames:
+        :param sparkSession:
+        :return:
+        """
+        pass
