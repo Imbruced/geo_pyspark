@@ -21,7 +21,16 @@ class Adapter(metaclass=MultipleMeta):
         :param geometryFieldName:
         :return:
         """
-        pass
+        sc = dataFrame._sc
+        jvm = sc._jvm
+
+        srdd = jvm.Adapter.toSpatialRdd(dataFrame._jdf, geometryFieldName)
+
+        spatial_rdd = SpatialRDD(sc)
+        spatial_rdd.set_srdd(srdd)
+
+        return spatial_rdd
+
 
     @classmethod
     def toSpatialRdd(cls, dataFrame: DataFrame, geometryColId: int) -> SpatialRDD:
@@ -31,7 +40,16 @@ class Adapter(metaclass=MultipleMeta):
         :param geometryColId:
         :return:
         """
-        pass
+
+        sc = dataFrame._sc
+        jvm = sc._jvm
+
+        srdd = jvm.Adapter.toSpatialRdd(dataFrame._jdf, geometryColId)
+
+        spatial_rdd = SpatialRDD(sc)
+        spatial_rdd.set_srdd(srdd)
+
+        return spatial_rdd
 
     @classmethod
     def toSpatialRdd(cls, dataFrame: DataFrame, geometryColId: int, fieldNames: List[str]) -> SpatialRDD:
@@ -42,7 +60,15 @@ class Adapter(metaclass=MultipleMeta):
         :param fieldNames:
         :return:
         """
-        pass
+        sc = dataFrame._sc
+        jvm = sc._jvm
+
+        srdd = jvm.Adapter.toSpatialRdd(dataFrame._jdf, geometryColId, fieldNames)
+
+        spatial_rdd = SpatialRDD(sc)
+        spatial_rdd.set_srdd(srdd)
+
+        return spatial_rdd
 
     @classmethod
     def toSpatialRdd(cls, dataFrame: DataFrame, geometryFieldName: str, fieldNames: List[str]) -> SpatialRDD:
@@ -53,7 +79,15 @@ class Adapter(metaclass=MultipleMeta):
         :param fieldNames:
         :return:
         """
-        pass
+        sc = dataFrame._sc
+        jvm = sc._jvm
+
+        srdd = jvm.Adapter.toSpatialRdd(dataFrame._jdf, geometryFieldName, fieldNames)
+
+        spatial_rdd = SpatialRDD(sc)
+        spatial_rdd.set_srdd(srdd)
+
+        return spatial_rdd
 
     @classmethod
     def toDf(cls, spatialRDD: SpatialRDD, fieldNames: List[str], sparkSession: SparkSession) -> DataFrame:
@@ -64,7 +98,14 @@ class Adapter(metaclass=MultipleMeta):
         :param sparkSession:
         :return:
         """
-        pass
+        sc = spatialRDD._sc
+        jvm = sc._jvm
+
+        jdf = jvm.Adapter.toDf(spatialRDD._srdd, fieldNames, sparkSession._jsparkSession)
+
+        df = DataFrame(jdf, sparkSession._wrapped)
+
+        return df
 
     @classmethod
     def toDf(cls, spatialRDD: SpatialRDD, sparkSession: SparkSession) -> DataFrame:
@@ -74,7 +115,14 @@ class Adapter(metaclass=MultipleMeta):
         :param sparkSession:
         :return:
         """
-        pass
+        sc = spatialRDD._sc
+        jvm = sc._jvm
+
+        jdf = jvm.Adapter.toDf(spatialRDD._srdd, sparkSession._jsparkSession)
+
+        df = DataFrame(jdf, sparkSession._wrapped)
+
+        return df
 
     @classmethod
     def toDf(cls, spatialPairRDD: RDD, sparkSession: SparkSession):
@@ -84,7 +132,14 @@ class Adapter(metaclass=MultipleMeta):
         :param sparkSession:
         :return:
         """
-        pass
+        sc = spatialPairRDD.ctx
+        jvm = sc._jvm
+
+        jdf = jvm.Adapter.toDf(spatialPairRDD._jrdd, sparkSession._jsparkSession)
+
+        df = DataFrame(jdf, sparkSession._wrapped)
+
+        return df
 
     @classmethod
     def toDf(cls, spatialPairRDD: RDD, leftFieldnames: List[str], rightFieldNames: List[str], sparkSession: SparkSession):
@@ -96,4 +151,11 @@ class Adapter(metaclass=MultipleMeta):
         :param sparkSession:
         :return:
         """
-        pass
+        sc = spatialPairRDD.ctx
+        jvm = sc._jvm
+
+        jdf = jvm.Adapter.toDf(spatialPairRDD._jrdd, leftFieldnames, rightFieldNames, sparkSession._jsparkSession)
+
+        df = DataFrame(jdf, sparkSession._wrapped)
+
+        return df
