@@ -17,6 +17,7 @@ class GeoSparkLib(Enum):
     CircleRDD = "org.datasyslab.geospark.spatialRDD.CircleRDD"
     LineStringRDD = "org.datasyslab.geospark.spatialRDD.LineStringRDD"
     RectangleRDD = "org.datasyslab.geospark.spatialRDD.RectangleRDD"
+    SpatialRDD = "org.datasyslab.geospark.spatialRDD.SpatialRDD"
     FileDataSplitter = "org.datasyslab.geospark.enums.FileDataSplitter"
     GeoJsonReader = "org.datasyslab.geospark.formatMapper.GeoJsonReader"
     ShapeFileReader = "org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader"
