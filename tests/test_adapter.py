@@ -10,7 +10,8 @@ from geo_pyspark.core.spatialOperator import JoinQuery
 from geo_pyspark.register import GeoSparkRegistrator
 from geo_pyspark.register import upload_jars
 from geo_pyspark.utils.adapter import Adapter
-from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location
+from tests.data import geojson_input_location, shape_file_with_missing_trailing_input_location, \
+    geojson_id_input_location
 from tests.data import shape_file_input_location, area_lm_point_input_location
 from tests.data import mixed_wkt_geometry_input_location
 
@@ -59,7 +60,7 @@ class TestAdapter:
         spatial_df.show()
         spatial_df.printSchema()
         print("S")
-        spatial_rdd = Adapter.toSpatialRdd(df=spatial_df, geometry_col_id=2)
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, 2)
         # spatial_rdd.analyze()
         # new_df = Adapter.toDf(spatial_rdd, spark)
         # new_df.show()
@@ -112,6 +113,41 @@ class TestAdapter:
         df.show()
         assert (df.columns[1] == "STATEFP")
 
+    def test_convert_spatial_join_result_to_dataframe(self):
+        polygon_wkt_df = spark.read.format("csv").option("delimiter", "\t").option("header", "false").load(
+            mixed_wkt_geometry_input_location)
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+
+        polygon_df = spark.sql(
+            "select ST_GeomFromWKT(polygontable._c0) as usacounty, 'abc' as abc, 'def' as def from polygontable")
+        polygon_rdd = Adapter.toSpatialRdd(polygon_df, "usacounty")
+
+        polygon_rdd.analyze()
+
+        point_csv_df = spark.read.format("csv").option("delimiter", ",").option("header", "false").load(
+            area_lm_point_input_location)
+        point_csv_df.createOrReplaceTempView("pointtable")
+
+        point_df = spark.sql(
+            "select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+
+        point_rdd = Adapter.toSpatialRdd(point_df, "arealandmark")
+        point_rdd.analyze()
+
+        point_rdd.spatialPartitioning(GridType.QUADTREE)
+        polygon_rdd.spatialPartitioning(point_rdd.getPartitioner)
+
+        point_rdd.buildIndex(IndexType.QUADTREE, True)
+
+        join_result_point_rdd = JoinQuery.\
+            SpatialJoinQueryFlat(point_rdd, polygon_rdd, True, True)
+
+        join_result_df = Adapter.toDf(join_result_point_rdd, spark)
+        join_result_df.show()
+
+        join_result_df2 = Adapter.toDf(join_result_point_rdd, ["abc", "def"], list(), spark)
+        join_result_df2.show()
+
     def test_distance_join_result_to_dataframe(self):
         point_csv_df = spark.\
             read.\
@@ -153,3 +189,11 @@ class TestAdapter:
         join_result_df = Adapter.toDf(join_result_pair_rdd, spark)
         join_result_df.printSchema()
         join_result_df.show()
+
+    def test_load_id_column_data_check(self):
+        spatial_rdd = PolygonRDD(spark.sparkContext, geojson_id_input_location, FileDataSplitter.GEOJSON, True)
+        spatial_rdd.analyze()
+        df = Adapter.toDf(spatial_rdd, spark)
+        df.show()
+        assert df.columns.__len__() == 4
+        assert df.count() == 1
