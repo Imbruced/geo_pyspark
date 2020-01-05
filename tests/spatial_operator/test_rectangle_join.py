@@ -1,19 +1,15 @@
 import pytest
 import os
 
-import pytest
-from py4j.java_gateway import get_field
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
-from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
-from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
+from geo_pyspark.core.enums import FileDataSplitter, GridType
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.core.spatialOperator import KNNQuery, JoinQuery
+from geo_pyspark.core.spatialOperator import JoinQuery
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
-from geo_pyspark.utils.spatial_rdd_parser import GeoData
 from tests.utils import tests_path
 
 upload_jars()
