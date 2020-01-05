@@ -328,7 +328,6 @@ class SpatialRDD:
         :param partitioning:
         :return:
         """
-        print("s")
         if type(partitioning) == str:
             grid = GridTypeJvm(self._jvm, GridType.from_str(partitioning)).jvm_instance
         elif type(partitioning) == GridType:

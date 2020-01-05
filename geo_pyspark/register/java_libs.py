@@ -24,4 +24,3 @@ class GeoSparkLib(Enum):
     StorageLevel = "org.apache.spark.storage.StorageLevel"
     GridType = "org.datasyslab.geospark.enums.GridType"
     IndexType = "org.datasyslab.geospark.enums.IndexType"
-

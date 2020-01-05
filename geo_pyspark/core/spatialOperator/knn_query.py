@@ -6,7 +6,7 @@ from geo_pyspark.core.jvm.geometry.primitive import JvmCoordinate, JvmPoint
 from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.binary_parser import BinaryParser
-from geo_pyspark.utils.spatial_rdd_parser import SpatialPairRDDParserNonUserData
+from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData
 
 
 @attr.s
@@ -40,7 +40,7 @@ class KNNQuery:
         geoms_data = []
         for arr in srdd:
             binary_parser = BinaryParser(arr)
-            geom = SpatialPairRDDParserNonUserData.deserialize(binary_parser)
+            geom = SpatialRDDParserData.deserialize(binary_parser)
             geoms_data.append(geom)
 
         return geoms_data
