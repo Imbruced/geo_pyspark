@@ -5,12 +5,12 @@ from pyspark import PickleSerializer
 
 from geo_pyspark.utils.binary_parser import BinaryParser
 from geo_pyspark.utils.decorators import classproperty
-from geo_pyspark.utils.spatial_rdd_parser import SpatialPairRDDParserNonUserData
+from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData, SpatialPairRDDParserData
 
 PARSERS = {
-    0: SpatialPairRDDParserNonUserData(),
-    1: SpatialPairRDDParserNonUserData(),
-    2: SpatialPairRDDParserNonUserData(),
+    0: SpatialRDDParserData(),
+    1: SpatialRDDParserData(),
+    2: SpatialPairRDDParserData(),
 
 
 }
