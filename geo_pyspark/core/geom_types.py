@@ -1,5 +1,8 @@
 import attr
 
+from geo_pyspark.core.utils import require
+from geo_pyspark.register.java_libs import GeoSparkLib
+
 
 @attr.s
 class Envelope:
@@ -8,8 +11,9 @@ class Envelope:
     miny = attr.ib()
     maxy = attr.ib()
 
+    @require([GeoSparkLib.Envelope])
     def create_java_object(self, jvm):
-        return jvm.com.vividsolutions.jts.geom.Envelope(
+        return jvm.Envelope(
             self.minx, self.maxx, self.miny, self.maxy
         )
 
@@ -21,3 +25,5 @@ class Envelope:
             miny=java_obj.getMinY(),
             maxy=java_obj.getMaxY(),
         )
+
+Envelope(1, 2, 3, 4)

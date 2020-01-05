@@ -6,7 +6,6 @@ from geo_pyspark.exceptions import InvalidParametersException
 import typing
 from typing import Any
 from typing import GenericMeta
-from typing import List
 
 
 def is_subclass_with_typing(type_a: Any, type_b: Any):
@@ -82,15 +81,19 @@ class MultiMethod:
             types_from_args = tuple(type(arg) for arg in args[1:])
 
         number_of_arguments = len(types_from_args)
+        number_of_kwargs = len(kwargs)
+
         methods_shortened_to_args = [
             [tuple(tp[1] for tp in types[:number_of_arguments]), types, method]
             for types, method in self._methods.items()
         ]
         methods_which_are_correct = []
         for function_methods in methods_shortened_to_args:
+            print("s")
             is_instances = all([
                 is_subclass_with_typing(from_args, from_definition)
                 for from_args, from_definition in zip(types_from_args, function_methods[0])
+                if len(function_methods[0]) == number_of_arguments + number_of_kwargs
             ])
             if is_instances:
                 methods_which_are_correct.append(function_methods[1:])
