@@ -34,3 +34,7 @@ class SpatialRDDFactory(ABC):
     @require([GeoSparkLib.CircleRDD])
     def create_circle_rdd(self):
         return self._jvm.CircleRDD
+
+    @require([GeoSparkLib.SpatialRDD])
+    def create_spatial_rdd(self):
+        return self._jvm.SpatialRDD
