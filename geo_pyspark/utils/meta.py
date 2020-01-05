@@ -88,15 +88,15 @@ class MultiMethod:
             for types, method in self._methods.items()
         ]
         methods_which_are_correct = []
+
         for function_methods in methods_shortened_to_args:
-            print("s")
-            is_instances = all([
-                is_subclass_with_typing(from_args, from_definition)
-                for from_args, from_definition in zip(types_from_args, function_methods[0])
-                if len(function_methods[0]) == number_of_arguments + number_of_kwargs
-            ])
-            if is_instances:
-                methods_which_are_correct.append(function_methods[1:])
+            if len(function_methods[0]) == number_of_arguments + number_of_kwargs:
+                is_instances = all([
+                    is_subclass_with_typing(from_args, from_definition)
+                    for from_args, from_definition in zip(types_from_args, function_methods[0])
+                ])
+                if is_instances:
+                    methods_which_are_correct.append(function_methods[1:])
 
         if methods_which_are_correct:
             for correct_params, method in methods_which_are_correct:
