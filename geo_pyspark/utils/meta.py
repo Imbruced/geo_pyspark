@@ -3,6 +3,24 @@ import types
 
 from geo_pyspark.exceptions import InvalidParametersException
 
+import typing
+from typing import Any
+from typing import GenericMeta
+from typing import List
+
+
+def is_subclass_with_typing(type_a: Any, type_b: Any):
+    if isinstance(type_a, GenericMeta) and isinstance(type_b, GenericMeta):
+        return type_a == type_b
+    elif isinstance(type_a, GenericMeta) and not isinstance(type_b, GenericMeta):
+        python_type_a = type_a.__orig_bases__[0]
+        return issubclass(python_type_a, type_b)
+    elif not isinstance(type_a, GenericMeta) and isinstance(type_b, GenericMeta):
+        python_type_b = type_b.__orig_bases__[0]
+        return issubclass(type_a, python_type_b)
+    else:
+        return issubclass(type_a, type_b)
+
 
 class MultiMethod:
     """
@@ -68,12 +86,17 @@ class MultiMethod:
             [tuple(tp[1] for tp in types[:number_of_arguments]), types, method]
             for types, method in self._methods.items()
         ]
+        methods_which_are_correct = []
+        for function_methods in methods_shortened_to_args:
+            is_instances = all([
+                is_subclass_with_typing(from_args, from_definition)
+                for from_args, from_definition in zip(types_from_args, function_methods[0])
+            ])
+            if is_instances:
+                methods_which_are_correct.append(function_methods[1:])
 
-        methods_wich_are_correct = [
-            el[1:] for el in methods_shortened_to_args if types_from_args == el[0]
-        ]
-        if methods_wich_are_correct:
-            for correct_params, method in methods_wich_are_correct:
+        if methods_which_are_correct:
+            for correct_params, method in methods_which_are_correct:
                 if len(correct_params[number_of_arguments:]) != kwargs.__len__():
                     continue
                 else:
@@ -82,7 +105,7 @@ class MultiMethod:
                             value = kwargs[name]
                         except KeyError:
                             break
-                        if type(value) == param:
+                        if is_subclass_with_typing(value, param):
                             pass
                         else:
                             break
