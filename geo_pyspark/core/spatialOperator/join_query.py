@@ -106,3 +106,31 @@ class JoinQuery:
         serlialized = jvm.GeoSerializerData.serializeToPython(srdd)
 
         return RDD(serlialized, sc, GeoSparkPickler())
+
+    @classmethod
+    @require([GeoSparkLib.JoinQuery])
+    def SpatialJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
+                              considerBoundaryIntersection: bool):
+        """
+
+        :param spatialRDD:
+        :param queryRDD:
+        :param useIndex:
+        :param considerBoundaryIntersection:
+        :return:
+        """
+
+        jvm = spatialRDD._jvm
+        sc = spatialRDD._sc
+
+        spatial_join = jvm.JoinQuery.SpatialJoinQueryFlat
+        srdd = spatial_join(
+            spatialRDD._srdd,
+            queryRDD._srdd,
+            useIndex,
+            considerBoundaryIntersection
+        )
+
+        serlialized = jvm.GeoSerializerData.serializeToPython(srdd)
+
+        return RDD(serlialized, sc, GeoSparkPickler())
