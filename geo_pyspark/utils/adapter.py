@@ -4,7 +4,7 @@ import attr
 from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geo_pyspark.utils.meta import MultipleMeta
 
 
@@ -12,6 +12,15 @@ class Adapter(metaclass=MultipleMeta):
     """
     Class which allow to convert between Spark DataFrame and SpatialRDD and reverse.
     """
+
+    @classmethod
+    def toRdd(cls, dataFrame: DataFrame) -> JvmSpatialRDD:
+        sc = dataFrame._sc
+        jvm = sc._jvm
+
+        srdd = jvm.Adapter.toRdd(dataFrame._jdf)
+
+        return srdd.toJavaRDD()
 
     @classmethod
     def toSpatialRdd(cls, dataFrame: DataFrame, geometryFieldName: str) -> SpatialRDD:
@@ -31,6 +40,22 @@ class Adapter(metaclass=MultipleMeta):
 
         return spatial_rdd
 
+    @classmethod
+    def toSpatialRdd(cls, dataFrame: DataFrame):
+        """
+
+        :param dataFrame:
+        :return:
+        """
+        sc = dataFrame._sc
+        jvm = sc._jvm
+
+        srdd = jvm.Adapter.toSpatialRdd(dataFrame._jdf)
+
+        spatial_rdd = SpatialRDD(sc)
+        spatial_rdd.set_srdd(srdd)
+
+        return spatial_rdd
 
     @classmethod
     def toSpatialRdd(cls, dataFrame: DataFrame, geometryColId: int) -> SpatialRDD:
