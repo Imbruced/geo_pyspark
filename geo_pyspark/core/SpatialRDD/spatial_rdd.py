@@ -4,6 +4,7 @@ import attr
 from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
 
+from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.geom_types import Envelope
@@ -87,6 +88,8 @@ class SpatialRDD:
         if self._sc is not None:
             self._jsc = self._sc._jsc
             self._jvm = self._sc._jvm
+            self._srdd = SpatialRDDFactory(self._sc).create_spatial_rdd(
+            )()
 
     def analyze(self) -> bool:
         """
@@ -273,9 +276,12 @@ class SpatialRDD:
 
     @rawSpatialRDD.setter
     def rawSpatialRDD(self, spatial_rdd: 'SpatialRDD'):
-        self._srdd = spatial_rdd._srdd
-        self._sc = spatial_rdd._sc
-        self._jvm = spatial_rdd._jvm
+        if isinstance(spatial_rdd, SpatialRDD):
+            self._srdd = spatial_rdd._srdd
+            self._sc = spatial_rdd._sc
+            self._jvm = spatial_rdd._jvm
+        else:
+            self._srdd.setRawSpatialRDD(spatial_rdd)
 
     def saveAsGeoJSON(self, path: str):
         """
