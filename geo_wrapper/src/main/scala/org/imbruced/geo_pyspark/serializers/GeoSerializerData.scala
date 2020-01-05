@@ -68,7 +68,6 @@ object GeoSerializerData {
       }
     )
   }
-  isinstance(types_from_args[0], function_methods[0][0])
   def serializeToPython(spatialRDD: JavaPairRDD[Geometry, Geometry]): JavaRDD[Array[Byte]] = {
     spatialRDD.rdd.map[Array[Byte]](pairRDD =>{
       val leftGeometry = pairRDD._1
