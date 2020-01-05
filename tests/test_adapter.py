@@ -4,6 +4,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import expr
 
 from geo_pyspark.core.SpatialRDD import PolygonRDD, CircleRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
 from geo_pyspark.core.spatialOperator import JoinQuery
@@ -47,41 +48,82 @@ class TestAdapter:
         spatial_rdd.analyze()
         Adapter.toDf(spatial_rdd, spark).show()
 
-    def test_csv_point_at_different_column_id_into_spatial_rdd(self):
-        df = spark.\
-            read.\
-            format("csv").\
-            option("delimiter", "\t").\
-            option("header", "false").load(area_lm_point_input_location)
+    def test_read_csv_point_into_spatial_rdd_by_passing_coordinates(self):
+        df = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(area_lm_point_input_location)
+
         df.show()
         df.createOrReplaceTempView("inputtable")
+
         spatial_df = spark.sql(
-            "select \'123\', \'456\', ST_PointFromText(inputtable._c0,\",\") as arealandmark, \'789\' from inputtable")
+            "select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable"
+        )
+
         spatial_df.show()
         spatial_df.printSchema()
-        print("S")
-        spatial_rdd = Adapter.toSpatialRdd(spatial_df, 2)
-        # spatial_rdd.analyze()
-        # new_df = Adapter.toDf(spatial_rdd, spark)
-        # new_df.show()
-        # schema_names = [str(el.name) for el in new_df.schema]
-        # schema_string = "\t".join(schema_names)
-        # assert schema_string == "geometry\t123\t456\t789"
+        spatial_rdd = SpatialRDD(spark.sparkContext)
+        spatial_rdd.rawSpatialRDD = Adapter.toRdd(spatial_df)
+        spatial_rdd.analyze()
+        assert (Adapter.toDf(spatial_rdd, spark).columns.__len__() == 1)
+        Adapter.toDf(spatial_rdd, spark).show()
 
-    def test_read_csv_point_at_a_different_column_col_name_into_a_spatial_rdd(self):
-        pass
+    def test_read_csv_point_into_spatial_rdd_with_unique_id_by_passing_coordinates(self):
+        df = spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(area_lm_point_input_location)
 
-    def test_read_csv_point_into_a_spatial_rdd_by_passing_coordinates(self):
-        pass
+        df.show()
+        df.createOrReplaceTempView("inputtable")
 
-    def test_read_csv_point_into_s_spatial_rdd_with_unique_id_by_passing_coordinates(self):
-        pass
+        spatial_df = spark.sql(
+            "select ST_Point(cast(inputtable._c0 as Decimal(24,20)),cast(inputtable._c1 as Decimal(24,20))) as arealandmark from inputtable")
+
+        spatial_df.show()
+        spatial_df.printSchema()
+
+        spatial_rdd = SpatialRDD(spark.sparkContext)
+        spatial_rdd.rawSpatialRDD = Adapter.toRdd(spatial_df)
+        spatial_rdd.analyze()
+        assert (Adapter.toDf(spatial_rdd, spark).columns.__len__() == 1)
+        Adapter.toDf(spatial_rdd, spark).show()
 
     def test_read_mixed_wkt_geometries_into_spatial_rdd(self):
-        pass
+        df = spark.read.format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").load(mixed_wkt_geometry_input_location)
+
+        df.show()
+        df.createOrReplaceTempView("inputtable")
+        spatial_df = spark.sql("select ST_GeomFromWKT(inputtable._c0) as usacounty from inputtable")
+        spatial_df.show()
+        spatial_df.printSchema()
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df)
+        spatial_rdd.analyze()
+        Adapter.toDf(spatial_rdd, spark).show()
+        assert (Adapter.toDf(spatial_rdd, spark).columns.__len__() == 1)
+        Adapter.toDf(spatial_rdd, spark).show()
 
     def test_read_mixed_wkt_geometries_into_spatial_rdd_with_unique_id(self):
-        pass
+        df = spark.read.format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").\
+            load(mixed_wkt_geometry_input_location)
+
+        df.show()
+        df.createOrReplaceTempView("inputtable")
+
+        spatial_df = spark.sql(
+            "select ST_GeomFromWKT(inputtable._c0) as usacounty, inputtable._c3, inputtable._c5 from inputtable")
+        spatial_df.show()
+        spatial_df.printSchema()
+
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "usacounty")
+        spatial_rdd.analyze()
+        assert (Adapter.toDf(spatial_rdd, spark).columns.__len__() == 3)
+        Adapter.toDf(spatial_rdd, spark).show()
 
     def test_read_shapefile_to_dataframe(self):
         spatial_rdd = ShapefileReader.readToGeometryRDD(
