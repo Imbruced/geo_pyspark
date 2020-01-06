@@ -19,7 +19,7 @@ class GridType(Enum):
     @classmethod
     def from_str(cls, grid: str) -> 'GridType':
         try:
-            grid = getattr(cls, grid)
+            grid = getattr(cls, grid.upper())
         except AttributeError:
             raise AttributeError(f"{cls.__class__.__name__} has no {grid} attribute")
         return grid
