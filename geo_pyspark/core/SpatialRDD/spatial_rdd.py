@@ -7,6 +7,7 @@ from pyspark import SparkContext, RDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
+from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.utils.serde import GeoSparkPickler
 from geo_pyspark.utils.types import crs
@@ -30,27 +31,16 @@ class SpatialValidator:
 
     def __call__(self, instance, attribute, value):
         value_type = instance.java_class_name
-        instance_type = instance.__class__.__name__.replace("Jvm", "")
-        if value_type != instance_type:
+        instance_type = instance.__class__.__name__.replace("Jvm", "").replace("line")
+        if value_type.lower() != instance_type.lower():
             raise ValueError("Value should be an instance of ")
 
 
 @attr.s
 class JvmSpatialRDD:
-    srdd = attr.ib(validator=[SpatialValidator()])
+    jsrdd = attr.ib()
     sc = attr.ib(type=SparkContext)
-
-    @property
-    def java_class_name(self) -> Optional[str]:
-        class_name = self.srdd.getClass().toString()
-        try:
-            cls_name = class_name.split(".")[-1]
-        except IndexError:
-            cls_name = None
-        except TypeError:
-            cls_name = None
-
-        return cls_name
+    tp = attr.ib(type=SpatialType)
 
 
 @attr.s
@@ -307,26 +297,26 @@ class SpatialRDD:
         """
         return self._srdd.saveAsWKT(path)
 
-    def setRawSpatialRDD(self):
+    def setRawSpatialRDD(self, jrdd):
         """
 
         :return:
         """
-        raise self._srdd.setRawSpatialRDD()
+        return self._srdd.setRawSpatialRDD(jrdd)
 
     def setSampleNumber(self):
         """
 
         :return:
         """
-        raise self._srdd.setSampleNumber()
+        return self._srdd.setSampleNumber()
 
     def spatialPartitionedRDD(self):
         """
 
         :return:
         """
-        raise self._srdd.spatialPartitionedRDD()
+        return self._srdd.spatialPartitionedRDD()
 
     def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner]) -> bool:
         """
@@ -353,18 +343,23 @@ class SpatialRDD:
         return self._srdd
 
     def getRawJvmSpatialRDD(self) -> JvmSpatialRDD:
-        raise NotImplementedError("SpatialRDD does not implement getRawJvmSpatialRDD")
+        return JvmSpatialRDD(jsrdd=self._srdd.getRawSpatialRDD(), sc=self._sc, tp=SpatialType.from_str(self.name))
 
     @property
     def rawJvmSpatialRDD(self) -> JvmSpatialRDD:
         return self.getRawJvmSpatialRDD()
 
     @rawJvmSpatialRDD.setter
-    def rawJvmSpatialRDD(self, value: JvmSpatialRDD):
-        if value.java_class_name != self.__class__.__name__:
-            raise TypeError(f"value should be type {self.__class__.__name__} but {value.java_class_name} was found")
+    def rawJvmSpatialRDD(self, jsrdd_p: JvmSpatialRDD):
+        if jsrdd_p.tp.value.lower() != self.name:
+            raise TypeError(f"value should be type {self.name} but {jsrdd_p.tp} was found")
 
-        self._sc = value.sc
+        self._sc = jsrdd_p.sc
         self._jvm = self._sc._jvm
         self._jsc = self._sc._jsc
-        self._srdd = value.srdd
+        self.setRawSpatialRDD(jsrdd_p.jsrdd)
+
+    @property
+    def name(self):
+        name = self.__class__.__name__
+        return name.replace("RDD", "").lower()
