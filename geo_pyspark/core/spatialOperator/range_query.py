@@ -25,7 +25,7 @@ class RangeQuery(metaclass=MultipleMeta):
         jvm = spatialRDD._jvm
         sc = spatialRDD._sc
 
-        jvm_envelope = rangeQueryWindow.create_java_object(jvm)
+        jvm_envelope = rangeQueryWindow.create_jvm_instance(jvm)
 
         srdd = jvm.\
             RangeQuery.SpatialRangeQuery(
