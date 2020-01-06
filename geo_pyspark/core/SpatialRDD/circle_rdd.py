@@ -54,6 +54,3 @@ class CircleRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def MinimumBoundingRectangle(self):
         raise NotImplementedError("CircleRDD has not MinimumBoundingRectangle method.")
-
-    def getRawJvmSpatialRDD(self) -> JvmCircleRDD:
-        return JvmCircleRDD(self._srdd, self._sc)
