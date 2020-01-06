@@ -35,10 +35,12 @@ class GeometryFactory:
 
     @classmethod
     def to_bytes(cls, geom: BaseGeometry) -> List[int]:
+        from geo_pyspark.sql.types import GeometryType
         geom_name = str(geom.__class__.__name__).lower()
 
         try:
             appr_parser = PARSERS[geom_name]
+            geom.__UDT__ = GeometryType()
         except KeyError:
             raise KeyError(f"Parser for geometry {geom_name}")
         return appr_parser.serialize(geom, BinaryBuffer())
