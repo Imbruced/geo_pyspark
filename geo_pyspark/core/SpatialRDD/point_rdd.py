@@ -1,7 +1,7 @@
 from pyspark import SparkContext, StorageLevel
 from pyspark.sql import SparkSession
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmPointRDD, JvmSpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
 from geo_pyspark.core.utils import JvmStorageLevel
@@ -21,24 +21,29 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
             srdd = jvm_linestring_rdd()
             self._srdd = srdd
 
-    def __init__(self, jvmSpatialRDD: JvmSpatialRDD):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD):
         """
 
-        :param spatialRDD:
+        :param rawSpatialRDD:
         """
-        super().__init__(jvmSpatialRDD.sc)
-        self._srdd = jvmSpatialRDD.jsrdd
+        super().__init__(rawSpatialRDD.sc)
+        jsrdd = rawSpatialRDD.jsrdd
+        empty_jvm_rectangle_rdd = self._create_jvm_point_rdd(rawSpatialRDD.sc)
+        self._srdd = empty_jvm_rectangle_rdd(jsrdd)
 
-    def __init__(self, jvmSpatialRDD: JvmPointRDD, sourceEpsgCode: str, targetEpsgCode: str):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD, sourceEpsgCode: str, targetEpsgCode: str):
         """
 
-        :param spatialRDD:
+        :param rawSpatialRDD:
         :param sourceEpsgCode:
         :param targetEpsgCode:
         """
-        super().__init__(jvmSpatialRDD.sc)
-        jvm_point_rdd = self._create_jvm_point_rdd(self._sc)
-        self._srdd = jvm_point_rdd(jvmSpatialRDD.srdd.getRawSpatialRDD(), sourceEpsgCode, targetEpsgCode)
+
+        super().__init__(rawSpatialRDD.sc)
+        jsrdd = rawSpatialRDD.jsrdd
+        empty_jvm_rectangle_rdd = self._create_jvm_point_rdd(rawSpatialRDD.sc)
+        self._srdd = empty_jvm_rectangle_rdd(jsrdd, sourceEpsgCode, targetEpsgCode)
+
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int, splitter: FileDataSplitter,
                  carryInputData: bool, partitions: int):
@@ -125,19 +130,19 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
             carryInputData
         )
 
-    def __init__(self, jvmSpatialRDD: JvmPointRDD, newLevel: StorageLevel):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel):
         """
 
-        :param spatialRDD:
-        :param newLevel:
+        :param rawSpatialRDD:
+        :param sourceEpsgCode:
+        :param targetEpsgCode:
         """
-        super().__init__(jvmSpatialRDD.sc)
-        jvm_point_rdd = self._create_jvm_point_rdd(self._sc)
+
+        super().__init__(rawSpatialRDD.sc)
+        jsrdd = rawSpatialRDD.jsrdd
+        empty_jvm_rectangle_rdd = self._create_jvm_point_rdd(rawSpatialRDD.sc)
         new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
-        self._srdd = jvm_point_rdd(
-            jvmSpatialRDD.srdd.getRawSpatialRDD(),
-            new_level_jvm
-        )
+        self._srdd = empty_jvm_rectangle_rdd(jsrdd, new_level_jvm)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int, splitter: FileDataSplitter,
                  carryInputData: bool, partitions: int, newLevel: StorageLevel):
@@ -237,24 +242,20 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
             new_level_jvm
         )
 
-    def __init__(self, jvmSpatialRDD: JvmPointRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
-        :param spatialRDD:
+        :param rawSpatialRDD:
         :param newLevel:
         :param sourceEpsgCRSCode:
         :param targetEpsgCode:
         """
-        super().__init__(jvmSpatialRDD.sc)
-        jvm_point_rdd = self._create_jvm_point_rdd(self._sc)
-        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
-        self._srdd = jvm_point_rdd(
-            jvmSpatialRDD.srdd.getRawSpatialRDD(),
-            new_level_jvm,
-            sourceEpsgCRSCode,
-            targetEpsgCode
-        )
+        super().__init__(rawSpatialRDD.sc)
+        jsrdd = rawSpatialRDD.jsrdd
+        empty_jvm_rectangle_rdd = self._create_jvm_point_rdd(rawSpatialRDD.sc)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+        self._srdd = empty_jvm_rectangle_rdd(jsrdd, new_level_jvm, sourceEpsgCRSCode, targetEpsgCode)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int, splitter: FileDataSplitter,
                  carryInputData: bool, partitions: int, newLevel: StorageLevel, sourceEpsgCRSCode: str,

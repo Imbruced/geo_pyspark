@@ -1,7 +1,7 @@
 from pyspark import SparkContext, StorageLevel
 from pyspark.sql import SparkSession
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmRectangleRDD, JvmSpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
 from geo_pyspark.core.utils import JvmStorageLevel
@@ -21,31 +21,34 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
             srdd = jvm_linestring_rdd()
             self._srdd = srdd
 
-    def __init__(self, rawSpatialRDD: JvmRectangleRDD):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD):
         """
 
         :param rawSpatialRDD:
         """
         super().__init__(rawSpatialRDD.sc)
-        self._srdd = rawSpatialRDD.srdd
+        jsrdd = rawSpatialRDD.jsrdd
+        empty_jvm_rectangle_rdd = self._create_jvm_rectangle_rdd(rawSpatialRDD.sc)
+        self._srdd = empty_jvm_rectangle_rdd(jsrdd)
 
-    def __init__(self, rawSpatialRDD: JvmRectangleRDD, sourceEpsgCode: str, targetEpsgCode: str):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD, sourceEpsgCode: str, targetEpsgCode: str):
         """
 
         :param rawSpatialRDD:
         :param sourceEpsgCode: str, the source epsg CRS code
         :param targetEpsgCode: str, the target epsg code
         """
+
         super().__init__(rawSpatialRDD.sc)
         jvm_polygon_rdd = self._create_jvm_rectangle_rdd(self._sc)
 
         self._srdd = jvm_polygon_rdd(
-            rawSpatialRDD.srdd.getRawSpatialRDD(),
+            rawSpatialRDD.jsrdd,
             sourceEpsgCode,
             targetEpsgCode
         )
 
-    def __init__(self, rawSpatialRDD: JvmRectangleRDD, newLevel: StorageLevel):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel):
         """
 
         :param rawSpatialRDD:
@@ -56,7 +59,7 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
 
         self._srdd = jvm_polygon_rdd(
-            rawSpatialRDD.srdd.getRawSpatialRDD(),
+            rawSpatialRDD.jsrdd,
             new_level_jvm
         )
 
@@ -251,24 +254,21 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
             new_level_jvm
         )
 
-    def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
+    def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str,
+                 targetEpsgCode: str):
         """
 
         :param rawSpatialRDD:
         :param newLevel:
-        :param sourceEpsgCRSCode: str, the source epsg CRS code
-        :param targetEpsgCode: str, the target epsg code
+        :param sourceEpsgCRSCode:
+        :param targetEpsgCode:
         """
 
         super().__init__(rawSpatialRDD.sc)
-        jvm_polygon_rdd = self._create_jvm_rectangle_rdd(self._sc)
-
-        self._srdd = jvm_polygon_rdd(
-            rawSpatialRDD.srdd.getRawSpatialRDD(),
-            newLevel,
-            sourceEpsgCRSCode,
-            targetEpsgCode
-        )
+        jsrdd = rawSpatialRDD.jsrdd
+        empty_jvm_rectangle_rdd = self._create_jvm_rectangle_rdd(rawSpatialRDD.sc)
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+        self._srdd = empty_jvm_rectangle_rdd(jsrdd, new_level_jvm, sourceEpsgCRSCode, targetEpsgCode)
 
     def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int,
             splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel,
@@ -399,10 +399,3 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def MinimumBoundingRectangle(self):
         raise NotImplementedError("RectangleRDD has not MinimumBoundingRectangle method.")
-
-    def getRawJvmSpatialRDD(self) -> JvmRectangleRDD:
-        return JvmRectangleRDD(self._srdd, self._sc)
-
-    @property
-    def rawJvmSpatialRDD(self) -> JvmRectangleRDD:
-        return self.getRawJvmSpatialRDD()
