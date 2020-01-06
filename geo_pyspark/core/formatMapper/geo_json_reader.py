@@ -12,6 +12,7 @@ from geo_pyspark.utils.meta import MultipleMeta
 class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
+    @require([GeoSparkLib.GeoJsonReader])
     def validate_imports(cls) -> bool:
         return True
 
