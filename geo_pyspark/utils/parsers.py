@@ -64,7 +64,6 @@ def add_offsets_to_polygon(geom: Polygon, binary_buffer: BinaryBuffer, initial_o
     return offset
 
 
-
 @attr.s
 class OffsetsReader:
 
@@ -360,3 +359,32 @@ class MultiPointParser(GeometryParser):
         coordinates = read_coordinates(parser, number_of_points)
         has_user_data = parser.read_boolean()
         return MultiPoint(coordinates)
+
+
+@attr.s
+class CircleParser(GeometryParser):
+    name = "Circle"
+
+    @classmethod
+    def serialize(cls, obj: BaseGeometry, binary_buffer: BinaryBuffer):
+        pass
+
+    @classmethod
+    def deserialize(cls, bin_parser: BinaryParser) -> BaseGeometry:
+        radius = bin_parser.read_double()
+        primitive_geom_type = bin_parser.read_byte()
+        parser = GeomEnum.get_name(primitive_geom_type)
+        geom = PARSERS[parser].deserialize(bin_parser)
+        return geom.buffer(radius)
+
+
+PARSERS = dict(
+    undefined=UndefinedParser,
+    point=PointParser,
+    polyline=PolyLineParser,
+    multilinestring=MultiLineStringParser,
+    linestring=LineStringParser,
+    polygon=PolygonParser,
+    multipoint=MultiPointParser,
+    multipolygon=MultiPolygonParser
+)
