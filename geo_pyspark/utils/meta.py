@@ -90,22 +90,22 @@ class MultiMethod:
         methods_which_are_correct = []
 
         for function_methods in methods_shortened_to_args:
-            if len(function_methods[0]) == number_of_arguments + number_of_kwargs:
-                is_instances = all([
-                    is_subclass_with_typing(from_args, from_definition)
-                    for from_args, from_definition in zip(types_from_args, function_methods[0])
-                ])
-                if is_instances:
-                    methods_which_are_correct.append(function_methods[1:])
+            is_instances = all([
+                is_subclass_with_typing(from_args, from_definition)
+                for from_args, from_definition in zip(types_from_args, function_methods[0])
+            ])
+
+            if is_instances:
+                methods_which_are_correct.append(function_methods[1:])
 
         if methods_which_are_correct:
             for correct_params, method in methods_which_are_correct:
-                if len(correct_params[number_of_arguments:]) != kwargs.__len__():
+                if len(correct_params) != number_of_arguments + number_of_kwargs:
                     continue
                 else:
                     for name, param in correct_params[number_of_arguments:]:
                         try:
-                            value = kwargs[name]
+                            value = type(kwargs[name])
                         except KeyError:
                             break
                         if is_subclass_with_typing(value, param):
@@ -160,6 +160,7 @@ class MultipleMeta(type):
     """
 
     def __new__(cls, clsname, bases, clsdict):
+        print(clsname)
         return type.__new__(cls, clsname, bases, dict(clsdict))
 
     @classmethod
