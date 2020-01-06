@@ -1,5 +1,4 @@
 import attr
-from pyspark import SparkContext
 
 from geo_pyspark.core.enums import IndexType
 from geo_pyspark.core.enums.join_build_side import JoinBuildSide
@@ -28,5 +27,3 @@ class JvmJoinParams(JvmObject):
     @property
     def jvm_reference(self):
         return self.jvm.JoinParams.createJoinParams
-
-

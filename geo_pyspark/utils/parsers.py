@@ -372,6 +372,7 @@ class CircleParser(GeometryParser):
     @classmethod
     def deserialize(cls, bin_parser: BinaryParser) -> BaseGeometry:
         radius = bin_parser.read_double()
+        print(radius)
         primitive_geom_type = bin_parser.read_byte()
         parser = GeomEnum.get_name(primitive_geom_type)
         geom = PARSERS[parser].deserialize(bin_parser)
