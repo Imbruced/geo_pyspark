@@ -289,6 +289,8 @@ class TestSpatialRDD:
             carryInputData=False
         )
         query_window_rdd = CircleRDD(object_rdd, 0.1)
+        print(query_window_rdd.rawSpatialRDD.collect())
+        print("s")
         object_rdd.analyze()
         object_rdd.spatialPartitioning(GridType.QUADTREE)
         query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)

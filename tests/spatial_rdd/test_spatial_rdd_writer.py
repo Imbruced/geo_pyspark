@@ -9,6 +9,7 @@ from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.utils import tests_path
 
 upload_jars()
 
@@ -27,16 +28,16 @@ sc = spark.sparkContext
 wkb_folder = "wkb"
 wkt_folder = "wkt"
 
-test_save_as_wkb_with_data = os.path.join(wkb_folder, "testSaveAsWKBWithData")
-test_save_as_wkb = os.path.join(wkb_folder, "testSaveAsWKB")
-test_save_as_empty_wkb = os.path.join(wkb_folder, "testSaveAsEmptyWKB")
-test_save_as_wkt = os.path.join(wkt_folder, "testSaveAsWKT")
-test_save_as_wkt_with_data = os.path.join(wkt_folder, "testSaveAsWKTWithData")
+test_save_as_wkb_with_data = os.path.join(tests_path, wkb_folder, "testSaveAsWKBWithData")
+test_save_as_wkb = os.path.join(tests_path, wkb_folder, "testSaveAsWKB")
+test_save_as_empty_wkb = os.path.join(tests_path, wkb_folder, "testSaveAsEmptyWKB")
+test_save_as_wkt = os.path.join(tests_path, wkt_folder, "testSaveAsWKT")
+test_save_as_wkt_with_data = os.path.join(tests_path, wkt_folder, "testSaveAsWKTWithData")
 
-inputLocation = "resources/arealm-small.csv"
-queryWindowSet = "zcta510-small.csv"
+inputLocation = os.path.join(tests_path, "resources/arealm-small.csv")
+queryWindowSet = os.path.join(tests_path, "zcta510-small.csv")
 offset = 1
-splitter = "csv"
+splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 11
