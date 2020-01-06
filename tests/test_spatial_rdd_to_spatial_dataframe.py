@@ -1,20 +1,17 @@
 import os
 
 import pytest
-from pyspark import StorageLevel, RDD
+from pyspark import StorageLevel
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 from geo_pyspark.core.SpatialRDD import PointRDD
-from geo_pyspark.core.enums import IndexType, GridType
-from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.core.utils import ImportedJvmLib
+from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
-from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.sql.types import GeometryType
-from geo_pyspark.utils.serde import GeoSparkPickler
+from geo_pyspark.utils.prep import assign_all
 from tests.utils import tests_path
-from py4j.java_gateway import get_field
+from shapely.geometry import Point
 
 upload_jars()
 
@@ -34,13 +31,36 @@ point_input_path = os.path.join(tests_path, "resources/arealm-small.csv")
 crs_test_point = os.path.join(tests_path, "resources/crs-test-point.csv")
 
 offset = 1
-splitter = "csv"
+splitter = FileDataSplitter.CSV
 gridType = "rtree"
 indexType = "rtree"
 numPartitions = 11
 
 
 class TestSpatialRDDToDataFrame:
+
+    def test_list_to_rdd_and_df(self):
+        assign_all()
+        point_data = [
+            [Point(21, 52.0), "1", 1],
+            [Point(22, 52.0), "2", 2],
+            [Point(23.0, 52), "3", 3],
+            [Point(23, 54), "4", 4],
+            [Point(24.0, 56.0), "5", 5]
+        ]
+        schema = StructType(
+            [
+                StructField("geom", GeometryType(), False),
+                StructField("id_1", StringType(), False),
+                StructField("id_2", IntegerType(), False),
+            ]
+        )
+
+        rdd_data = spark.sparkContext.parallelize(point_data)
+        df = spark.createDataFrame(rdd_data)
+        df.show()
+        df.printSchema()
+
 
     def test_polygon_rdd(self):
         pass

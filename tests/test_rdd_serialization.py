@@ -6,6 +6,7 @@ from pyspark.sql import SparkSession
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
 from geo_pyspark.core.enums import FileDataSplitter, IndexType
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.utils import tests_path
 
 upload_jars()
 
@@ -16,9 +17,9 @@ spark = SparkSession.builder. \
 GeoSparkRegistrator.registerAll(spark)
 
 resource_folder = "resources"
-point_rdd_input_location = os.path.join(resource_folder, "arealm-small.csv")
-polygon_rdd_input_location = os.path.join(resource_folder, "primaryroads-polygon.csv")
-linestring_rdd_input_location = os.path.join(resource_folder, "primaryroads-linestring.csv")
+point_rdd_input_location = os.path.join(tests_path, resource_folder, "arealm-small.csv")
+polygon_rdd_input_location = os.path.join(tests_path, resource_folder, "primaryroads-polygon.csv")
+linestring_rdd_input_location = os.path.join(tests_path, resource_folder, "primaryroads-linestring.csv")
 linestring_rdd_splittter = FileDataSplitter.CSV
 
 polygon_rdd_splitter = FileDataSplitter.CSV
@@ -50,14 +51,14 @@ class TestRDDSerialization:
             [-88.388954, 32.357073], [-88.221102, 32.35078]
         ]
 
-        assert [[point.x, point.y] for point in collected_points[:4]] == points_coordinates[:4]
+        assert [[geo_data.geom.x, geo_data.geom.y] for geo_data in collected_points[:4]] == points_coordinates[:4]
 
     def test_polygon_rdd(self):
         polygon_rdd = PolygonRDD(
             sparkContext=sc,
             InputLocation=polygon_rdd_input_location,
-            startingOffset=polygon_rdd_start_offset,
-            endingOffset=polygon_rdd_end_offset,
+            startOffset=polygon_rdd_start_offset,
+            endOffset=polygon_rdd_end_offset,
             splitter=polygon_rdd_splitter,
             carryInputData=True
         )
@@ -70,27 +71,26 @@ class TestRDDSerialization:
             "POLYGON ((-74.021683 40.833253, -74.021683 40.834288, -74.021368 40.834288, -74.021368 40.833253, -74.021683 40.833253))"
         ]
 
-        assert [polygon.wkt for polygon in collected_polygon_rdd][:3] == input_wkt_polygons
+        assert [geo_data.geom.wkt for geo_data in collected_polygon_rdd][:3] == input_wkt_polygons
 
     def test_circle_rdd(self):
-        pass
-        # object_rdd = PointRDD(
-        #     sparkContext=sc,
-        #     InputLocation=point_rdd_input_location,
-        #     Offset=point_rdd_offset,
-        #     splitter=point_rdd_splitter,
-        #     carryInputData=False
-        # )
-        # circle_rdd = CircleRDD(object_rdd, 0.1)
-        # circle_rdd.getRawSpatialRDD().collect()
-        # print(circle_rdd)
+        object_rdd = PointRDD(
+            sparkContext=sc,
+            InputLocation=point_rdd_input_location,
+            Offset=point_rdd_offset,
+            splitter=point_rdd_splitter,
+            carryInputData=False
+        )
+        circle_rdd = CircleRDD(object_rdd, 0.1)
+        collected_data = circle_rdd.getRawSpatialRDD().collect()
+        print([geo_data.geom.wkt for geo_data in collected_data])
 
     def test_linestring_rdd(self):
         linestring_rdd = LineStringRDD(
             sparkContext=sc,
             InputLocation=linestring_rdd_input_location,
-            startingOffset=0,
-            endingOffset=7,
+            startOffset=0,
+            endOffset=7,
             splitter=FileDataSplitter.CSV,
             carryInputData=True
         )
@@ -98,7 +98,7 @@ class TestRDDSerialization:
         wkt = "LINESTRING (-112.506968 45.98186, -112.506968 45.983586, -112.504872 45.983586, -112.504872 45.98186)"
         collected_linestring_rdd = linestring_rdd.getRawSpatialRDD().collect()
 
-        assert wkt == collected_linestring_rdd[0].wkt
+        assert wkt == collected_linestring_rdd[0].geom.wkt
 
     def test_rectangle_rdd(self):
         pass
