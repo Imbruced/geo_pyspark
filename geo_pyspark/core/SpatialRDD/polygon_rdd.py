@@ -1,4 +1,5 @@
 from pyspark import SparkContext, StorageLevel
+from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmPolygonRDD, JvmRectangleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
@@ -10,7 +11,15 @@ from geo_pyspark.utils.meta import MultipleMeta
 class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self):
-        super().__init__()
+        session = SparkSession._instantiatedSession
+        if session is None or session._sc._jsc is None:
+            raise TypeError("Please initialize spark session")
+        else:
+            sc = session._sc
+            super().__init__(sc)
+            jvm_linestring_rdd = self._create_jvm_polygon_rdd(sc)
+            srdd = jvm_linestring_rdd()
+            self._srdd = srdd
 
     def __init__(self, jvmSpatialRDD: JvmPolygonRDD):
         """
@@ -395,10 +404,10 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
     def MinimumBoundingRectangle(self):
         from geo_pyspark.core.SpatialRDD import RectangleRDD
         rectangle_rdd = RectangleRDD()
-        rectangle_rdd.rawJvmSpatialRDD = JvmRectangleRDD(
-            self._srdd.MinimumBoundingRectangle(),
-            self._sc
-        )
+        srdd = self._srdd.MinimumBoundingRectangle()
+
+        rectangle_rdd.set_srdd(srdd)
+
         return rectangle_rdd
 
     @staticmethod
@@ -408,6 +417,3 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         jvm_polygon_rdd = spatial_factory.create_polygon_rdd()
 
         return jvm_polygon_rdd
-
-    def getRawJvmSpatialRDD(self) -> JvmPolygonRDD:
-        return JvmPolygonRDD(self._srdd)

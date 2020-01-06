@@ -1,4 +1,5 @@
 from pyspark import SparkContext, StorageLevel
+from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmLineStringRDD, JvmRectangleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
@@ -11,8 +12,16 @@ from geo_pyspark.utils.meta import MultipleMeta
 class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self):
-        super().__init__()
-        self._srdd = None
+
+        session = SparkSession._instantiatedSession
+        if session is None or session._sc._jsc is None:
+            raise TypeError("Please initialize spark session")
+        else:
+            sc = session._sc
+            super().__init__(sc)
+            jvm_linestring_rdd = self._create_jvm_linestring_rdd(sc)
+            srdd = jvm_linestring_rdd()
+            self._srdd = srdd
 
     def __init__(self, jvmSpatialRDD: JvmLineStringRDD):
         """
@@ -383,11 +392,8 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
     def MinimumBoundingRectangle(self):
         from geo_pyspark.core.SpatialRDD import RectangleRDD
         rectangle_rdd = RectangleRDD()
-        rectangle_rdd.rawJvmSpatialRDD = JvmRectangleRDD(
-            self._srdd.MinimumBoundingRectangle(),
-            self._sc
-        )
-        return rectangle_rdd
+        srdd = self._srdd.MinimumBoundingRectangle()
 
-    def getRawJvmSpatialRDD(self) -> JvmLineStringRDD:
-        return JvmLineStringRDD(self._srdd, self._sc)
+        rectangle_rdd.set_srdd(srdd)
+
+        return rectangle_rdd

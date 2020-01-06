@@ -1,6 +1,7 @@
 from pyspark import SparkContext, StorageLevel
+from pyspark.sql import SparkSession
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmPointRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmPointRDD, JvmSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
 from geo_pyspark.core.utils import JvmStorageLevel
@@ -10,16 +11,23 @@ from geo_pyspark.utils.meta import MultipleMeta
 class PointRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self):
-        super().__init__()
-        self._srdd = None
+        session = SparkSession._instantiatedSession
+        if session is None or session._sc._jsc is None:
+            raise TypeError("Please initialize spark session")
+        else:
+            sc = session._sc
+            super().__init__(sc)
+            jvm_linestring_rdd = self._create_jvm_point_rdd(sc)
+            srdd = jvm_linestring_rdd()
+            self._srdd = srdd
 
-    def __init__(self, jvmSpatialRDD: JvmPointRDD):
+    def __init__(self, jvmSpatialRDD: JvmSpatialRDD):
         """
 
         :param spatialRDD:
         """
         super().__init__(jvmSpatialRDD.sc)
-        self._srdd = jvmSpatialRDD.srdd
+        self._srdd = jvmSpatialRDD.jsrdd
 
     def __init__(self, jvmSpatialRDD: JvmPointRDD, sourceEpsgCode: str, targetEpsgCode: str):
         """
@@ -51,7 +59,7 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
             sparkContext._jsc,
             InputLocation,
             Offset,
-            jvm_splitter.jvm_instance,
+            jvm_splitter,
             carryInputData,
             partitions
         )
@@ -375,6 +383,3 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
     def _create_jvm_point_rdd(self, sc: SparkContext):
         spatial_factory = SpatialRDDFactory(sc)
         return spatial_factory.create_point_rdd()
-
-    def getRawJvmSpatialRDD(self) -> JvmPointRDD:
-        return JvmPointRDD(self._srdd, self._sc)

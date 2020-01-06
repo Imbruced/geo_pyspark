@@ -1,4 +1,5 @@
 from pyspark import SparkContext, StorageLevel
+from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmRectangleRDD, JvmSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
@@ -10,7 +11,15 @@ from geo_pyspark.utils.meta import MultipleMeta
 class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self):
-        super().__init__()
+        session = SparkSession._instantiatedSession
+        if session is None or session._sc._jsc is None:
+            raise TypeError("Please initialize spark session")
+        else:
+            sc = session._sc
+            super().__init__(sc)
+            jvm_linestring_rdd = self._create_jvm_rectangle_rdd(sc)
+            srdd = jvm_linestring_rdd()
+            self._srdd = srdd
 
     def __init__(self, rawSpatialRDD: JvmRectangleRDD):
         """
