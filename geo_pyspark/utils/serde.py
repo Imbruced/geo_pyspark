@@ -1,6 +1,5 @@
 from abc import ABC
 
-import attr
 from pyspark import PickleSerializer
 
 from geo_pyspark.utils.binary_parser import BinaryParser
@@ -37,8 +36,10 @@ class GeoSparkKryoRegistrator(Serializer):
         return "org.datasyslab.geospark.serde.GeoSparkKryoRegistrator"
 
 
-@attr.s
 class GeoSparkPickler(PickleSerializer):
+
+    def __init__(self):
+        super().__init__()
 
     def loads(self, obj, encoding="bytes"):
         binary_parser = BinaryParser(obj)
@@ -49,8 +50,7 @@ class GeoSparkPickler(PickleSerializer):
         return parsed_row
 
     def dumps(self, obj):
-        return super().dumps(obj)
+        raise NotImplementedError()
 
     def get_parser(self, number: int):
         return PARSERS[number]
-
