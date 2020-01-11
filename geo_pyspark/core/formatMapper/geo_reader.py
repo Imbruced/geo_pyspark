@@ -1,8 +1,6 @@
-from abc import ABC
 import abc
 
 import attr
-from pyspark import SparkContext
 
 from geo_pyspark.utils.meta import MultipleMeta
 

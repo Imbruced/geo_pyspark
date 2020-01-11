@@ -3,7 +3,6 @@ import types
 
 from geo_pyspark.exceptions import InvalidParametersException
 
-import typing
 from typing import Any
 from typing import GenericMeta
 

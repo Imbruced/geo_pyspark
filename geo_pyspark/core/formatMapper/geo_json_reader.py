@@ -1,5 +1,3 @@
-import inspect
-
 from pyspark import SparkContext, RDD
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD

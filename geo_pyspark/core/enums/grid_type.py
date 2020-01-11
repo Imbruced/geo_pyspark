@@ -31,7 +31,6 @@ class GridTypeJvm(JvmObject):
     grid = attr.ib(type=GridType)
 
     def _create_jvm_instance(self):
-        print(self.grid.value)
         return self.jvm_grid(self.grid.value) if self.grid.value is not None else None
 
     @property

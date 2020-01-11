@@ -1,7 +1,7 @@
 import attr
 from shapely.geometry.base import BaseGeometry
 
-from geo_pyspark.utils.abstract_parser import AbstractSpatialRDDParser, GeoData
+from geo_pyspark.utils.abstract_parser import AbstractSpatialRDDParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 
 

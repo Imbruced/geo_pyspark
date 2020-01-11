@@ -1,6 +1,6 @@
 from pyspark import SparkContext
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmCircleRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.utils.meta import MultipleMeta
 
