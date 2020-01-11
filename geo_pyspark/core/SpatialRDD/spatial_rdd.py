@@ -358,7 +358,7 @@ class SpatialRDD:
 
         :return:
         """
-        return self._srdd.setSampleNumber()
+        return self._srdd.setSampleNumber(sampleNumber)
 
     def spatialPartitionedRDD(self):
         """
