@@ -114,6 +114,9 @@ class BinaryBuffer:
         bytes = self.__pack("b", value)
         self.__extend_buffer(bytes)
 
+    def put(self, value):
+        self.__extend_buffer(value)
+
     def __pack(self, type, value):
         return struct.pack(type, value)
 
