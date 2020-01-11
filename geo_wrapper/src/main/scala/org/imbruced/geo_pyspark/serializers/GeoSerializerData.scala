@@ -1,17 +1,69 @@
 package org.imbruced.geo_pyspark.serializers
 
-import java.io.ByteArrayInputStream
-import java.nio.charset.StandardCharsets
-import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.ByteBuffer
 
-import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.io.Input
-import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.{Geometry, LineString, Point, Polygon}
+import net.razorvine.pickle.objects.{ArrayConstructor, ByteArrayConstructor, ClassDict}
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
+import org.apache.spark.sql.catalyst.util.ArrayData
 import org.datasyslab.geosparksql.utils.GeometrySerializer
+import java.nio.ByteOrder
+import java.nio.charset.StandardCharsets
+
+import net.razorvine.pickle.Unpickler
 
 
 object GeoSerializerData {
+
+  var initialized = false
+
+  def initialize(): Unit = {
+    synchronized{
+      if (!initialized) {
+        Unpickler.registerConstructor("array", "array", new ArrayConstructor())
+        Unpickler.registerConstructor("__builtin__", "bytearray", new ByteArrayConstructor())
+        Unpickler.registerConstructor("builtins", "bytearray", new ByteArrayConstructor())
+        Unpickler.registerConstructor("__builtin__", "bytes", new ByteArrayConstructor())
+        Unpickler.registerConstructor("_codecs", "encode", new ByteArrayConstructor())
+        initialized = true
+      }
+    }
+  }
+
+  def deserializeGeom(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] = {
+
+    JavaRDD.fromRDD(pythonRDD.rdd.mapPartitions { iter =>
+      iter.flatMap { row =>
+        val unpickler = new Unpickler
+        val obj = unpickler.loads(row)
+          obj match {
+            case _ => obj.asInstanceOf[java.util.ArrayList[_]].toArray.map(
+              classDict => {
+                val geoData = classDict.asInstanceOf[ClassDict]
+                val geom = geoData.asInstanceOf[ClassDict].get("geom")
+                val userData = geoData.asInstanceOf[ClassDict].get("userData")
+                val geometryInstance = GeometrySerializer.deserialize(ArrayData.toArrayData(geom))
+                geometryInstance.setUserData(userData)
+                geometryInstance.asInstanceOf[Geometry]
+              }
+            )
+          }
+      }
+    }.toJavaRDD())
+  }
+
+  def deserializeToPointRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[Point] = {
+    deserializeGeom(javaRDD).asInstanceOf[JavaRDD[Point]]
+  }
+
+  def deserializeToPolygonRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[Polygon] = {
+    deserializeGeom(javaRDD).asInstanceOf[JavaRDD[Polygon]]
+  }
+
+  def deserializeToLineStringRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[LineString] = {
+    deserializeGeom(javaRDD).asInstanceOf[JavaRDD[LineString]]
+  }
+
   def serializeToPython(spatialRDD: JavaRDD[Geometry]): JavaRDD[Array[Byte]] = {
 
     spatialRDD.rdd.map[Array[Byte]](geom =>{
@@ -82,10 +134,6 @@ object GeoSerializerData {
     ).toJavaRDD()
   }
 
-  def deserializeUserData(userData: Array[java.lang.Byte]): String = {
-    val in = new ByteArrayInputStream(userData.map(x=> x.toByte))
-    val kryo2 = new Kryo()
-    val input = new Input(in)
-    kryo2.readObject(input, "".getClass)
-  }
 }
+
+
