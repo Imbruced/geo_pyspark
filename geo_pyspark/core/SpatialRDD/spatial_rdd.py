@@ -123,6 +123,7 @@ class SpatialRDD:
             self._jvm = self._sc._jvm
             self._srdd = SpatialRDDFactory(self._sc).create_spatial_rdd(
             )()
+        self._spatial_partitioned = False
 
     def analyze(self) -> bool:
         """
@@ -177,16 +178,20 @@ class SpatialRDD:
         :param buildIndexOnSpatialPartitionedRDD:
         :return:
         """
-        if type(indexType) == str:
-            index_type = IndexTypeJvm(self._jvm, IndexType.from_string(indexType))
-        elif type(indexType) == IndexType:
-            index_type = IndexTypeJvm(self._jvm, indexType)
+
+        if self._spatial_partitioned:
+            if type(indexType) == str:
+                index_type = IndexTypeJvm(self._jvm, IndexType.from_string(indexType))
+            elif type(indexType) == IndexType:
+                index_type = IndexTypeJvm(self._jvm, indexType)
+            else:
+                raise TypeError("indexType should be str or IndexType")
+            return self._srdd.buildIndex(
+                index_type.jvm_instance,
+                buildIndexOnSpatialPartitionedRDD
+            )
         else:
-            raise TypeError("indexType should be str or IndexType")
-        return self._srdd.buildIndex(
-            index_type.jvm_instance,
-            buildIndexOnSpatialPartitionedRDD
-        )
+            raise AttributeError("Please run spatial partitioning before")
 
     def countWithoutDuplicates(self) -> int:
         """
@@ -219,7 +224,7 @@ class SpatialRDD:
 
         :return:
         """
-        raise self.getCRSTransformation()
+        return self._srdd.getCRStransformation()
 
     @property
     def getPartitioner(self) -> SpatialPartitioner:
@@ -313,6 +318,7 @@ class SpatialRDD:
             self._srdd = spatial_rdd._srdd
             self._sc = spatial_rdd._sc
             self._jvm = spatial_rdd._jvm
+            self._spatial_partitioned = spatial_rdd._spatial_partitioned
         else:
             self._srdd.setRawSpatialRDD(spatial_rdd)
 
@@ -375,6 +381,7 @@ class SpatialRDD:
             grid = partitioning.jvm_partitioner
         else:
             raise TypeError("Grid does not have correct type")
+        self._spatial_partitioned = True
         return self._srdd.spatialPartitioning(
             grid
         )
