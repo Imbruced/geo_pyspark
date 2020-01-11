@@ -305,7 +305,7 @@ class SpatialRDD:
         :return:
         """
 
-        return get_field(self._srdd, "partitionTree")
+        return JvmPartitioner(get_field(self._srdd, "partitionTree"))
 
     @property
     def rawSpatialRDD(self):
