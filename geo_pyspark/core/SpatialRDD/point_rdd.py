@@ -1,4 +1,4 @@
-from pyspark import SparkContext, StorageLevel
+from pyspark import SparkContext, StorageLevel, RDD
 from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
@@ -9,6 +9,27 @@ from geo_pyspark.utils.meta import MultipleMeta
 
 
 class PointRDD(SpatialRDD, metaclass=MultipleMeta):
+
+    def __init__(self, rdd: RDD, newLevel: StorageLevel):
+        self._sc = rdd.ctx
+        self._jvm = self._sc._jvm
+
+        spatial_rdd = self._jvm.GeoSerializerData.deserializeToPointRawRDD(rdd._jrdd)
+        jvm_linestring_rdd = self._create_jvm_point_rdd(self._sc)
+
+        new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+        srdd = jvm_linestring_rdd(spatial_rdd, new_level_jvm)
+        self._srdd = srdd
+
+    def __init__(self, rdd: RDD):
+        self._sc = rdd.ctx
+        self._jvm = self._sc._jvm
+
+        spatial_rdd = self._jvm.GeoSerializerData.deserializeToPointRawRDD(rdd._jrdd)
+        jvm_linestring_rdd = self._create_jvm_point_rdd(self._sc)
+
+        srdd = jvm_linestring_rdd(spatial_rdd)
+        self._srdd = srdd
 
     def __init__(self):
         session = SparkSession._instantiatedSession
