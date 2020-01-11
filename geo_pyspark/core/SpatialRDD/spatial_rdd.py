@@ -273,11 +273,14 @@ class SpatialRDD:
         :return:
         """
         jvm_grids = get_field(self._srdd, "grids")
-        number_of_grids = jvm_grids.size()
+        if jvm_grids:
+            number_of_grids = jvm_grids.size()
 
-        envelopes = [Envelope.from_jvm_instance(jvm_grids[index]) for index in range(number_of_grids)]
+            envelopes = [Envelope.from_jvm_instance(jvm_grids[index]) for index in range(number_of_grids)]
 
-        return envelopes
+            return envelopes
+        else:
+            return None
 
     @property
     def indexedRDD(self):
