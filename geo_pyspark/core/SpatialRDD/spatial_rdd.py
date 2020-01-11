@@ -242,7 +242,7 @@ class SpatialRDD:
         serialized_spatial_rdd = self._jvm.GeoSerializerData.serializeToPython(self._srdd.getRawSpatialRDD())
         return RDD(serialized_spatial_rdd, self._sc, GeoSparkPickler())
 
-    def getSampleNumber(self):
+    def getSampleNumber(self) -> int:
         """
 
         :return:
@@ -264,7 +264,7 @@ class SpatialRDD:
         return self._srdd.getTargetEpgsgCode()
 
     @property
-    def grids(self) -> List[Envelope]:
+    def grids(self) -> Optional[List[Envelope]]:
         """
         Returns grids for SpatialRDD, it is a list of Envelopes.
 
@@ -295,7 +295,7 @@ class SpatialRDD:
         return self._srdd.indexedRawRDD()
 
     @property
-    def partitionTree(self):
+    def partitionTree(self) -> JvmPartitioner:
         """TODO add python wrapper for partitionTree based on name"""
         """
 
@@ -353,7 +353,7 @@ class SpatialRDD:
         """
         return self._srdd.setRawSpatialRDD(jrdd)
 
-    def setSampleNumber(self):
+    def setSampleNumber(self, sampleNumber: int) -> bool:
         """
 
         :return:
