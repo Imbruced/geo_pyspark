@@ -1,28 +1,16 @@
 import os
 
 import pytest
-from pyspark.sql import SparkSession
 from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import KNNQuery
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
-from geo_pyspark.utils.spatial_rdd_parser import GeoData
+from geo_pyspark.utils.abstract_parser import GeoData
+from tests.test_base import TestBase
 from tests.utils import tests_path
 
-upload_jars()
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
@@ -43,14 +31,14 @@ def distance_sorting_functions(geo_data: GeoData, query_point: Point):
     return geo_data.geom.distance(query_point)
 
 
-class TestRectangleKNN:
+class TestRectangleKNN(TestBase):
     query_envelope = Envelope(-90.01, -80.01, 30.01, 40.01)
     loop_times = 5
     query_point = Point(-84.01, 34.01)
     top_k = 100
 
     def test_spatial_knn_query(self):
-        rectangle_rdd = RectangleRDD(sc, inputLocation, offset, splitter, True)
+        rectangle_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)
 
         for i in range(self.loop_times):
             result = KNNQuery.SpatialKnnQuery(rectangle_rdd, self.query_point, self.top_k, False)
@@ -59,7 +47,7 @@ class TestRectangleKNN:
             assert result[0].getUserData() is not None
 
     def test_spatial_knn_query_using_index(self):
-        rectangle_rdd = RectangleRDD(sc, inputLocation, offset, splitter, True)
+        rectangle_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)
         rectangle_rdd.buildIndex(IndexType.RTREE, False)
 
         for i in range(self.loop_times):
@@ -69,7 +57,7 @@ class TestRectangleKNN:
             assert result[0].getUserData() is not None
 
     def test_spatial_knn_query_correctness(self):
-        rectangle_rdd = RectangleRDD(sc, inputLocation, offset, splitter, True)
+        rectangle_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)
 
         result_no_index = KNNQuery.SpatialKnnQuery(rectangle_rdd, self.query_point, self.top_k, False)
         rectangle_rdd.buildIndex(IndexType.RTREE, False)

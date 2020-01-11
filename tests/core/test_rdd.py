@@ -1,9 +1,6 @@
 import logging
-import os
-import pytest
 
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
@@ -12,18 +9,10 @@ from geo_pyspark.core.enums.join_build_side import JoinBuildSide
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
 import os
 
+from tests.test_base import TestBase
 from tests.utils import tests_path
-
-upload_jars()
-
-spark = SparkSession.builder.\
-    master("local[*]").\
-    getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
 
 resource_folder = "resources"
 
@@ -50,14 +39,12 @@ range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 join_query_partitionin_type = GridType.QUADTREE
 each_query_loop_times = 1
 
-sc = spark.sparkContext
 
-
-class TestSpatialRDD:
+class TestSpatialRDD(TestBase):
 
     def test_empty_constructor_test(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -69,7 +56,7 @@ class TestSpatialRDD:
 
     def test_spatial_range_query(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -83,7 +70,7 @@ class TestSpatialRDD:
 
     def test_range_query_using_index(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -96,7 +83,7 @@ class TestSpatialRDD:
 
     def test_knn_query(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -107,7 +94,7 @@ class TestSpatialRDD:
 
     def test_knn_query_with_index(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -119,7 +106,7 @@ class TestSpatialRDD:
 
     def test_spaltial_join(self):
         query_window_rdd = PolygonRDD(
-            sc,
+            self.sc,
             polygon_rdd_input_location,
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
@@ -128,7 +115,7 @@ class TestSpatialRDD:
         )
 
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -144,7 +131,7 @@ class TestSpatialRDD:
 
     def test_spatial_join_using_index(self):
         query_window = PolygonRDD(
-            sc,
+            self.sc,
             polygon_rdd_input_location,
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
@@ -152,7 +139,7 @@ class TestSpatialRDD:
             True
         )
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -170,7 +157,7 @@ class TestSpatialRDD:
 
     def test_spatial_join_using_index_on_polygons(self):
         query_window = PolygonRDD(
-            sc,
+            self.sc,
             polygon_rdd_input_location,
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
@@ -178,7 +165,7 @@ class TestSpatialRDD:
             True
         )
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -200,7 +187,7 @@ class TestSpatialRDD:
 
     def test_spatial_join_query_using_index_on_polygons(self):
         query_window_rdd = PolygonRDD(
-            sc,
+            self.sc,
             polygon_rdd_input_location,
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
@@ -208,7 +195,7 @@ class TestSpatialRDD:
             True
         )
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -225,7 +212,7 @@ class TestSpatialRDD:
 
     def test_spatial_join_query_and_build_index_on_points_on_the_fly(self):
         query_window = PolygonRDD(
-            sc,
+            self.sc,
             polygon_rdd_input_location,
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
@@ -233,7 +220,7 @@ class TestSpatialRDD:
             True
         )
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -253,7 +240,7 @@ class TestSpatialRDD:
 
     def test_spatial_join_query_and_build_index_on_polygons_on_the_fly(self):
         query_window_rdd = PolygonRDD(
-            sc,
+            self.sc,
             polygon_rdd_input_location,
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
@@ -262,7 +249,7 @@ class TestSpatialRDD:
         )
 
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -282,15 +269,13 @@ class TestSpatialRDD:
 
     def test_distance_join_query(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
             carryInputData=False
         )
         query_window_rdd = CircleRDD(object_rdd, 0.1)
-        print(query_window_rdd.rawSpatialRDD.collect())
-        print("s")
         object_rdd.analyze()
         object_rdd.spatialPartitioning(GridType.QUADTREE)
         query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
@@ -304,7 +289,7 @@ class TestSpatialRDD:
 
     def test_distance_join_query_using_index(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -362,7 +347,7 @@ class TestSpatialRDD:
 
     def test_crs_transformed_spatial_range_query(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -378,7 +363,7 @@ class TestSpatialRDD:
 
     def test_crs_tranformed_spatial_range_query_using_index(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,

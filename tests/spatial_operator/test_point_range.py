@@ -1,27 +1,14 @@
 import os
 
 import pytest
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery
-from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+from tests.test_base import TestBase
 from tests.utils import tests_path
 
-upload_jars()
-
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 input_location = os.path.join(tests_path, "resources/arealm-small.csv")
 queryWindowSet = os.path.join("zcta510-small.csv")
@@ -45,12 +32,12 @@ polygonMatchCount = 472
 polygonMatchWithOriginalDuplicatesCount = 562
 
 
-class TestPointRange:
+class TestPointRange(TestBase):
     loop_times = 5
     query_envelope = Envelope(-90.01, -80.01, 30.01, 40.01)
 
     def test_spatial_range_query(self):
-        spatial_rdd = PointRDD(sc, input_location, offset, splitter, False)
+        spatial_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
         for i in range(self.loop_times):
             result_size = RangeQuery.\
                 SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False)\
@@ -61,7 +48,7 @@ class TestPointRange:
                    getUserData() is not None
 
     def test_spatial_range_query_using_index(self):
-        spatial_rdd = PointRDD(sc, input_location, offset, splitter, False)
+        spatial_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
 
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 

@@ -2,25 +2,12 @@ import os
 
 import pytest
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import PolygonRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.test_base import TestBase
 from tests.utils import tests_path
-
-upload_jars()
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 inputLocation = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
@@ -42,11 +29,11 @@ intersectsMatchCount = 24323
 intersectsMatchWithOriginalDuplicatesCount = 32726
 
 
-class TestPolygonRDD:
+class TestPolygonRDD(TestBase):
 
     def test_constructor(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -61,7 +48,7 @@ class TestPolygonRDD:
 
     def test_empty_constructor(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -77,7 +64,7 @@ class TestPolygonRDD:
 
     def test_geojson_constructor(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocationGeojson,
             splitter=FileDataSplitter.GEOJSON,
             carryInputData=True,
@@ -93,7 +80,7 @@ class TestPolygonRDD:
 
     def test_wkt_constructor(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocationWkt,
             splitter=FileDataSplitter.WKT,
             carryInputData=True,
@@ -107,7 +94,7 @@ class TestPolygonRDD:
 
     def test_wkb_constructor(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocationWkb,
             splitter=FileDataSplitter.WKB,
             carryInputData=True,
@@ -120,7 +107,7 @@ class TestPolygonRDD:
 
     def test_hilbert_curve_spatial_partitioning(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -135,7 +122,7 @@ class TestPolygonRDD:
 
     def test_r_tree_spatial_partitioning(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -151,7 +138,7 @@ class TestPolygonRDD:
 
     def test_voronoi_spatial_partitioning(self):
         spatial_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=FileDataSplitter.CSV,
             carryInputData=True,
@@ -166,7 +153,7 @@ class TestPolygonRDD:
 
     def test_build_index_without_set_grid(self):
         spatial_rdd = PolygonRDD(
-            sc,
+            self.sc,
             inputLocation,
             FileDataSplitter.CSV,
             carryInputData=True,
@@ -186,7 +173,7 @@ class TestPolygonRDD:
 
     def test_mbr(self):
         polygon_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=FileDataSplitter.CSV,
             carryInputData=True,

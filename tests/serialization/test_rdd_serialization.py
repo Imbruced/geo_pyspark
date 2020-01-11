@@ -1,20 +1,10 @@
 import os
 
-import pytest
-from pyspark.sql import SparkSession
-
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
 from geo_pyspark.core.enums import FileDataSplitter, IndexType
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.test_base import TestBase
 from tests.utils import tests_path
 
-upload_jars()
-
-spark = SparkSession.builder. \
-    master("local[*]"). \
-    getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
 
 resource_folder = "resources"
 point_rdd_input_location = os.path.join(tests_path, resource_folder, "arealm-small.csv")
@@ -28,16 +18,15 @@ polygon_rdd_num_partitions = 5
 polygon_rdd_start_offset = 0
 polygon_rdd_end_offset = 9
 
-sc = spark.sparkContext
 point_rdd_offset = 1
 point_rdd_splitter = FileDataSplitter.CSV
 
 
-class TestRDDSerialization:
+class TestRDDSerialization(TestBase):
 
     def test_point_rdd(self):
         point_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -55,7 +44,7 @@ class TestRDDSerialization:
 
     def test_polygon_rdd(self):
         polygon_rdd = PolygonRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=polygon_rdd_input_location,
             startOffset=polygon_rdd_start_offset,
             endOffset=polygon_rdd_end_offset,
@@ -75,7 +64,7 @@ class TestRDDSerialization:
 
     def test_circle_rdd(self):
         object_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
@@ -87,7 +76,7 @@ class TestRDDSerialization:
 
     def test_linestring_rdd(self):
         linestring_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=linestring_rdd_input_location,
             startOffset=0,
             endOffset=7,

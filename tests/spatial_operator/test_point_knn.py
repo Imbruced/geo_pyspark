@@ -1,29 +1,14 @@
 import os
 
 import pytest
-from pyspark.sql import SparkSession
 from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter
-from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery
-from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+from geo_pyspark.core.spatialOperator import KNNQuery
 from tests.spatial_operator.test_rectangle_knn import distance_sorting_functions
+from tests.test_base import TestBase
 from tests.utils import tests_path
-
-upload_jars()
-
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 input_location = os.path.join(tests_path, "resources/arealm-small.csv")
 queryWindowSet = os.path.join("zcta510-small.csv")
@@ -33,13 +18,13 @@ gridType = "rtree"
 indexType = "rtree"
 
 
-class TestPointKnn:
+class TestPointKnn(TestBase):
     loop_times = 5
     query_point = Point(-84.01, 34.01)
     top_k = 100
 
     def test_spatial_knn_query(self):
-        point_rdd = PointRDD(sc, input_location, offset, splitter, False)
+        point_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
 
         for i in range(self.loop_times):
             result = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, False)
@@ -47,7 +32,7 @@ class TestPointKnn:
             assert result[0].getUserData() is not None
 
     def test_spatial_knn_query_using_index(self):
-        point_rdd = PointRDD(sc, input_location, offset, splitter, False)
+        point_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
         point_rdd.buildIndex(IndexType.RTREE, False)
 
         for i in range(self.loop_times):
@@ -56,7 +41,7 @@ class TestPointKnn:
             assert result[0].getUserData() is not None
 
     def test_spatial_knn_correctness(self):
-        point_rdd = PointRDD(sc, input_location, offset, splitter, False)
+        point_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
         result_no_index = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, False)
         point_rdd.buildIndex(IndexType.RTREE, False)
         result_with_index = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, True)

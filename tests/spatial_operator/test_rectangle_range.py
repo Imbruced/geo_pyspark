@@ -5,23 +5,11 @@ from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
-from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
+from geo_pyspark.core.enums import IndexType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.test_base import TestBase
 from tests.utils import tests_path
-
-upload_jars()
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
@@ -38,12 +26,12 @@ matchCount = 17599
 matchWithOriginalDuplicatesCount = 17738
 
 
-class TestRectangleRange:
+class TestRectangleRange(TestBase):
     query_envelope = Envelope(-90.01, -80.01, 30.01, 40.01)
     loop_times = 5
 
     def test_spatial_range_query(self):
-        spatial_rdd = RectangleRDD(sc, inputLocation, offset, splitter, True, StorageLevel.MEMORY_ONLY)
+        spatial_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True, StorageLevel.MEMORY_ONLY)
 
         for i in range(self.loop_times):
             result_size = RangeQuery.SpatialRangeQuery(
@@ -55,7 +43,7 @@ class TestRectangleRange:
 
     def test_spatial_range_query_using_index(self):
         spatial_rdd = RectangleRDD(
-            sc, inputLocation, offset, splitter, True, StorageLevel.MEMORY_ONLY)
+            self.sc, inputLocation, offset, splitter, True, StorageLevel.MEMORY_ONLY)
 
         spatial_rdd.buildIndex(IndexType.RTREE, False)
         for i in range(self.loop_times):

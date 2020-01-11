@@ -1,30 +1,15 @@
 import os
 
-import pytest
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter
-from geo_pyspark.register import GeoSparkRegistrator, upload_jars
 from geo_pyspark.sql.types import GeometryType
-from geo_pyspark.utils.prep import assign_all
+from tests.test_base import TestBase
 from tests.utils import tests_path
 from shapely.geometry import Point
 
-upload_jars()
-
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 point_input_path = os.path.join(tests_path, "resources/arealm-small.csv")
 
@@ -37,10 +22,9 @@ indexType = "rtree"
 numPartitions = 11
 
 
-class TestSpatialRDDToDataFrame:
+class TestSpatialRDDToDataFrame(TestBase):
 
     def test_list_to_rdd_and_df(self):
-        assign_all()
         point_data = [
             [Point(21, 52.0), "1", 1],
             [Point(22, 52.0), "2", 2],
@@ -56,11 +40,10 @@ class TestSpatialRDDToDataFrame:
             ]
         )
 
-        rdd_data = spark.sparkContext.parallelize(point_data)
-        df = spark.createDataFrame(rdd_data)
+        rdd_data = self.spark.sparkContext.parallelize(point_data)
+        df = self.spark.createDataFrame(rdd_data)
         df.show()
         df.printSchema()
-
 
     def test_polygon_rdd(self):
         pass
@@ -70,7 +53,7 @@ class TestSpatialRDDToDataFrame:
 
     def test_point_rdd(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=crs_test_point,
             Offset=0,
             splitter=splitter,
@@ -83,7 +66,7 @@ class TestSpatialRDDToDataFrame:
             lambda x: [x.geom, *x.getUserData().split("\t")]
         )
 
-        spark.createDataFrame(raw_spatial_rdd).show()
+        self.spark.createDataFrame(raw_spatial_rdd).show()
 
         schema = StructType(
             [
@@ -92,7 +75,7 @@ class TestSpatialRDDToDataFrame:
             ]
         )
 
-        spatial_rdd_with_schema = spark.createDataFrame(
+        spatial_rdd_with_schema = self.spark.createDataFrame(
             raw_spatial_rdd, schema
         )
 

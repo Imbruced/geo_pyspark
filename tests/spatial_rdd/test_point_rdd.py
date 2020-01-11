@@ -2,26 +2,12 @@ import os
 
 import pytest
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+from tests.test_base import TestBase
 from tests.utils import tests_path
-
-upload_jars()
-
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 inputLocation = os.path.join(tests_path, "resources/arealm-small.csv")
 queryWindowSet = os.path.join("zcta510-small.csv")
@@ -45,11 +31,11 @@ polygonMatchCount = 472
 polygonMatchWithOriginalDuplicatesCount = 562
 
 
-class TestPointRDD:
+class TestPointRDD(TestBase):
 
     def test_constructor(self):
         spatial_rdd = PointRDD(
-            sc,
+            self.sc,
             inputLocation,
             offset,
             splitter,
@@ -68,7 +54,7 @@ class TestPointRDD:
 
     def test_empty_constructor(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             Offset=offset,
             splitter=splitter,
@@ -83,7 +69,7 @@ class TestPointRDD:
 
     def test_equal_partitioning(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             Offset=offset,
             splitter=splitter,
@@ -100,7 +86,7 @@ class TestPointRDD:
 
     def test_hilbert_curve_spatial_partitioning(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             Offset=offset,
             splitter=splitter,
@@ -118,7 +104,7 @@ class TestPointRDD:
 
     def test_r_tree_spatial_partitioning(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             Offset=offset,
             splitter=splitter,
@@ -136,7 +122,7 @@ class TestPointRDD:
 
     def test_voronoi_spatial_partitioning(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             Offset=offset,
             splitter=splitter,
@@ -155,7 +141,7 @@ class TestPointRDD:
 
     def test_build_index_without_set_grid(self):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             Offset=offset,
             splitter=splitter,

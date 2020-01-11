@@ -2,25 +2,12 @@ import os
 
 import pytest
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import LineStringRDD
 from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.test_base import TestBase
 from tests.utils import tests_path
-
-upload_jars()
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 inputLocation = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
@@ -37,11 +24,11 @@ matchCount = 535
 matchWithOriginalDuplicatesCount = 875
 
 
-class TestLineStringRDD:
+class TestLineStringRDD(TestBase):
 
     def test_constructor(self):
         spatial_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -56,7 +43,7 @@ class TestLineStringRDD:
 
     def test_empty_constructor(self):
         spatial_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -73,7 +60,7 @@ class TestLineStringRDD:
 
     def test_hilbert_curve_spatial_partitioning(self):
         spatial_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -88,7 +75,7 @@ class TestLineStringRDD:
 
     def test_rtree_spatial_partitioning(self):
         spatial_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -103,7 +90,7 @@ class TestLineStringRDD:
 
     def test_voronoi_spatial_partitioning(self):
         spatial_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -118,7 +105,7 @@ class TestLineStringRDD:
 
     def test_build_index_without_set_grid(self):
         spatial_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,
@@ -139,7 +126,7 @@ class TestLineStringRDD:
 
     def test_mbr(self):
         linestring_rdd = LineStringRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             splitter=splitter,
             carryInputData=True,

@@ -2,27 +2,15 @@ import pytest
 import os
 
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import FileDataSplitter, GridType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import JoinQuery
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.test_base import TestBase
 from tests.utils import tests_path
 
-upload_jars()
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
@@ -39,14 +27,14 @@ matchCount = 17599
 matchWithOriginalDuplicatesCount = 17738
 
 
-class TestRectangleJoin:
+class TestRectangleJoin(TestBase):
 
     def partition_rdds(self, query_rdd: SpatialRDD, spatial_rdd: SpatialRDD, index: GridType):
         spatial_rdd.spatialPartitioning(index)
         query_rdd.spatialPartitioning(spatial_rdd.getPartitioner)
 
     def create_rectangle_rdd(self):
-        rdd = RectangleRDD(sc, inputLocation, splitter, True, numPartitions)
+        rdd = RectangleRDD(self.sc, inputLocation, splitter, True, numPartitions)
         rdd.analyze()
         return RectangleRDD(rdd.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
 

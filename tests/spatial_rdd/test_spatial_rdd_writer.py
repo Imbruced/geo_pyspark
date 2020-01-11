@@ -3,26 +3,12 @@ import shutil
 
 import pytest
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.register import upload_jars, GeoSparkRegistrator
+from tests.test_base import TestBase
 from tests.utils import tests_path
-
-upload_jars()
-
-
-spark = SparkSession.\
-    builder.\
-    master("local").\
-    getOrCreate()
-
-GeoSparkRegistrator.\
-    registerAll(spark)
-
-sc = spark.sparkContext
 
 
 wkb_folder = "wkb"
@@ -65,20 +51,15 @@ def remove_directory(path: str) -> bool:
 
 
 @pytest.fixture
-def remove_wkt_directory():
-    remove_directory(os.path.join(os.getcwd(), wkt_folder))
-
-
-@pytest.fixture
 def remove_wkb_directory():
-    remove_directory(os.path.join(os.getcwd(), wkb_folder))
+    remove_directory(test_save_as_wkb_with_data)
 
 
-class TestSpatialRDDWriter:
+class TestSpatialRDDWriter(TestBase):
 
-    def test_save_as_wkb_with_data(self, remove_wkt_directory):
+    def test_save_as_geo_json_with_data(self, remove_wkb_directory):
         spatial_rdd = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=inputLocation,
             Offset=offset,
             splitter=splitter,
@@ -87,30 +68,15 @@ class TestSpatialRDDWriter:
             newLevel=StorageLevel.MEMORY_ONLY
         )
 
-        spatial_rdd.saveAsWKB(test_save_as_wkb_with_data)
+        spatial_rdd.saveAsGeoJSON(test_save_as_wkb_with_data)
 
         result_wkb = PointRDD(
-            sparkContext=sc,
+            sparkContext=self.sc,
             InputLocation=test_save_as_wkb_with_data,
-            Offset=0,
-            splitter=FileDataSplitter.WKB,
+            splitter=FileDataSplitter.GEOJSON,
             carryInputData=True,
             partitions=numPartitions,
             newLevel=StorageLevel.MEMORY_ONLY
         )
 
         assert result_wkb.rawSpatialRDD.count() == spatial_rdd.rawSpatialRDD.count()
-
-        assert result_wkb.rawSpatialRDD.takeOrdered(5) == spatial_rdd.rawSpatialRDD.takeOrdered(5)
-
-    def test_save_as_wkt_with_data(self):
-        pass
-
-    def test_save_as_wkb(self):
-        pass
-
-    def test_save_as_wkt(self):
-        pass
-
-    def test_save_as_empty_wkb(self):
-        pass

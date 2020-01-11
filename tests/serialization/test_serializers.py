@@ -3,21 +3,15 @@ import os
 from pyspark.sql.types import IntegerType
 import geopandas as gpd
 
-from .data import data_path
-from geo_pyspark.register import GeoSparkRegistrator, upload_jars
+from tests.data import data_path
 from geo_pyspark.sql.types import GeometryType
 from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon
-from pyspark.sql import types as t, SparkSession
+from pyspark.sql import types as t
 
-upload_jars()
-
-spark = SparkSession.builder.\
-        getOrCreate()
-
-GeoSparkRegistrator.registerAll(spark)
+from tests.test_base import TestBase
 
 
-class TestsSerializers:
+class TestsSerializers(TestBase):
 
     def test_point_serializer(self):
         data = [
@@ -32,12 +26,12 @@ class TestsSerializers:
                 t.StructField("geom_to", GeometryType(), True)
             ]
         )
-        spark.createDataFrame(
+        self.spark.createDataFrame(
             data,
             schema
         ).createOrReplaceTempView("points")
 
-        distance = spark.sql(
+        distance = self.spark.sql(
             "select st_distance(geom_from, geom_to) from points"
         ).collect()[0][0]
         assert distance == 3.0
@@ -58,7 +52,7 @@ class TestsSerializers:
                 t.StructField("geom", GeometryType(), True)
             ]
         )
-        m_point_out = spark.createDataFrame(
+        m_point_out = self.spark.createDataFrame(
             data,
             schema
         ).collect()[0][1]
@@ -78,12 +72,12 @@ class TestsSerializers:
             ]
         )
 
-        spark.createDataFrame(
+        self.spark.createDataFrame(
             data,
             schema
         ).createOrReplaceTempView("line")
 
-        length = spark.sql("select st_length(geom) from line").collect()[0][0]
+        length = self.spark.sql("select st_length(geom) from line").collect()[0][0]
         assert length == 12.0
 
     def test_multilinestring_serialization(self):
@@ -99,12 +93,12 @@ class TestsSerializers:
             ]
         )
 
-        spark.createDataFrame(
+        self.spark.createDataFrame(
             data,
             schema
         ).createOrReplaceTempView("multilinestring")
 
-        length = spark.sql("select st_length(geom) from multilinestring").collect()[0][0]
+        length = self.spark.sql("select st_length(geom) from multilinestring").collect()[0][0]
         assert length == 2.0
 
     def test_polygon_serialization(self):
@@ -124,17 +118,17 @@ class TestsSerializers:
             ]
         )
 
-        spark.createDataFrame(
+        self.spark.createDataFrame(
             data,
             schema
         ).createOrReplaceTempView("polygon")
 
-        length = spark.sql("select st_area(geom) from polygon").collect()[0][0]
+        length = self.spark.sql("select st_area(geom) from polygon").collect()[0][0]
         assert length == 3.75
 
     def test_geopandas_convertion(self):
         gdf = gpd.read_file(os.path.join(data_path, "gis_osm_pois_free_1.shp"))
-        print(spark.createDataFrame(
+        print(self.spark.createDataFrame(
             gdf
         ).toPandas())
 
@@ -158,13 +152,13 @@ class TestsSerializers:
                 t.StructField("geom", GeometryType(), True)
             ]
         )
-        spark.createDataFrame(
+        self.spark.createDataFrame(
             data,
             schema
         ).show(1, False)
-        spark.createDataFrame(
+        self.spark.createDataFrame(
             data,
             schema
         ).createOrReplaceTempView("polygon")
-        length = spark.sql("select st_area(geom) from polygon").collect()[0][0]
+        length = self.spark.sql("select st_area(geom) from polygon").collect()[0][0]
         assert length == 4.75
