@@ -19,10 +19,13 @@ class SpatialPartitioner:
     jvm_partitioner = attr.ib()
 
     @classmethod
-    def from_java_class_name(cls, jvm_partitioner):
-        jvm_full_name = jvm_partitioner.toString()
-        full_class_name = jvm_full_name.split("@")[0]
-        partitioner = full_class_name.split(".")[-1]
+    def from_java_class_name(cls, jvm_partitioner) -> 'SpatialPartitioner':
+        if jvm_partitioner is not None:
+            jvm_full_name = jvm_partitioner.toString()
+            full_class_name = jvm_full_name.split("@")[0]
+            partitioner = full_class_name.split(".")[-1]
+        else:
+            partitioner = None
 
         return cls(partitioner, jvm_partitioner)
 
