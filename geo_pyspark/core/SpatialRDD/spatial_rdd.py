@@ -9,7 +9,7 @@ from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.utils.serde import GeoSparkPickler
+from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 from geo_pyspark.utils.types import crs
 
 
@@ -179,7 +179,7 @@ class SpatialRDD:
         :return:
         """
 
-        if self._spatial_partitioned:
+        if self._spatial_partitioned or not buildIndexOnSpatialPartitionedRDD:
             if type(indexType) == str:
                 index_type = IndexTypeJvm(self._jvm, IndexType.from_string(indexType))
             elif type(indexType) == IndexType:
