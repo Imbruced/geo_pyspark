@@ -1,8 +1,11 @@
+from copy import copy
+
 import attr
+from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core.jvm.abstract import JvmObject
-from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.utils.decorators import require
 
 
 @attr.s
