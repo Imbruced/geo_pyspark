@@ -58,7 +58,9 @@ class TestSpatialRDD(TestBase):
 
     def test_minimum_bounding_rectangle(self):
         spatial_rdd = self.create_spatial_rdd()
-        spatial_rdd.MinimumBoundingRectangle()
+
+        with pytest.raises(NotImplementedError):
+            spatial_rdd.MinimumBoundingRectangle()
 
     def test_approximate_total_count(self):
         spatial_rdd = self.create_spatial_rdd()
