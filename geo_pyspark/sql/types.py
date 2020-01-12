@@ -18,7 +18,9 @@ class GeometryType(UserDefinedType):
         return GeometryFactory.to_bytes(obj)
 
     def deserialize(self, datum):
+        from geo_pyspark.sql.geometry import GeometryFactory
         from geo_pyspark.utils.binary_parser import BinaryParser
+
         bin_parser = BinaryParser(datum)
         geom = GeometryFactory.geometry_from_bytes(bin_parser)
 
