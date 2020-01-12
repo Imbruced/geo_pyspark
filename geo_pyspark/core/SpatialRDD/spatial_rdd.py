@@ -1,3 +1,4 @@
+import pickle
 from typing import Optional, List, Union
 
 import attr
@@ -9,6 +10,7 @@ from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.utils.binary_parser import BinaryBuffer
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 from geo_pyspark.utils.types import crs
 
@@ -370,7 +372,7 @@ class SpatialRDD:
         """
         return self._srdd.spatialPartitionedRDD()
 
-    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner]) -> bool:
+    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]]) -> bool:
         """
 
         :param partitioning:
@@ -382,6 +384,13 @@ class SpatialRDD:
             grid = GridTypeJvm(self._jvm, partitioning).jvm_instance
         elif type(partitioning) == SpatialPartitioner:
             grid = partitioning.jvm_partitioner
+        elif type(partitioning) == list:
+            if isinstance(partitioning[0], Envelope):
+                bytes_data = pickle.dumps(partitioning)
+                jvm_envelopes = self._jvm.GeoSerializerData.createEnvelopes(bytes_data)
+                grid = jvm_envelopes
+            else:
+                raise AttributeError("List should consists of Envelopes")
         else:
             raise TypeError("Grid does not have correct type")
         self._spatial_partitioned = True
