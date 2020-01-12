@@ -4,7 +4,7 @@ from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
 from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
-from geo_pyspark.utils.serde import GeoSparkPickler
+from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 
 
 class JoinQuery:

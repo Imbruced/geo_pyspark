@@ -4,29 +4,8 @@ from typing import List, Any
 import attr
 from shapely.geometry.base import BaseGeometry
 
+from geo_pyspark.core.data import GeoData
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
-
-
-@attr.s
-class GeoData:
-    geom = attr.ib()
-    userData = attr.ib()
-
-    def getUserData(self):
-        return self.userData
-
-    def __getstate__(self):
-        from geo_pyspark.sql.geometry import GeometryFactory
-        attributes = self.__dict__.copy()
-        geom = attributes["geom"]
-        attributes["geom"] = bytearray([el if el >= 0 else el + 256 for el in GeometryFactory.to_bytes(geom)])
-        return attributes
-
-    def __setstate__(self, attributes):
-        from geo_pyspark.sql.geometry import GeometryFactory
-        bin_parser = BinaryParser(attributes["geom"])
-        self.geom = GeometryFactory.geometry_from_bytes(bin_parser)
-        self.userData = attributes["userData"]
 
 
 @attr.s
