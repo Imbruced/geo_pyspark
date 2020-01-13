@@ -9,16 +9,19 @@ from geo_pyspark.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
 from tests.tools import tests_path
 
-input_location = os.path.join(tests_path, "resources/zcta510-small.csv")
+input_location = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
 query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
-offset = 0
+# offset=0
 splitter = FileDataSplitter.CSV
-distance = 0.001
-queryPolygonSet = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-inputCount = 3000
-inputBoundary = Envelope(-171.090042, 145.830505, -14.373765, 49.00127)
-match_count = 17599
-match_with_original_duplicates_count = 17738
+# gridType=rtree
+# indexType=rtree
+# numPartitions=5
+# distance=0.01
+query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
+# inputCount=3000
+# inputBoundary=-123.393766, -65.648659, 17.982169, 49.002374
+match_count = 535
+match_with_original_duplicates_count = 875
 
 
 def pytest_generate_tests(metafunc):
@@ -48,24 +51,20 @@ class TestRectangleJoin(TestJoinBase):
     }
 
     def test_nested_loop(self, num_partitions, use_legacy_apis, grid_type):
-        query_rdd = self.create_rectangle_rdd(input_location, splitter, num_partitions)
-        spatial_rdd = self.create_rectangle_rdd(input_location, splitter, num_partitions)
+        query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
+        spatial_rdd = self.create_linestring_rdd(input_location, splitter, num_partitions)
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type, use_legacy_apis)
 
         result = JoinQuery.SpatialJoinQuery(
             spatial_rdd, query_rdd, False, True).collect()
 
-        count = 0
-        for el in result:
-            count += el[1].__len__()
-        assert match_count == count
         self.sanity_check_join_results(result)
-        assert match_with_original_duplicates_count == self.count_join_results(result)
+        assert match_count == self.count_join_results(result)
 
     def test_dynamic_index_int(self, num_partitions, use_legacy_apis, grid_type, index_type):
-        query_rdd = self.create_rectangle_rdd(input_location, splitter, num_partitions)
-        spatial_rdd = self.create_rectangle_rdd(input_location, splitter, num_partitions)
+        query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
+        spatial_rdd = self.create_linestring_rdd(input_location, splitter, num_partitions)
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type, use_legacy_apis)
 
@@ -80,8 +79,8 @@ class TestRectangleJoin(TestJoinBase):
         assert expected_count == result.__len__()
 
     def test_index_int(self, num_partitions, use_legacy_apis, grid_type, index_type):
-        query_rdd = self.create_rectangle_rdd(input_location, splitter, num_partitions)
-        spatial_rdd = self.create_rectangle_rdd(input_location, splitter, num_partitions)
+        query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
+        spatial_rdd = self.create_linestring_rdd(input_location, splitter, num_partitions)
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type, use_legacy_apis)
         spatial_rdd.buildIndex(index_type, True)
