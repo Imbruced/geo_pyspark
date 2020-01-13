@@ -33,6 +33,11 @@ class BinaryParser:
         self.current_index = self.current_index + DOUBLE_SIZE
         return data
 
+    def read_double_reverse(self):
+        data = self.unpack_reverse("d", self.bytes)
+        self.current_index = self.current_index + DOUBLE_SIZE
+        return data
+
     def read_int(self):
         data = self.unpack("i", self.bytes)
         self.current_index = self.current_index + INT_SIZE
@@ -75,10 +80,14 @@ class BinaryParser:
         self.current_index = length
         return decoded_string
 
-
     def unpack(self, tp: str, bytes: bytearray):
         max_index = self.current_index + size_dict[tp]
         bytes = self._convert_to_binary_array(bytes[self.current_index: max_index])
+        return struct.unpack(tp, bytes)[0]
+
+    def unpack_reverse(self, tp: str, bytes: bytearray):
+        max_index = self.current_index + size_dict[tp]
+        bytes = bytearray(reversed(self._convert_to_binary_array(bytes[self.current_index: max_index])))
         return struct.unpack(tp, bytes)[0]
 
     @classmethod
