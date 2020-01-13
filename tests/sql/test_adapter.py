@@ -164,7 +164,7 @@ class TestAdapter(TestBase):
         point_rdd.analyze()
 
         point_rdd.spatialPartitioning(GridType.QUADTREE)
-        polygon_rdd.spatialPartitioning(point_rdd.getPartitioner)
+        polygon_rdd.spatialPartitioning(point_rdd.getPartitioner())
 
         point_rdd.buildIndex(IndexType.QUADTREE, True)
 
@@ -208,7 +208,7 @@ class TestAdapter(TestBase):
         circle_rdd = CircleRDD(polygon_rdd, 0.2)
 
         point_rdd.spatialPartitioning(GridType.QUADTREE)
-        circle_rdd.spatialPartitioning(point_rdd.getPartitioner)
+        circle_rdd.spatialPartitioning(point_rdd.getPartitioner())
 
         point_rdd.buildIndex(IndexType.QUADTREE, True)
 

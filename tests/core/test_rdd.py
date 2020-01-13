@@ -123,7 +123,7 @@ class TestSpatialRDD(TestBase):
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
-        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         for x in range(each_query_loop_times):
             result_size = JoinQuery.SpatialJoinQuery(
@@ -147,7 +147,7 @@ class TestSpatialRDD(TestBase):
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
-        query_window.spatialPartitioning(object_rdd.getPartitioner)
+        query_window.spatialPartitioning(object_rdd.getPartitioner())
 
         object_rdd.buildIndex(point_rdd_index_type, True)
 
@@ -173,7 +173,7 @@ class TestSpatialRDD(TestBase):
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
-        query_window.spatialPartitioning(object_rdd.getPartitioner)
+        query_window.spatialPartitioning(object_rdd.getPartitioner())
 
         query_window.buildIndex(polygon_rdd_index_type, True)
 
@@ -203,7 +203,7 @@ class TestSpatialRDD(TestBase):
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
-        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.SpatialJoinQuery(
@@ -228,7 +228,7 @@ class TestSpatialRDD(TestBase):
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
-        query_window.spatialPartitioning(object_rdd.getPartitioner)
+        query_window.spatialPartitioning(object_rdd.getPartitioner())
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.SpatialJoinQuery(
@@ -257,7 +257,7 @@ class TestSpatialRDD(TestBase):
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
-        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         for i in range(each_query_loop_times):
             join_params = JoinParams(False, polygon_rdd_index_type, JoinBuildSide.LEFT)
@@ -278,7 +278,7 @@ class TestSpatialRDD(TestBase):
         query_window_rdd = CircleRDD(object_rdd, 0.1)
         object_rdd.analyze()
         object_rdd.spatialPartitioning(GridType.QUADTREE)
-        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.DistanceJoinQuery(
@@ -298,7 +298,7 @@ class TestSpatialRDD(TestBase):
         query_window_rdd = CircleRDD(object_rdd, 0.1)
         object_rdd.analyze()
         object_rdd.spatialPartitioning(GridType.QUADTREE)
-        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+        query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         object_rdd.buildIndex(IndexType.RTREE, True)
 

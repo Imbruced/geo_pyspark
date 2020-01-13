@@ -120,16 +120,16 @@ class TestSpatialRDD(TestBase):
     def test_get_partitioner(self):
         spatial_rdd = self.create_spatial_rdd()
 
-        assert spatial_rdd.getPartitioner.name is None
+        assert spatial_rdd.getPartitioner().name is None
 
         for grid_type in GridType:
             spatial_rdd.spatialPartitioning(grid_type)
             if grid_type == GridType.QUADTREE:
-                assert spatial_rdd.getPartitioner.name == "QuadTreePartitioner"
+                assert spatial_rdd.getPartitioner().name == "QuadTreePartitioner"
             elif grid_type == GridType.KDBTREE:
-                assert spatial_rdd.getPartitioner.name == "KDBTreePartitioner"
+                assert spatial_rdd.getPartitioner().name == "KDBTreePartitioner"
             else:
-                assert spatial_rdd.getPartitioner.name == "FlatGridPartitioner"
+                assert spatial_rdd.getPartitioner().name == "FlatGridPartitioner"
 
     def test_get_raw_spatial_rdd(self):
         spatial_rdd = self.create_spatial_rdd()

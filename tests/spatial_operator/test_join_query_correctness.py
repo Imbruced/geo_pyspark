@@ -167,7 +167,7 @@ class TestJoinQueryCorrectness(TestBase):
         object_rdd.rawSpatialRDD.repartition(4)
         object_rdd.spatialPartitioning(grid_type)
         object_rdd.buildIndex(IndexType.RTREE, True)
-        window_rdd.spatialPartitioning(object_rdd.getPartitioner)
+        window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
     @classmethod
     def verify_join_result(cls, result):

@@ -59,9 +59,8 @@ class TestRectangleJoin(TestJoinBase):
         count = 0
         for el in result:
             count += el[1].__len__()
-        assert match_count == count
         self.sanity_check_join_results(result)
-        assert match_with_original_duplicates_count == self.count_join_results(result)
+        assert match_count == self.count_join_results(result)
 
     def test_dynamic_index_int(self, num_partitions, use_legacy_apis, grid_type, index_type):
         query_rdd = self.create_rectangle_rdd(input_location, splitter, num_partitions)

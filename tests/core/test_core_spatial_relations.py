@@ -32,7 +32,7 @@ class TestJoinQuery(TestBase):
 
         point_rdd.analyze()
         point_rdd.spatialPartitioning(GridType.KDBTREE)
-        polygon_rdd.spatialPartitioning(point_rdd.getPartitioner)
+        polygon_rdd.spatialPartitioning(point_rdd.getPartitioner())
         result = JoinQuery.SpatialJoinQuery(
             point_rdd,
             polygon_rdd,
