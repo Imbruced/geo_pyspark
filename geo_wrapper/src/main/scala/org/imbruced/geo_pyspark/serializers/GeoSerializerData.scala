@@ -2,13 +2,14 @@ package org.imbruced.geo_pyspark.serializers
 
 import java.nio.ByteBuffer
 
-import com.vividsolutions.jts.geom.{Geometry, LineString, Point, Polygon}
+import com.vividsolutions.jts.geom.{Envelope, Geometry, LineString, Point, Polygon}
 import net.razorvine.pickle.objects.{ArrayConstructor, ByteArrayConstructor, ClassDict}
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.datasyslab.geosparksql.utils.GeometrySerializer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
+import scala.collection.JavaConverters._
 
 import net.razorvine.pickle.Unpickler
 
@@ -28,6 +29,18 @@ object GeoSerializerData {
         initialized = true
       }
     }
+  }
+
+  def createEnvelopes(bytes: Array[Byte]): java.util.List[Envelope] = {
+    val arrBytes = bytes.map(x => x.toByte)
+    val unpickler = new Unpickler
+    val pythonEnvelopes = unpickler.loads(arrBytes).asInstanceOf[java.util.ArrayList[_]].toArray
+    pythonEnvelopes.map(pythonEnvelope => new Envelope(
+      pythonEnvelope.asInstanceOf[ClassDict].get("minx").asInstanceOf[Double],
+      pythonEnvelope.asInstanceOf[ClassDict].get("maxx").asInstanceOf[Double],
+      pythonEnvelope.asInstanceOf[ClassDict].get("miny").asInstanceOf[Double],
+      pythonEnvelope.asInstanceOf[ClassDict].get("maxy").asInstanceOf[Double]
+    )).toList.asJava
   }
 
   def deserializeGeom(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] = {
