@@ -10,7 +10,6 @@ from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.core.geom_types import Envelope
-from geo_pyspark.utils.binary_parser import BinaryBuffer
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 from geo_pyspark.utils.types import crs
 
@@ -228,7 +227,6 @@ class SpatialRDD:
         """
         return self._srdd.getCRStransformation()
 
-    @property
     def getPartitioner(self) -> SpatialPartitioner:
         """
 
@@ -372,7 +370,7 @@ class SpatialRDD:
         """
         return self._srdd.spatialPartitionedRDD()
 
-    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]]) -> bool:
+    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope], JvmPartitioner]) -> bool:
         """
 
         :param partitioning:
@@ -380,6 +378,8 @@ class SpatialRDD:
         """
         if type(partitioning) == str:
             grid = GridTypeJvm(self._jvm, GridType.from_str(partitioning)).jvm_instance
+        elif type(partitioning) == JvmPartitioner:
+            grid = partitioning.jpart
         elif type(partitioning) == GridType:
             grid = GridTypeJvm(self._jvm, partitioning).jvm_instance
         elif type(partitioning) == SpatialPartitioner:
