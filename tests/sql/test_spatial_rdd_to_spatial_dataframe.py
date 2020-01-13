@@ -7,9 +7,9 @@ from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.sql.types import GeometryType
 from tests.test_base import TestBase
-from tests.utils import tests_path
 from shapely.geometry import Point
 
+from tests.tools import tests_path
 
 point_input_path = os.path.join(tests_path, "resources/arealm-small.csv")
 

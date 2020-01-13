@@ -5,10 +5,8 @@ from shapely.geometry import Point
 from geo_pyspark.core.SpatialRDD import PolygonRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter
 from geo_pyspark.core.spatialOperator import KNNQuery
-from tests.spatial_operator.test_rectangle_knn import distance_sorting_functions
 from tests.test_base import TestBase
-from tests.utils import tests_path
-
+from tests.tools import tests_path, distance_sorting_functions
 
 input_location = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 splitter = FileDataSplitter.CSV

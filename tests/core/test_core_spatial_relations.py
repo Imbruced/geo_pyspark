@@ -4,7 +4,7 @@ from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD
 from geo_pyspark.core.enums import FileDataSplitter, GridType
 from geo_pyspark.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 point_path = os.path.join(tests_path, "resources/points.csv")
 counties_path = os.path.join(tests_path, "resources/counties_tsv.csv")

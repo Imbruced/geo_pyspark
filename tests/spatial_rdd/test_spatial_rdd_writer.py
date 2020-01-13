@@ -8,8 +8,7 @@ from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from tests.test_base import TestBase
-from tests.utils import tests_path
-
+from tests.tools import tests_path
 
 wkb_folder = "wkb"
 wkt_folder = "wkt"

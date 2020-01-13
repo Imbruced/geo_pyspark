@@ -9,8 +9,7 @@ from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.formatMapper.geo_json_reader import GeoJsonReader
 from geo_pyspark.core.geom_types import Envelope
 from tests.test_base import TestBase
-from tests.utils import tests_path
-
+from tests.tools import tests_path
 
 input_file_location = os.path.join(tests_path, "resources/arealm-small.csv")
 crs_test_point = os.path.join(tests_path, "resources/crs-test-point.csv")

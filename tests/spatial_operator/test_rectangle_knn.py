@@ -7,10 +7,8 @@ from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import KNNQuery
-from geo_pyspark.utils.abstract_parser import GeoData
 from tests.test_base import TestBase
-from tests.utils import tests_path
-
+from tests.tools import tests_path, distance_sorting_functions
 
 inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
@@ -25,10 +23,6 @@ inputCount = 3000
 inputBoundary = Envelope(-171.090042, 145.830505, -14.373765, 49.00127)
 matchCount = 17599
 matchWithOriginalDuplicatesCount = 17738
-
-
-def distance_sorting_functions(geo_data: GeoData, query_point: Point):
-    return geo_data.geom.distance(query_point)
 
 
 class TestRectangleKNN(TestBase):

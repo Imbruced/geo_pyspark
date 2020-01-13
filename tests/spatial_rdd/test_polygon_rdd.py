@@ -7,7 +7,7 @@ from geo_pyspark.core.SpatialRDD import PolygonRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
 from geo_pyspark.core.geom_types import Envelope
 from tests.test_base import TestBase
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 inputLocation = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")

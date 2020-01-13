@@ -7,7 +7,7 @@ from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from tests.test_base import TestBase
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 inputLocation = os.path.join(tests_path, "resources/arealm-small.csv")
 queryWindowSet = os.path.join("zcta510-small.csv")

@@ -3,8 +3,7 @@ import os
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
 from geo_pyspark.core.enums import FileDataSplitter, IndexType
 from tests.test_base import TestBase
-from tests.utils import tests_path
-
+from tests.tools import tests_path
 
 resource_folder = "resources"
 point_rdd_input_location = os.path.join(tests_path, resource_folder, "arealm-small.csv")

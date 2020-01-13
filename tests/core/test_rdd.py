@@ -12,7 +12,7 @@ from geo_pyspark.core.spatialOperator.join_params import JoinParams
 import os
 
 from tests.test_base import TestBase
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 resource_folder = "resources"
 

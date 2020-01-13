@@ -2,14 +2,13 @@ import os
 
 import pytest
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery
 from tests.test_base import TestBase
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 inputLocation = os.path.join(tests_path, "resources/zcta510-small.csv")
 queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")

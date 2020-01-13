@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 
 from geo_pyspark.core.formatMapper.geo_json_reader import GeoJsonReader
 from geo_pyspark.register import GeoSparkRegistrator, upload_jars
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 upload_jars()
 

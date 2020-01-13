@@ -8,7 +8,7 @@ from geo_pyspark.core.enums import IndexType, FileDataSplitter
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery
 from tests.test_base import TestBase
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
 offset = 0

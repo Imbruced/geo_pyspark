@@ -4,7 +4,7 @@ from geo_pyspark.core.enums import FileDataSplitter
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.SpatialRDD import PolygonRDD
 from tests.test_base import TestBase
-from tests.utils import tests_path
+from tests.tools import tests_path
 
 point_path = os.path.join(tests_path, "resources/points.csv")
 counties_path = os.path.join(tests_path, "resources/counties_tsv.csv")
@@ -28,7 +28,7 @@ class TestSpatialRDD(TestBase):
     def test_creating_polygon_rdd(self):
         polygon_rdd = PolygonRDD(
             self.spark._sc,
-            "/home/pkocinski001/Desktop/projects/geo_pyspark_installed/counties_tsv.csv",
+            counties_path,
             2,
             3,
             FileDataSplitter.WKT,
