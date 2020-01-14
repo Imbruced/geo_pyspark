@@ -55,6 +55,27 @@ class JvmGrids:
     sc = attr.ib(type=SparkContext)
 
 
+@attr.s
+class JvmIndexedRDD:
+    j_indexed_rdd = attr.ib()
+    sc = attr.ib(type=SparkContext)
+
+
+@attr.s
+class JvmIndexedRawRDD:
+    j_indexed_raw_rdd = attr.ib()
+    sc = attr.ib(type=SparkContext)
+
+
+class GeoDataSerializer:
+
+    def serialize(self, jvm):
+        raise NotImplementedError("GeoDataSerializer has to implement serialize method")
+
+    def deserialize(self):
+        raise NotImplementedError("GeoDataSerializer has to implement deserialize method")
+
+
 class SpatialRDD:
 
     def __init__(self, sparkContext: Optional[SparkContext] = None):
@@ -243,6 +264,24 @@ class SpatialRDD:
     @jvm_grids.setter
     def jvm_grids(self, jvm_grid: JvmGrids):
         self._srdd.grids = jvm_grid.jgrid
+
+    @property
+    def jvm_indexed_rdd(self):
+        jindexed_rdd = get_field(self._srdd, "indexedRDD")
+        return JvmIndexedRDD(j_indexed_rdd=jindexed_rdd, sc=self._sc)
+
+    @jvm_indexed_rdd.setter
+    def jvm_indexed_rdd(self, indexed_rdd: JvmIndexedRDD):
+        self._srdd.indexedRDD = indexed_rdd.j_indexed_rdd
+
+    @property
+    def jvm_indexed_raw_rdd(self):
+        j_indexed_raw_rdd = get_field(self._srdd, "indexedRawRDD")
+        return JvmIndexedRawRDD(j_indexed_raw_rdd=j_indexed_raw_rdd, sc=self._sc)
+
+    @jvm_indexed_raw_rdd.setter
+    def jvm_indexed_raw_rdd(self, indexed_rdd: JvmIndexedRawRDD):
+        self._srdd.indexedRawRDD = indexed_rdd.j_indexed_raw_rdd
 
     @property
     def indexedRDD(self):
