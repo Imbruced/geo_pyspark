@@ -10,6 +10,7 @@ from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.jvm.partitioner import JvmPartitioner
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 from geo_pyspark.utils.types import crs
 
@@ -48,68 +49,9 @@ class JvmSpatialRDD:
 
 
 @attr.s
-class JvmPartitioner:
-    jpart = attr.ib()
-
-    def assignPartitionIds(self):
-        raise NotImplementedError("Currently not supported")
-
-    def assignPartitionLineage(self):
-        raise NotImplementedError("Currently not supported")
-
-    def dropElements(self):
-        raise NotImplementedError("Currently not supported")
-
-    def equals(self):
-        raise NotImplementedError("Currently not supported")
-
-    def findZone(self):
-        raise NotImplementedError("Currently not supported")
-
-    def forceGrowUp(self):
-        raise NotImplementedError("Currently not supported")
-
-    def getAllZones(self):
-        raise NotImplementedError("Currently not supported")
-
-    def getClass(self):
-        raise NotImplementedError("Currently not supported")
-
-    def getElements(self):
-        raise NotImplementedError("Currently not supported")
-
-    def getLeafZones(self):
-        raise NotImplementedError("Currently not supported")
-
-    def getParentZone(self):
-        raise NotImplementedError("Currently not supported")
-
-    def getTotalNumLeafNode(self):
-        raise NotImplementedError("Currently not supported")
-
-    def getZone(self):
-        raise NotImplementedError("Currently not supported")
-
-    def hashCode(self):
-        raise NotImplementedError("Currently not supported")
-
-    def insert(self):
-        raise NotImplementedError("Currently not supported")
-
-    def isLeaf(self):
-        raise NotImplementedError("Currently not supported")
-
-    def notify(self):
-        raise NotImplementedError("Currently not supported")
-
-    def notifyAll(self):
-        raise NotImplementedError("Currently not supported")
-
-    def toString(self):
-        raise NotImplementedError("Currently not supported")
-
-    def wait(self):
-        raise NotImplementedError("Currently not supported")
+class JvmGrids:
+    jgrid = attr.ib()
+    sc = attr.ib(type=SparkContext)
 
 
 class SpatialRDD:
@@ -272,7 +214,7 @@ class SpatialRDD:
         >> [Envelope(minx=10.0, maxx=12.0, miny=10.0, maxy=12.0)]
         :return:
         """
-        jvm_grids = get_field(self._srdd, "grids")
+        jvm_grids = self.jvm_grids.jgrid
         if jvm_grids:
             number_of_grids = jvm_grids.size()
 
@@ -281,6 +223,15 @@ class SpatialRDD:
             return envelopes
         else:
             return None
+
+    @property
+    def jvm_grids(self) -> JvmGrids:
+        jvm_grids = get_field(self._srdd, "grids")
+        return JvmGrids(jgrid=jvm_grids, sc=self._sc)
+
+    @jvm_grids.setter
+    def jvm_grids(self, jvm_grid: JvmGrids):
+        self._srdd.grids = jvm_grid.jgrid
 
     @property
     def indexedRDD(self):
