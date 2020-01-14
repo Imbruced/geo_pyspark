@@ -4,6 +4,7 @@ from typing import Optional, List, Union
 import attr
 from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
+from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
@@ -67,6 +68,16 @@ class SpatialRDD:
             self._srdd = SpatialRDDFactory(self._sc).create_spatial_rdd(
             )()
         self._spatial_partitioned = False
+
+    def _empty_srdd(self):
+        session = SparkSession._instantiatedSession
+        if session is None or session._sc._jsc is None:
+            raise TypeError("Please initialize spark session")
+        else:
+            sc = session._sc
+            self.__init__(sc)
+            srdd = self._jvm_spatial_rdd()
+        return srdd
 
     def analyze(self) -> bool:
         """
@@ -376,3 +387,7 @@ class SpatialRDD:
     def name(self):
         name = self.__class__.__name__
         return name.replace("RDD", "").lower()
+
+    @property
+    def _jvm_spatial_rdd(self):
+        raise NotImplementedError()

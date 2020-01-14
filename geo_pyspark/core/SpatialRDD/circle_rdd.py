@@ -14,8 +14,7 @@ class CircleRDD(SpatialRDD, metaclass=MultipleMeta):
         :param Radius:
         """
         super().__init__(spatialRDD._sc)
-        circle_rdd = self._create_jvm_circle_rdd(self._sc)
-        self._srdd = circle_rdd(
+        self._srdd = self._jvm_spatial_rdd(
             spatialRDD._srdd,
             Radius
         )
@@ -48,8 +47,9 @@ class CircleRDD(SpatialRDD, metaclass=MultipleMeta):
         rectangle_rdd.set_srdd(srdd)
         return rectangle_rdd
 
-    def _create_jvm_circle_rdd(self, sc: SparkContext):
-        spatial_factory = SpatialRDDFactory(sc)
+    @property
+    def _jvm_spatial_rdd(self):
+        spatial_factory = SpatialRDDFactory(self._sc)
         return spatial_factory.create_circle_rdd()
 
     def MinimumBoundingRectangle(self):
