@@ -1,13 +1,13 @@
+import pickle
 from math import sqrt
 
 import attr
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString, Point, Polygon, MultiPoint, MultiPolygon, MultiLineString
 from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core.jvm.abstract import JvmObject
 from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import require
-from geo_pyspark.utils.meta import MultipleMeta
 
 
 @attr.s
@@ -28,12 +28,19 @@ class JvmPoint(JvmObject):
         return self.jvm.GeomFactory.createPoint(self.coordinate)
 
 
-@attr.s
-class Envelope:
-    minx = attr.ib(default=0)
-    maxx = attr.ib(default=-1)
-    miny = attr.ib(default=0)
-    maxy = attr.ib(default=-1)
+class Envelope(Polygon):
+
+    def __init__(self, minx=0, maxx=1, miny=0, maxy=1):
+        self.minx = minx
+        self.maxx = maxx
+        self.miny = miny
+        self.maxy = maxy
+        super().__init__([
+            [self.minx, self.miny],
+            [self.minx, self.maxy],
+            [self.maxx, self.maxy],
+            [self.maxx, self.miny]
+        ])
 
     @require([GeoSparkLib.Envelope])
     def create_jvm_instance(self, jvm):
@@ -72,15 +79,53 @@ class Envelope:
 
         return cls(min(x_coord), max(x_coord), min(y_coord), max(y_coord))
 
+    def __reduce__(self):
+        return (self.__class__, (), dict(
+            minx=self.minx,
+            maxx=self.maxx,
+            miny=self.miny,
+            maxy=self.maxy,
 
-class Circle(metaclass=MultipleMeta):
+        ))
+
+    def __getstate__(self):
+        return dict(
+            minx=self.minx,
+            maxx=self.maxx,
+            miny=self.miny,
+            maxy=self.maxy,
+
+        )
+
+    def __setstate__(self, state):
+        self.minx = state.get("minx", 0)
+        self.minx = state.get("maxx", 1)
+        self.minx = state.get("miny", 0)
+        self.minx = state.get("maxy", 1)
+
+    @property
+    def __array_interface__(self):
+        raise NotImplementedError()
+
+    def _get_coords(self):
+        raise NotImplementedError()
+
+    def _set_coords(self, ob):
+        raise NotImplementedError()
+
+    @property
+    def coords(self):
+        raise NotImplementedError()
+
+
+class Circle(Polygon):
 
     def __init__(self, centerGeometry: BaseGeometry, givenRadius: float):
+        self.MBR = None
         self.centerGeometry = centerGeometry
         self.radius = givenRadius
         center_geometry_mbr = Envelope.from_shapely_geom(self.centerGeometry)
-
-        self.centerPoint = Point(
+        self.centerPoint = self.centerPoint = Point(
             (center_geometry_mbr.minx + center_geometry_mbr.maxx) / 2.0,
             (center_geometry_mbr.miny + center_geometry_mbr.maxy) / 2.0
         )
@@ -96,12 +141,13 @@ class Circle(metaclass=MultipleMeta):
             self.centerPoint.y - self.radius,
             self.centerPoint.y + self.radius
         )
+        super().__init__(self.centerPoint.buffer(self.radius))
 
     def getCenterGeometry(self) -> BaseGeometry:
-        pass
+        return self.centerGeometry
 
     def getCenterPoint(self):
-        pass
+        return self.centerPoint
 
     def getRadius(self) -> float:
         return self.radius
@@ -120,35 +166,61 @@ class Circle(metaclass=MultipleMeta):
         )
 
     def covers(self, other: BaseGeometry) -> bool:
-        pass
+        if isinstance(other, Point):
+            return self.covers_point(other)
+        elif isinstance(other, LineString):
+            return self.covers_linestring(other)
+        elif isinstance(other, Polygon):
+            return self.covers_linestring(other.exterior)
+        elif isinstance(other, MultiPoint):
+            return all([self.covers_point(point) for point in other])
+        elif isinstance(other, MultiPolygon):
+            return all([self.covers_linestring(polygon.exterior) for polygon in other.geoms])
+        elif isinstance(other, MultiLineString):
+            return all([self.covers_linestring(linestring) for linestring in other.geoms])
+        else:
+            raise TypeError("Not supported")
 
-    def covers(self, lineString: LineString) -> bool:
-        pass
+    def covers_point(self, point: Point):
+        delta_x = point.x - self.centerPoint.x
+        delta_y = point.y - self.centerPoint.y
 
-    def covers(self, point: Point):
-        pass
+        return (delta_x * delta_x + delta_y * delta_y) <= self.radius * self.radius
+
+    def covers_linestring(self, linestring: LineString):
+        for point in linestring.coords:
+            if not self.covers_point(Point(*point)):
+                return False
+        return True
 
     def intersects(self, other: BaseGeometry):
-        pass
+        return super().intersects(other)
 
-    def intersects(self, polygon: Polygon) -> bool:
-        pass
-
-    def intersects(self, lineString: LineString) -> bool:
-        pass
-
-    def intersects(self, start: Point, end: Point) -> bool:
-        pass
+    def getEnvelopeInternal(self):
+        return self._compute_envelope_internal()
 
     @property
     def is_empty(self):
-        pass
+        return self.MBR is None
 
     def _compute_envelope_internal(self):
         if self.is_empty:
             return Envelope()
-        return self.mbr
+        return self.MBR
 
     def __str__(self):
         return "Circle of radius " + str(self.radius) + " around " + str(self.centerGeometry)
 
+    @property
+    def __array_interface__(self):
+        raise NotImplementedError()
+
+    def _get_coords(self):
+        raise NotImplementedError()
+
+    def _set_coords(self, ob):
+        raise NotImplementedError()
+
+    @property
+    def coords(self):
+        raise NotImplementedError()
