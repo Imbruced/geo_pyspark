@@ -78,6 +78,24 @@ class Circle(metaclass=MultipleMeta):
     def __init__(self, centerGeometry: BaseGeometry, givenRadius: float):
         self.centerGeometry = centerGeometry
         self.radius = givenRadius
+        center_geometry_mbr = Envelope.from_shapely_geom(self.centerGeometry)
+
+        self.centerPoint = Point(
+            (center_geometry_mbr.minx + center_geometry_mbr.maxx) / 2.0,
+            (center_geometry_mbr.miny + center_geometry_mbr.maxy) / 2.0
+        )
+
+        width = center_geometry_mbr.maxx - center_geometry_mbr.minx
+        length = center_geometry_mbr.maxy - center_geometry_mbr.miny
+
+        center_geometry_internal_radius = sqrt(width ** 2 + length ** 2) / 2.0
+        self.radius = givenRadius if givenRadius > center_geometry_internal_radius else center_geometry_internal_radius
+        self.MBR = Envelope(
+            self.centerPoint.x - self.radius,
+            self.centerPoint.x + self.radius,
+            self.centerPoint.y - self.radius,
+            self.centerPoint.y + self.radius
+        )
 
     def getCenterGeometry(self) -> BaseGeometry:
         pass
@@ -86,7 +104,7 @@ class Circle(metaclass=MultipleMeta):
         pass
 
     def getRadius(self) -> float:
-        pass
+        return self.radius
 
     def setRadius(self):
         pass
@@ -111,6 +129,15 @@ class Circle(metaclass=MultipleMeta):
 
     def intersects(self, start: Point, end: Point) -> bool:
         pass
+
+    @property
+    def is_empty(self):
+        pass
+
+    def _compute_envelope_internal(self):
+        if self.is_empty:
+            return Envelope()
+        return self.mbr
 
     def __str__(self):
         return "Circle of radius " + str(self.radius) + " around " + str(self.centerGeometry)
