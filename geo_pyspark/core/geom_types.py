@@ -59,6 +59,19 @@ class Envelope:
         bin_buffer.put_double(self.maxy)
         return bin_buffer.byte_array
 
+    @classmethod
+    def from_shapely_geom(cls, geometry: BaseGeometry):
+        if isinstance(geometry, Point):
+            return cls(geometry.x, geometry.x, geometry.y, geometry.y)
+        else:
+            envelope = geometry.envelope
+            exteriors = envelope.exterior
+            coordinates = list(exteriors.coords)
+            x_coord = [coord[0] for coord in coordinates]
+            y_coord = [coord[1] for coord in coordinates]
+
+        return cls(min(x_coord), max(x_coord), min(y_coord), max(y_coord))
+
 
 class Circle(metaclass=MultipleMeta):
 
