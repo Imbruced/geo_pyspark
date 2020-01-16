@@ -9,6 +9,7 @@ from shapely.geometry import MultiLineString
 from shapely.geometry import MultiPoint
 from shapely.geometry.base import BaseGeometry
 
+from geo_pyspark.core.geom_types import Circle
 from geo_pyspark.sql.enums import ShapeEnum
 from geo_pyspark.sql.exceptions import InvalidGeometryException
 from geo_pyspark.sql.geometry import GeomEnum
@@ -370,12 +371,12 @@ class CircleParser(GeometryParser):
         pass
 
     @classmethod
-    def deserialize(cls, bin_parser: BinaryParser) -> BaseGeometry:
+    def deserialize(cls, bin_parser: BinaryParser):
         radius = bin_parser.read_double_reverse()
         primitive_geom_type = bin_parser.read_byte()
         parser = GeomEnum.get_name(primitive_geom_type)
         geom = PARSERS[parser].deserialize(bin_parser)
-        return geom.buffer(radius)
+        return Circle(geom, radius)
 
 
 PARSERS = dict(
