@@ -106,8 +106,18 @@ class Circle(metaclass=MultipleMeta):
     def getRadius(self) -> float:
         return self.radius
 
-    def setRadius(self):
-        pass
+    def setRadius(self, givenRadius: float):
+        center_geometry_mbr = Envelope.from_shapely_geom(self.centerGeometry)
+        width = center_geometry_mbr.maxx - center_geometry_mbr.minx
+        length = center_geometry_mbr.maxy - center_geometry_mbr.miny
+        center_geometry_internal_radius = sqrt(width ** 2 + length ** 2) / 2
+        self.radius = givenRadius if givenRadius > center_geometry_internal_radius else center_geometry_internal_radius
+        self.MBR = Envelope(
+            self.centerPoint.x - self.radius,
+            self.centerPoint.x + self.radius,
+            self.centerPoint.y - self.radius,
+            self.centerPoint.y + self.radius
+        )
 
     def covers(self, other: BaseGeometry) -> bool:
         pass
