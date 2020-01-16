@@ -609,10 +609,6 @@ sc = spark.sparkContext
 	GeoSpark has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
 If you add ==the GeoSpark full dependencies== as suggested above, please use the following two lines to enable GeoSpark Kryo serializer instead:
-```Scala
-conf.set("spark.serializer", classOf[KryoSerializer].getName)
-conf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
-```
 
 # Create a SpatialRDD
 
