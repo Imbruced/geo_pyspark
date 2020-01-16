@@ -1,3 +1,5 @@
+from math import sqrt
+
 import attr
 from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.base import BaseGeometry
@@ -28,10 +30,10 @@ class JvmPoint(JvmObject):
 
 @attr.s
 class Envelope:
-    minx = attr.ib()
-    maxx = attr.ib()
-    miny = attr.ib()
-    maxy = attr.ib()
+    minx = attr.ib(default=0)
+    maxx = attr.ib(default=-1)
+    miny = attr.ib(default=0)
+    maxy = attr.ib(default=-1)
 
     @require([GeoSparkLib.Envelope])
     def create_jvm_instance(self, jvm):
