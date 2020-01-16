@@ -585,3 +585,55 @@ Currently package supports spark versions
 
 <li> 1.2.0 </li>
 <li> 1.1.3 </li>
+
+# GeoSpark Core
+
+## Initiate SparkContext
+
+```python
+from pyspark.sql import SparkSession
+
+from geo_pyspark.utils import KryoSerializer, GeoSparkKryoRegistrator
+
+spark = SparkSession. \
+    builder. \
+    config("spark.serializer", KryoSerializer.getName). \
+    config("spark.kryo.registrator", GeoSparkKryoRegistrator.getName). \
+    master("local[*]"). \
+    getOrCreate()
+
+sc = spark.sparkContext
+```
+
+!!!warning
+	GeoSpark has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
+
+If you add ==the GeoSpark full dependencies== as suggested above, please use the following two lines to enable GeoSpark Kryo serializer instead:
+```Scala
+conf.set("spark.serializer", classOf[KryoSerializer].getName)
+conf.set("spark.kryo.registrator", classOf[GeoSparkVizKryoRegistrator].getName)
+```
+
+# Create a SpatialRDD
+
+#### PointRDD from CSV/TSV
+Suppose we have a `checkin.csv` CSV file at Path `/Download/checkin.csv` as follows:
+```
+-88.331492,32.324142,hotel
+-88.175933,32.360763,gas
+-88.388954,32.357073,bar
+-88.221102,32.35078,restaurant
+```
+This file has three columns and corresponding ==offsets==(Column IDs) are 0, 1, 2.
+Use the following code to create a PointRDD
+
+```python
+from geo_pyspark.core.SpatialRDD import PointRDD
+from geo_pyspark.core.enums import FileDataSplitter
+
+point_rdd_input_location = "/Download/checkin.csv"
+point_rdd_offset = 0  ## The point long/lat starts from Column 0
+point_rdd_splitter = FileDataSplitter.CSV
+carry_other_attributes = True  ## Carry Column 2 (hotel, gas, bar...)
+object_rdd = PointRDD(sc, point_rdd_input_location, point_rdd_offset, point_rdd_splitter, carry_other_attributes)
+```
