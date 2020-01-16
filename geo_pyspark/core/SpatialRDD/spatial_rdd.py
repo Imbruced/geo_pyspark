@@ -96,7 +96,9 @@ class SpatialRDD:
             raise TypeError("Please initialize spark session")
         else:
             sc = session._sc
-            self.__init__(sc)
+            self._sc = sc
+            self._jvm = sc._jvm
+            self._jsc = self._sc._jsc
             srdd = self._jvm_spatial_rdd()
         return srdd
 
@@ -134,6 +136,7 @@ class SpatialRDD:
         """
 
         jvm_boundary = self._srdd.boundary()
+
         envelope = Envelope.from_jvm_instance(jvm_boundary)
         return envelope
 

@@ -19,13 +19,11 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
         self._srdd = srdd
 
     def __init__(self, rdd: RDD):
-        self._sc = rdd.ctx
-        self._jvm = self._sc._jvm
+        super().__init__(rdd.ctx)
 
         spatial_rdd = self._jvm.GeoSerializerData.deserializeToPointRawRDD(rdd._jrdd)
-        jvm_linestring_rdd = self._jvm_spatial_rdd(self._sc)
 
-        srdd = jvm_linestring_rdd(spatial_rdd)
+        srdd = self._jvm_spatial_rdd(spatial_rdd)
         self._srdd = srdd
 
     def __init__(self):
