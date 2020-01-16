@@ -127,3 +127,14 @@ class TestCircle:
         assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(Point(-112.574945, 45.987772), 0.01)
 
         assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(Point(-112.574942, 45.987772), 0.01)
+
+    def test_radius(self):
+        polygon = wkt.loads(
+            "POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1),(-0.6 -0.6, 0.6 -0.6, 0.6 0.6, -0.6 0.6, -0.6 -0.6))"
+        )
+        circle = Circle(polygon, 1.0)
+        pytest.approx(circle.radius, 1.414213, 0.001)
+        pytest.approx(circle.MBR.minx, -1.414213, 0.001)
+        pytest.approx(circle.MBR.maxx, 1.414213, 0.001)
+        pytest.approx(circle.MBR.miny, -1.414213, 0.001)
+        pytest.approx(circle.MBR.maxy, 1.414213, 0.001)
