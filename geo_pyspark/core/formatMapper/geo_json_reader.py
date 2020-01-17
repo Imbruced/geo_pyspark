@@ -15,12 +15,11 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         return True
 
     @classmethod
-    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str):
+    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str) -> SpatialRDD:
         """
-
-        :param sc:
-        :param inputPath:
-        :return:
+        :param sc: SparkContext
+        :param inputPath: str, file input location
+        :return: SpatialRDD
         """
         GeoJsonReader.validate_imports()
         jvm = sc._jvm
@@ -37,11 +36,11 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
                           skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
         """
 
-        :param sc:
-        :param inputPath:
-        :param allowInvalidGeometries:
-        :param skipSyntacticallyInvalidGeometries:
-        :return:
+        :param sc: SparkContext
+        :param inputPath: str, path to the file
+        :param allowInvalidGeometries: bool
+        :param skipSyntacticallyInvalidGeometries: bool
+        :return: SpatialRDD
         """
         GeoJsonReader.validate_imports()
         jvm = sc._jvm
@@ -54,11 +53,11 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, rawTextRDD: RDD):
+    def readToGeometryRDD(cls, rawTextRDD: RDD) -> SpatialRDD:
         """
 
-        :param rawTextRDD:
-        :return:
+        :param rawTextRDD:  RDD
+        :return: SpatialRDD
         """
         GeoJsonReader.validate_imports()
         sc = rawTextRDD.ctx
@@ -73,13 +72,13 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, rawTextRDD: RDD, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool):
+    def readToGeometryRDD(cls, rawTextRDD: RDD, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
         """
 
-        :param rawTextRDD:
-        :param allowInvalidGeometries:
-        :param skipSyntacticallyInvalidGeometries:
-        :return:
+        :param rawTextRDD: RDD
+        :param allowInvalidGeometries: bool
+        :param skipSyntacticallyInvalidGeometries: bool
+        :return: SpatialRDD
         """
         GeoJsonReader.validate_imports()
         sc = rawTextRDD.ctx
