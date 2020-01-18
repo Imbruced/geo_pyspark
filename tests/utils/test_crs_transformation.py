@@ -4,6 +4,7 @@ import pytest
 from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
+from geo_pyspark.core.geom_types import Circle
 from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
 from tests.properties.crs_transform import *
 from tests.test_base import TestBase
@@ -164,4 +165,4 @@ class TestCrsTransformation(TestBase):
 
         for data in results:
             for polygon_data in data[1]:
-                assert data[0].geom.buffer(0.1).covers(polygon_data.geom)
+                assert Circle(data[0].geom, 0.1).covers(polygon_data.geom)

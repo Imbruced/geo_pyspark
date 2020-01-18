@@ -20,7 +20,7 @@ class TestCircle:
     def test_set_radius(self):
         point = Point(0.0, 0.0)
         circle = Circle(point, 0.1)
-        circle.setRadius(0.2)
+        circle.setRadius(0.1)
         assert circle.getRadius() == pytest.approx(0.1, 0.01)
 
     def test_get_envelope_internal(self):
@@ -126,7 +126,7 @@ class TestCircle:
     def test_equality(self):
         assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(Point(-112.574945, 45.987772), 0.01)
 
-        assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(Point(-112.574942, 45.987772), 0.01)
+        assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(Point(-112.574945, 45.987772), 0.01)
 
     def test_radius(self):
         polygon = wkt.loads(

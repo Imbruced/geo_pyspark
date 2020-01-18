@@ -11,6 +11,8 @@ from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
 import os
 
+from tests.polygon_properties import polygon_rdd_input_location, polygon_rdd_start_offset, polygon_rdd_end_offset, \
+    polygon_rdd_splitter, polygon_rdd_index_type
 from tests.test_base import TestBase
 from tests.tools import tests_path
 
@@ -23,14 +25,6 @@ point_rdd_splitter = FileDataSplitter.CSV
 point_rdd_index_type = IndexType.RTREE
 point_rdd_num_partitions = 5
 point_rdd_offset = 1
-
-polygon_rdd_input_location = os.path.join(tests_path, resource_folder, "primaryroads-polygon.csv")
-polygon_rdd_splitter = FileDataSplitter.CSV
-polygon_rdd_index_type = IndexType.RTREE
-polygon_rdd_num_partitions = 5
-polygon_rdd_start_offset = 0
-polygon_rdd_end_offset = 9
-
 
 knn_query_point = Point(-84.01, 34.01)
 
