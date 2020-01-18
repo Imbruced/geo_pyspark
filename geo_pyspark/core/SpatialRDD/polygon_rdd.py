@@ -268,7 +268,7 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
         self._srdd = self._jvm_spatial_rdd(jsrdd, new_level_jvm, sourceEpsgCRSCode, targetEpsgCode)
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: str,
+    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
             splitter: FileDataSplitter, carryInputData: bool, partitions: int, newLevel: StorageLevel,
                  sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
