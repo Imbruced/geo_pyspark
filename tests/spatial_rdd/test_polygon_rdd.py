@@ -1,62 +1,74 @@
-import os
-
-import pytest
 from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD import PolygonRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
 from geo_pyspark.core.geom_types import Envelope
+from tests.polygon_properties import input_location, splitter, num_partitions, input_count, input_boundary, grid_type, \
+    input_location_geo_json, input_location_wkt, input_location_wkb, query_envelope
 from tests.test_base import TestBase
-from tests.tools import tests_path
-
-inputLocation = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-queryWindowSet = os.path.join(tests_path, "resources/zcta510-small.csv")
-offset = 0
-splitter = FileDataSplitter.CSV
-gridType = "rtree"
-indexType = "rtree"
-numPartitions = 5
-distance = 0.01
-queryPolygonSet = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-inputLocationGeojson = os.path.join(tests_path, "resources/testPolygon.json")
-inputLocationWkt = os.path.join(tests_path, "resources/county_small.tsv")
-inputLocationWkb = os.path.join(tests_path, "resources/county_small_wkb.tsv")
-inputCount = 3000
-inputBoundary = Envelope(minx=-158.104182, maxx=-66.03575, miny=17.986328, maxy=48.645133)
-containsMatchCount = 6941
-containsMatchWithOriginalDuplicatesCount = 9334
-intersectsMatchCount = 24323
-intersectsMatchWithOriginalDuplicatesCount = 32726
 
 
 class TestPolygonRDD(TestBase):
 
-    def test_constructor(self):
-        spatial_rdd = PolygonRDD(
-            sparkContext=self.sc,
-            InputLocation=inputLocation,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
+    def compare_spatial_rdd(self, spatial_rdd: SpatialRDD, envelope: Envelope) -> bool:
 
         spatial_rdd.analyze()
 
-        assert inputCount == spatial_rdd.approximateTotalCount
-        assert inputBoundary == spatial_rdd.boundaryEnvelope
+        assert input_count == spatial_rdd.approximateTotalCount
+        assert envelope == spatial_rdd.boundaryEnvelope
+
+        return True
+
+    def test_constructor(self):
+        spatial_rdd_core = PolygonRDD(
+            sparkContext=self.sc,
+            InputLocation=input_location,
+            splitter=splitter,
+            carryInputData=True,
+            partitions=num_partitions,
+            newLevel=StorageLevel.MEMORY_ONLY
+        )
+        self.compare_spatial_rdd(spatial_rdd_core, input_boundary)
+
+        spatial_rdd_core = PolygonRDD(
+            self.sc,
+            input_location,
+            splitter,
+            True,
+            num_partitions,
+            StorageLevel.MEMORY_ONLY
+        )
+
+        self.compare_spatial_rdd(spatial_rdd_core, input_boundary)
+        spatial_rdd = PolygonRDD(rawSpatialRDD=spatial_rdd_core.rawJvmSpatialRDD)
+        self.compare_spatial_rdd(spatial_rdd, input_boundary)
+        spatial_rdd = PolygonRDD(spatial_rdd_core.rawJvmSpatialRDD, "epsg:4326", "epsg:5070")
+        self.compare_spatial_rdd(spatial_rdd, query_envelope)
+        assert spatial_rdd.getSourceEpsgCode() == "epsg:4326"
+        assert spatial_rdd.getTargetEpsgCode() == "epsg:5070"
+        spatial_rdd = PolygonRDD(rawSpatialRDD=spatial_rdd_core.rawJvmSpatialRDD, sourceEpsgCode="epsg:4326", targetEpsgCode="epsg:5070")
+        assert spatial_rdd.getSourceEpsgCode() == "epsg:4326"
+        assert spatial_rdd.getTargetEpsgCode() == "epsg:5070"
+        self.compare_spatial_rdd(spatial_rdd, query_envelope)
+        spatial_rdd = PolygonRDD(rawSpatialRDD=spatial_rdd.rawJvmSpatialRDD, newLevel=StorageLevel.MEMORY_ONLY)
+        self.compare_spatial_rdd(spatial_rdd, query_envelope)
+        spatial_rdd = PolygonRDD(spatial_rdd_core.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
+        self.compare_spatial_rdd(spatial_rdd, input_boundary)
+        spatial_rdd = PolygonRDD()
+
 
     def test_empty_constructor(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocation,
+            InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions,
+            partitions=num_partitions,
             newLevel=StorageLevel.MEMORY_ONLY
         )
         spatial_rdd.analyze()
-        spatial_rdd.spatialPartitioning(gridType)
+        spatial_rdd.spatialPartitioning(grid_type)
         spatial_rdd.buildIndex(IndexType.RTREE, True)
         spatial_rdd_copy = PolygonRDD()
         spatial_rdd_copy.rawSpatialRDD = spatial_rdd
@@ -65,7 +77,7 @@ class TestPolygonRDD(TestBase):
     def test_geojson_constructor(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocationGeojson,
+            InputLocation=input_location_geo_json,
             splitter=FileDataSplitter.GEOJSON,
             carryInputData=True,
             partitions=4,
@@ -81,7 +93,7 @@ class TestPolygonRDD(TestBase):
     def test_wkt_constructor(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocationWkt,
+            InputLocation=input_location_wkt,
             splitter=FileDataSplitter.WKT,
             carryInputData=True,
             newLevel=StorageLevel.MEMORY_ONLY
@@ -95,7 +107,7 @@ class TestPolygonRDD(TestBase):
     def test_wkb_constructor(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocationWkb,
+            InputLocation=input_location_wkb,
             splitter=FileDataSplitter.WKB,
             carryInputData=True,
             newLevel=StorageLevel.MEMORY_ONLY
@@ -108,7 +120,7 @@ class TestPolygonRDD(TestBase):
     def test_hilbert_curve_spatial_partitioning(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocation,
+            InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
             partitions=10,
@@ -123,7 +135,7 @@ class TestPolygonRDD(TestBase):
     def test_r_tree_spatial_partitioning(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocation,
+            InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
             partitions=10,
@@ -139,7 +151,7 @@ class TestPolygonRDD(TestBase):
     def test_voronoi_spatial_partitioning(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocation,
+            InputLocation=input_location,
             splitter=FileDataSplitter.CSV,
             carryInputData=True,
             partitions=10,
@@ -154,10 +166,10 @@ class TestPolygonRDD(TestBase):
     def test_build_index_without_set_grid(self):
         spatial_rdd = PolygonRDD(
             self.sc,
-            inputLocation,
+            input_location,
             FileDataSplitter.CSV,
             carryInputData=True,
-            partitions=numPartitions,
+            partitions=num_partitions,
             newLevel=StorageLevel.MEMORY_ONLY
         )
         spatial_rdd.analyze()
@@ -174,10 +186,10 @@ class TestPolygonRDD(TestBase):
     def test_mbr(self):
         polygon_rdd = PolygonRDD(
             sparkContext=self.sc,
-            InputLocation=inputLocation,
+            InputLocation=input_location,
             splitter=FileDataSplitter.CSV,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=num_partitions
         )
 
         rectangle_rdd = polygon_rdd.MinimumBoundingRectangle()
