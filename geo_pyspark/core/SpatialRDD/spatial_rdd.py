@@ -89,6 +89,7 @@ class SpatialRDD:
             self._srdd = SpatialRDDFactory(self._sc).create_spatial_rdd(
             )()
         self._spatial_partitioned = False
+        self._is_analyzed = False
 
     def _empty_srdd(self):
         session = SparkSession._instantiatedSession
@@ -107,7 +108,9 @@ class SpatialRDD:
         Analyze SpatialRDD
         :return: bool,
         """
-        return self._srdd.analyze()
+        self._srdd.analyze()
+        self._is_analyzed = True
+        return self._is_analyzed
 
     def CRSTransform(self, sourceEpsgCRSCode: crs, targetEpsgCRSCode: crs) -> bool:
         """
@@ -146,6 +149,8 @@ class SpatialRDD:
 
         :return:
         """
+        if not self._is_analyzed:
+            raise TypeError("Please use analyze before")
         java_boundary_envelope = get_field(self._srdd, "boundaryEnvelope")
         return Envelope.from_jvm_instance(java_boundary_envelope)
 
