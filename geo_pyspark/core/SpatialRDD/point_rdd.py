@@ -10,6 +10,11 @@ from geo_pyspark.utils.meta import MultipleMeta
 class PointRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self, rdd: RDD, newLevel: StorageLevel):
+        """
+
+        :param rdd:
+        :param newLevel:
+        """
         super().__init__(rdd.ctx)
 
         spatial_rdd = self._jvm.GeoSerializerData.deserializeToPointRawRDD(rdd._jrdd)
@@ -19,6 +24,10 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
         self._srdd = srdd
 
     def __init__(self, rdd: RDD):
+        """
+
+        :param rdd:
+        """
         super().__init__(rdd.ctx)
 
         spatial_rdd = self._jvm.GeoSerializerData.deserializeToPointRawRDD(rdd._jrdd)
@@ -184,11 +193,13 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
 
         super().__init__(sparkContext)
         new_level_jvm = JvmStorageLevel(self._jvm, newLevel).jvm_instance
+        jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
+
         self._srdd = self._jvm_spatial_rdd(
             self._jsc,
             InputLocation,
             Offset,
-            splitter,
+            jvm_splitter,
             carryInputData,
             new_level_jvm
         )
