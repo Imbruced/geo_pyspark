@@ -16,7 +16,6 @@ class GeometryFactory:
 
     @classmethod
     def geometry_from_bytes(cls, bin_parser: BinaryParser) -> BaseGeometry:
-        assign_all()
         g_type = bin_parser.read_byte()
         shape_type = ShapeEnum.get_name(g_type)
 
