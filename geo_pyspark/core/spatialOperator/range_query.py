@@ -4,11 +4,10 @@ from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
-from geo_pyspark.utils.meta import MultipleMeta
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 
 
-class RangeQuery(metaclass=MultipleMeta):
+class RangeQuery:
 
     @classmethod
     @require([GeoSparkLib.RangeQuery])
