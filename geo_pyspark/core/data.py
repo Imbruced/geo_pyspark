@@ -37,3 +37,6 @@ class GeoData:
         return self._userData
 
     __slots__ = ("_geom", "_userData")
+
+    def __repr__(self):
+        return f"Geometry: {str(self.geom)} userData: {self.userData}"
