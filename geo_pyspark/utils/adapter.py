@@ -1,6 +1,5 @@
 from typing import List
 
-from py4j.java_gateway import get_field
 from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession
 
@@ -185,7 +184,6 @@ class Adapter(metaclass=MultipleMeta):
 
         for right_element in rightFieldNames:
             right_field_names_jvm.add(right_element)
-        print("s")
         jdf = jvm.Adapter.toDf(
             spatialPairRDD._jrdd, left_field_names_jvm.toList, right_field_names_jvm.toList, sparkSession._jsparkSession
         )

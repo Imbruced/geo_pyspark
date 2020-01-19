@@ -8,7 +8,6 @@ from geo_pyspark.sql.exceptions import GeometryUnavailableException
 from geo_pyspark.utils.abstract_parser import GeometryParser
 from geo_pyspark.utils.binary_parser import BinaryParser, BinaryBuffer
 from geo_pyspark.utils.parsers import CircleParser, PARSERS
-from geo_pyspark.utils.prep import assign_all
 
 
 @attr.s
@@ -41,5 +40,5 @@ class GeometryFactory:
             appr_parser = PARSERS[geom_name]
             geom.__UDT__ = GeometryType()
         except KeyError:
-            raise KeyError(f"Parser for geometry {geom_name}")
+            raise KeyError(f"Parser for geometry {geom_name} is not available")
         return appr_parser.serialize(geom, BinaryBuffer())

@@ -1,5 +1,4 @@
 from pyspark import SparkContext, StorageLevel, RDD
-from pyspark.sql import SparkSession
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory

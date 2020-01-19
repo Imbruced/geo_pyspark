@@ -1,4 +1,3 @@
-import pickle
 from math import sqrt
 
 import attr
