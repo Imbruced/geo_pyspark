@@ -1,6 +1,8 @@
 import os
 from os import path
 
+from tests.tools import tests_path
+
 data_path = path.abspath(path.dirname(__file__))
 
 
@@ -9,7 +11,7 @@ def create_data_path(relative_path: str) -> str:
 
 
 mixed_wkb_geometry_input_location = create_data_path("county_small_wkb.tsv")
-mixed_wkt_geometry_input_location = create_data_path("county_small.tsv")
+mixed_wkt_geometry_input_location = os.path.join(tests_path, "resources/county_small.tsv")
 shape_file_input_location = create_data_path("shapefiles/dbf")
 shape_file_with_missing_trailing_input_location = create_data_path("shapefiles/missing")
 geojson_input_location = create_data_path("testPolygon.json")
