@@ -1,6 +1,7 @@
 import attr
 from pyspark import SparkContext
 
+from geo_pyspark.core.SpatialRDD import PolygonRDD, PointRDD, LineStringRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.formatMapper.geo_reader import GeoDataReader
 from geo_pyspark.core.utils import require
@@ -18,6 +19,12 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
     def readToGeometryRDD(cls, sc: SparkContext, inputPath: str) -> SpatialRDD:
+        """
+
+        :param sc:
+        :param inputPath:
+        :return:
+        """
         ShapefileReader.validate_imports()
         jvm = sc._jvm
         jsc = sc._jsc
@@ -29,3 +36,33 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
 
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
+
+    @classmethod
+    def readToPolygonRDD(cls, sc: SparkContext, inputPath: str) -> PolygonRDD:
+        """
+
+        :param sc:
+        :param inputPath:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def readToPointRDD(cls, sc: SparkContext, inputPath: str) -> PointRDD:
+        """
+
+        :param sc:
+        :param inputPath:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def readToLineStringRDD(cls, sc: SparkContext, inputPath: str) -> LineStringRDD:
+        """
+
+        :param sc:
+        :param inputPath:
+        :return:
+        """
+        pass
