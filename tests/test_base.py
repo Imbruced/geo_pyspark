@@ -1,6 +1,4 @@
-import pytest
 from pyspark.sql import SparkSession
-from pyspark import SparkContext
 
 from geo_pyspark.register import upload_jars, GeoSparkRegistrator
 from geo_pyspark.utils import KryoSerializer, GeoSparkKryoRegistrator
