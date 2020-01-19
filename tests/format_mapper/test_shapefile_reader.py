@@ -2,7 +2,6 @@ import os
 
 from geo_pyspark.core import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery
-from tests.polygon_properties import input_location
 from tests.tools import tests_path
 from geo_pyspark.core.formatMapper.shapefileParser import ShapefileReader
 from tests.test_base import TestBase
@@ -28,16 +27,25 @@ class TestShapeFileReader(TestBase):
         assert shape_rdd.rawSpatialRDD.collect().__len__() == 10000
 
     def test_read_to_polygon_rdd(self):
+        input_location = os.path.join(tests_path, "resources/shapefiles/polygon")
         spatial_rdd = ShapefileReader.readToPolygonRDD(self.sc, input_location)
         geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
-        window = Envelope(-180, 180, -90, 90)
+        window = Envelope(-180.0, 180.0, -90.0, 90.0)
         count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
 
         assert spatial_rdd.rawSpatialRDD.count() == count
+        assert 'org.datasyslab.geospark.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
+        assert 'org.datasyslab.geospark.spatialRDD.PolygonRDD' in spatial_rdd._srdd.toString()
 
     def test_read_to_linestring_rdd(self):
-        # TODO add this test and implement loading to linestring rdd
-        pass
+        input_location = os.path.join(tests_path, "resources/shapefiles/polyline")
+        spatial_rdd = ShapefileReader.readToLineStringRDD(self.sc, input_location)
+        geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
+        window = Envelope(-180.0, 180.0, -90.0, 90.0)
+        count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
+        assert spatial_rdd.rawSpatialRDD.count() == count
+        assert 'org.datasyslab.geospark.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
+        assert 'org.datasyslab.geospark.spatialRDD.LineStringRDD' in spatial_rdd._srdd.toString()
 
     def test_read_to_point_rdd(self):
         # TODO add this test and implement loading to point rdd
