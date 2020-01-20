@@ -64,7 +64,16 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         :param inputPath:
         :return:
         """
-        pass
+        ShapefileReader.validate_imports()
+        jvm = sc._jvm
+        jsc = sc._jsc
+        srdd = jvm.ShapefileReader.readToPointRDD(
+            jsc,
+            inputPath
+        )
+        spatial_rdd = PointRDD()
+        spatial_rdd.set_srdd(srdd)
+        return spatial_rdd
 
     @classmethod
     def readToLineStringRDD(cls, sc: SparkContext, inputPath: str) -> LineStringRDD:
