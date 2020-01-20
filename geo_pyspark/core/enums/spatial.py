@@ -6,6 +6,7 @@ class SpatialType(Enum):
     POLYGON = "POLYGON"
     RECTANGLE = "RECTANGLE"
     POINT = "POINT"
+    SPATIAL = "SPATIAL"
 
     @classmethod
     def from_str(cls, spatial: str) -> 'SpatialType':
