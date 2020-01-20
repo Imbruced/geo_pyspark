@@ -11,7 +11,7 @@ class JoinQuery:
 
     @classmethod
     @require([GeoSparkLib.JoinQuery])
-    def SpatialJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool):
+    def SpatialJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
         :param spatialRDD:
@@ -36,7 +36,7 @@ class JoinQuery:
 
     @classmethod
     @require([GeoSparkLib.JoinQuery])
-    def DistanceJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool):
+    def DistanceJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
         :param spatialRDD:
@@ -60,7 +60,7 @@ class JoinQuery:
 
     @classmethod
     @require([GeoSparkLib.JoinQuery])
-    def spatialJoin(cls, queryWindowRDD: SpatialRDD, objectRDD: SpatialRDD, joinParams: JoinParams):
+    def spatialJoin(cls, queryWindowRDD: SpatialRDD, objectRDD: SpatialRDD, joinParams: JoinParams) -> RDD:
         """
 
         :param queryWindowRDD:
@@ -82,7 +82,7 @@ class JoinQuery:
 
     @classmethod
     @require([GeoSparkLib.JoinQuery])
-    def DistanceJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool):
+    def DistanceJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
         :param spatialRDD:
@@ -110,7 +110,7 @@ class JoinQuery:
     @classmethod
     @require([GeoSparkLib.JoinQuery])
     def SpatialJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
-                              considerBoundaryIntersection: bool):
+                              considerBoundaryIntersection: bool) -> RDD:
         """
 
         :param spatialRDD:
