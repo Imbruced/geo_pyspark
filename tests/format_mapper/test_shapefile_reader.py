@@ -48,9 +48,21 @@ class TestShapeFileReader(TestBase):
         assert 'org.datasyslab.geospark.spatialRDD.LineStringRDD' in spatial_rdd._srdd.toString()
 
     def test_read_to_point_rdd(self):
-        # TODO add this test and implement loading to point rdd
-        pass
+        input_location = os.path.join(tests_path, "resources/shapefiles/point")
+        spatial_rdd = ShapefileReader.readToPointRDD(self.sc, input_location)
+        geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
+        window = Envelope(-180.0, 180.0, -90.0, 90.0)
+        count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
+        assert spatial_rdd.rawSpatialRDD.count() == count
+        assert 'org.datasyslab.geospark.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
+        assert 'org.datasyslab.geospark.spatialRDD.PointRDD' in spatial_rdd._srdd.toString()
 
     def test_read_to_point_rdd_multipoint(self):
-        # TODO add this test and implement loading to point rdd with multipoint handling
-        pass
+        input_location = os.path.join(tests_path, "resources/shapefiles/multipoint")
+        spatial_rdd = ShapefileReader.readToPointRDD(self.sc, input_location)
+        geometry_rdd = ShapefileReader.readToGeometryRDD(self.sc, input_location)
+        window = Envelope(-180.0, 180.0, -90.0, 90.0)
+        count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
+        assert spatial_rdd.rawSpatialRDD.count() == count
+        assert 'org.datasyslab.geospark.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
+        assert 'org.datasyslab.geospark.spatialRDD.PointRDD' in spatial_rdd._srdd.toString()

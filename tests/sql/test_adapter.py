@@ -1,7 +1,10 @@
 import logging
 
+from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
+from pyspark.sql.functions import col
 
+from geo_pyspark.core import Envelope
 from geo_pyspark.core.SpatialRDD import PolygonRDD, CircleRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
@@ -51,7 +54,7 @@ class TestAdapter(TestBase):
         spatial_df.show()
         spatial_df.printSchema()
         spatial_rdd = SpatialRDD(self.spark.sparkContext)
-        spatial_rdd.rawSpatialRDD = Adapter.toRdd(spatial_df)
+        spatial_rdd.rawJvmSpatialRDD = Adapter.toRdd(spatial_df)
         spatial_rdd.analyze()
         assert (Adapter.toDf(spatial_rdd, self.spark).columns.__len__() == 1)
         Adapter.toDf(spatial_rdd, self.spark).show()
@@ -72,7 +75,7 @@ class TestAdapter(TestBase):
         spatial_df.printSchema()
 
         spatial_rdd = SpatialRDD(self.spark.sparkContext)
-        spatial_rdd.rawSpatialRDD = Adapter.toRdd(spatial_df)
+        spatial_rdd.rawJvmSpatialRDD = Adapter.toRdd(spatial_df)
         spatial_rdd.analyze()
         assert (Adapter.toDf(spatial_rdd, self.spark).columns.__len__() == 1)
         Adapter.toDf(spatial_rdd, self.spark).show()
@@ -175,7 +178,7 @@ class TestAdapter(TestBase):
         join_result_df.show()
 
         join_result_df2 = Adapter.toDf(join_result_point_rdd, ["abc", "def"], list(), self.spark)
-        # join_result_df2.show()
+        join_result_df2.show()
 
     def test_distance_join_result_to_dataframe(self):
         point_csv_df = self.spark.\
@@ -226,3 +229,89 @@ class TestAdapter(TestBase):
         df.show()
         assert df.columns.__len__() == 4
         assert df.count() == 1
+
+    def _create_spatial_point_table(self) -> DataFrame:
+        df = self.spark.read.\
+            format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").\
+            load(area_lm_point_input_location)
+
+        df.createOrReplaceTempView("inputtable")
+
+        spatial_df = self.spark.sql("select ST_PointFromText(inputtable._c0,\",\") as geom from inputtable")
+
+        return spatial_df
+
+    def test_to_rdd_from_dataframe(self):
+        spatial_df = self._create_spatial_point_table()
+
+        spatial_df.show()
+
+        jsrdd = Adapter.toRdd(spatial_df)
+
+        spatial_rdd = SpatialRDD(self.sc)
+        spatial_rdd.rawJvmSpatialRDD = jsrdd
+        spatial_rdd.analyze()
+
+        assert spatial_rdd.approximateTotalCount == 121960
+        assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
+
+    def test_to_spatial_rdd_df_and_geom_field_name(self):
+        spatial_df = self._create_spatial_point_table()
+
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "geom")
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, "s")
+        spatial_rdd.analyze()
+
+        assert spatial_rdd.approximateTotalCount == 121960
+        assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
+
+    def test_to_spatial_rdd_df(self):
+        spatial_df = self._create_spatial_point_table()
+
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df)
+
+        spatial_rdd.analyze()
+
+        assert spatial_rdd.approximateTotalCount == 121960
+        assert spatial_rdd.boundaryEnvelope == Envelope(-179.147236, 179.475569, -14.548699, 71.35513400000001)
+
+    def test_to_spatial_rdd_df_geom_column_id(self):
+        df = self.spark.read.\
+            format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").\
+            load(mixed_wkt_geometry_input_location)
+
+        df_shorter = df.select(col("_c0").alias("geom"), col("_c6").alias("county_name"))
+        df_shorter.createOrReplaceTempView("county_data")
+
+        spatial_df = self.spark.sql("SELECT ST_GeomFromWKT(geom) as geom, county_name FROM county_data")
+        spatial_df.show()
+
+        spatial_rdd = Adapter.toSpatialRdd(spatial_df, ["geom", "county_name"])
+        spatial_rdd.analyze()
+        assert spatial_rdd.approximateTotalCount == 100
+
+    def test_to_df_srdd_fn_spark(self):
+        spatial_rdd = PolygonRDD(
+            self.spark.sparkContext, geojson_input_location, FileDataSplitter.GEOJSON, True
+        )
+        spatial_rdd.analyze()
+        assert spatial_rdd.approximateTotalCount == 1001
+
+        spatial_columns = [
+                "state_id", "county_id", "tract_id", "bg_id",
+                "fips", "fips_short", "bg_nr", "type", "code1", "code2"
+            ]
+        spatial_df = Adapter.toDf(
+            spatial_rdd,
+            spatial_columns,
+            self.spark
+        )
+
+        spatial_df.show()
+
+        assert spatial_df.columns == ["geometry", *spatial_columns]
+        assert spatial_df.count() == 1001
