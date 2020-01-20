@@ -308,7 +308,6 @@ class SpatialRDD:
 
     @property
     def partitionTree(self) -> JvmPartitioner:
-        """TODO add python wrapper for partitionTree based on name"""
         """
 
         :return:
