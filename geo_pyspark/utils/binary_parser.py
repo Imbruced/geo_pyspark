@@ -65,7 +65,7 @@ class BinaryParser:
         try:
             encoded_string = string.decode(encoding, "ignore")
         except UnicodeEncodeError:
-            raise UnicodeEncodeError(f"Can not encode user data {string}")
+            raise UnicodeEncodeError
         return encoded_string
 
     def read_kryo_string(self, length: int, sc: SparkContext) -> str:
