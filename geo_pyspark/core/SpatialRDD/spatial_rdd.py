@@ -86,8 +86,9 @@ class SpatialRDD:
         if self._sc is not None:
             self._jsc = self._sc._jsc
             self._jvm = self._sc._jvm
-            self._srdd = SpatialRDDFactory(self._sc).create_spatial_rdd(
-            )()
+            self._srdd = self._jvm_spatial_rdd()
+        else:
+            self._srdd = self._empty_srdd()
         self._spatial_partitioned = False
         self._is_analyzed = False
 
@@ -436,4 +437,5 @@ class SpatialRDD:
 
     @property
     def _jvm_spatial_rdd(self):
-        raise NotImplementedError()
+        spatial_factory = SpatialRDDFactory(self._sc)
+        return spatial_factory.create_spatial_rdd()
