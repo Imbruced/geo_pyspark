@@ -25,13 +25,11 @@ class KNNQuery:
         """
 
         jvm = spatialRDD._jvm
-        sc = spatialRDD._sc
 
         coordinate = JvmCoordinate(jvm, originalQueryPoint.x, originalQueryPoint.y)
 
         point = JvmPoint(spatialRDD._jvm, coordinate.jvm_instance)
         jvm_point = point.jvm_instance
-
 
         knn_neighbours = jvm.KNNQuery.SpatialKnnQuery(spatialRDD._srdd, jvm_point, k, useIndex)
 

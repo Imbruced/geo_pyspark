@@ -16,6 +16,15 @@ class WktReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
     def readToGeometryRDD(cls, sc: SparkContext, inputPath: str, wktColumn: int, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+        """
+
+        :param sc: SparkContext
+        :param inputPath: str
+        :param wktColumn: int
+        :param allowInvalidGeometries: bool
+        :param skipSyntacticallyInvalidGeometries: bool
+        :return:
+        """
         WktReader.validate_imports()
         jvm = sc._jvm
         srdd = jvm.WktReader.readToGeometryRDD(sc._jsc, inputPath, wktColumn, allowInvalidGeometries,
@@ -27,6 +36,14 @@ class WktReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
     def readToGeometryRDD(cls, rawTextRDD: RDD, wktColumn: int, allowInvalidGeometries: bool, skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+        """
+
+        :param rawTextRDD: RDD
+        :param wktColumn: int
+        :param allowInvalidGeometries: bool
+        :param skipSyntacticallyInvalidGeometries: bool
+        :return:
+        """
         WktReader.validate_imports()
         sc = rawTextRDD.ctx
         jvm = sc._jvm
