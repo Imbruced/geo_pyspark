@@ -32,7 +32,7 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
             jsc,
             inputPath
         )
-        spatial_rdd = SpatialRDD(sparkContext=sc)
+        spatial_rdd = SpatialRDD(sc=sc)
 
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
