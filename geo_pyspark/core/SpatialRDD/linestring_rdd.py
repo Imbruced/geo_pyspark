@@ -29,7 +29,8 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         self._srdd = srdd
 
     def __init__(self):
-        self._srdd = self._empty_srdd()
+        self._do_init()
+        self._srdd = self._jvm_spatial_rdd()
 
     def __init__(self, rawSpatialRDD: JvmSpatialRDD):
         """

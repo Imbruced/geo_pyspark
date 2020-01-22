@@ -33,15 +33,6 @@ class SpatialPartitioner:
         return cls(partitioner, jvm_partitioner)
 
 
-class SpatialValidator:
-
-    def __call__(self, instance, attribute, value):
-        value_type = instance.java_class_name
-        instance_type = instance.__class__.__name__.replace("Jvm", "").replace("line")
-        if value_type.lower() != instance_type.lower():
-            raise ValueError("Value should be an instance of ")
-
-
 @attr.s
 class JvmSpatialRDD:
     jsrdd = attr.ib()
@@ -67,42 +58,24 @@ class JvmIndexedRawRDD:
     sc = attr.ib(type=SparkContext)
 
 
-class GeoDataSerializer:
-
-    def serialize(self, jvm):
-        raise NotImplementedError("GeoDataSerializer has to implement serialize method")
-
-    def deserialize(self):
-        raise NotImplementedError("GeoDataSerializer has to implement deserialize method")
-
-
 class SpatialRDD:
 
-    def __init__(self, sparkContext: Optional[SparkContext] = None):
-        self._sc = sparkContext
-        self._srdd = None
-        self._jvm = None
-        self._jsc = None
-        if self._sc is not None:
-            self._jsc = self._sc._jsc
-            self._jvm = self._sc._jvm
-            self._srdd = self._jvm_spatial_rdd()
-        else:
-            self._srdd = self._empty_srdd()
+    def __init__(self, sc: Optional[SparkContext] = None):
+        self._do_init(sc)
         self._spatial_partitioned = False
         self._is_analyzed = False
+        self._srdd = self._jvm_spatial_rdd()
 
-    def _empty_srdd(self):
-        session = SparkSession._instantiatedSession
-        if session is None or session._sc._jsc is None:
-            raise TypeError("Please initialize spark session")
-        else:
-            sc = session._sc
-            self._sc = sc
-            self._jvm = sc._jvm
-            self._jsc = self._sc._jsc
-            srdd = self._jvm_spatial_rdd()
-        return srdd
+    def _do_init(self, sc: Optional[SparkContext] = None):
+        if sc is None:
+            session = SparkSession._instantiatedSession
+            if session is None or session._sc._jsc is None:
+                raise TypeError("Please initialize spark session")
+            else:
+                sc = session._sc
+        self._sc = sc
+        self._jvm = sc._jvm
+        self._jsc = self._sc._jsc
 
     def analyze(self) -> bool:
         """
