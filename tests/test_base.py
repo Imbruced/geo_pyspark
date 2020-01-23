@@ -10,7 +10,7 @@ class TestBase:
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
-            upload_jars()
+            # upload_jars()
 
             spark = SparkSession. \
                 builder. \

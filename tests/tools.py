@@ -2,7 +2,7 @@ from os import path
 
 from shapely.geometry import Point
 
-from geo_pyspark.core.data import GeoData
+from geo_pyspark.utils.spatial_rdd_parser import GeoData
 
 tests_path = path.abspath(path.dirname(__file__))
 

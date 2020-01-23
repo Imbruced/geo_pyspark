@@ -1,6 +1,3 @@
-import os
-
-import pytest
 from pyspark import StorageLevel
 from shapely.geometry import Point, Polygon, LineString
 from shapely.geometry.base import BaseGeometry
@@ -9,7 +6,7 @@ from geo_pyspark.core.SpatialRDD import LineStringRDD, PolygonRDD, CircleRDD, Po
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import IndexType, GridType
 from geo_pyspark.core.spatialOperator import JoinQuery
-from geo_pyspark.utils.abstract_parser import GeoData
+from geo_pyspark.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
 
 

@@ -1,6 +1,3 @@
-import os
-
-import pytest
 from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
