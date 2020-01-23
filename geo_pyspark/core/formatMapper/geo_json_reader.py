@@ -2,6 +2,7 @@ from pyspark import SparkContext, RDD
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.formatMapper.geo_reader import GeoDataReader
+from geo_pyspark.core.jvm.config import since
 from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.meta import MultipleMeta
@@ -10,6 +11,7 @@ from geo_pyspark.utils.meta import MultipleMeta
 class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
+    @since("1.2.0")
     @require([GeoSparkLib.GeoJsonReader])
     def validate_imports(cls) -> bool:
         return True
