@@ -1,14 +1,13 @@
 from pyspark import PickleSerializer
 
 from geo_pyspark.utils.binary_parser import BinaryParser
-from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData, SpatialPairRDDParserData
+from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData, SpatialPairRDDParserData, \
+    SpatialRDDParserDataMultipleRightGeom
 
 PARSERS = {
     0: SpatialRDDParserData(),
-    1: SpatialRDDParserData(),
+    1: SpatialRDDParserDataMultipleRightGeom(),
     2: SpatialPairRDDParserData(),
-
-
 }
 
 
