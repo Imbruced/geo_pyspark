@@ -1,4 +1,3 @@
-import pytest
 import os
 
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType

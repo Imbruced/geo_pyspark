@@ -11,15 +11,8 @@ from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
 query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
-# offset=0
 splitter = FileDataSplitter.CSV
-# gridType=rtree
-# indexType=rtree
-# numPartitions=5
-# distance=0.01
 query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-# inputCount=3000
-# inputBoundary=-123.393766, -65.648659, 17.982169, 49.002374
 match_count = 535
 match_with_original_duplicates_count = 875
 
