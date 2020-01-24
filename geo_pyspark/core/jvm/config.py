@@ -1,3 +1,4 @@
+import os
 from re import findall
 from typing import Optional
 import logging
@@ -12,11 +13,13 @@ logging.basicConfig(format=FORMAT)
 
 def compare_versions(version_a: str, version_b: str) -> bool:
     version_numbers = version_a.split("."), version_b.split(".")
-    for ver_a, ver_b in zip(*version_numbers):
-        if ver_a < version_b:
-            return False
-    if any(version_numbers):
+
+    if any([version[0] == "" for version in version_numbers]):
         return False
+
+    for ver_a, ver_b in zip(*version_numbers):
+        if int(ver_a) < int(ver_b):
+            return False
     return True
 
 
@@ -60,7 +63,8 @@ class SparkJars:
         try:
             used_jar_files = java_spark_conf.get("spark.jars")
         except Exception as e:
-            raise AttributeError("Can not find GeoSpark jars")
+            print(e)
+            used_jar_files = ",".join(os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars")))
         return used_jar_files
 
     @property
@@ -90,10 +94,7 @@ class GeoSparkMeta:
 
 
 if __name__ == "__main__":
-    from geo_pyspark.register import upload_jars
-    upload_jars()
-    spark = SparkSession. \
-        builder. \
-        master("local[*]"). \
-        getOrCreate()
-    assert GeoSparkMeta.version == "1.2.0"
+    assert not compare_versions("1.2.0", "1.1.5")
+    assert compare_versions("1.3.5", "1.2.0")
+    assert not compare_versions("", "1.2.0")
+    assert not compare_versions("1.3.5", "")
