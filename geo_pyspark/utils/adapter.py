@@ -119,10 +119,10 @@ class Adapter(metaclass=MultipleMeta):
         :param sparkSession:
         :return:
         """
-        spatialPairRDD_mapped = spatialPairRDD.map(
+        spatial_pair_rdd_mapped = spatialPairRDD.map(
             lambda x: [x[0].geom, *x[0].getUserData().split("\t"), x[1].geom, *x[1].getUserData().split("\t")]
         )
-        df = sparkSession.createDataFrame(spatialPairRDD_mapped)
+        df = sparkSession.createDataFrame(spatial_pair_rdd_mapped)
         return df
 
     @classmethod
