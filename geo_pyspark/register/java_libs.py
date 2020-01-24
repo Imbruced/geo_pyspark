@@ -26,3 +26,4 @@ class GeoSparkLib(Enum):
     GridType = "org.datasyslab.geospark.enums.GridType"
     IndexType = "org.datasyslab.geospark.enums.IndexType"
     AdapterWrapper = "org.imbruced.geo_pyspark.AdapterWrapper"
+    WktReader = "org.datasyslab.geospark.formatMapper.WktReader"
