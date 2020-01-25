@@ -66,8 +66,6 @@ class SpatialRDD:
 
     def __init__(self, sc: Optional[SparkContext] = None):
         self._do_init(sc)
-        self._spatial_partitioned = False
-        self._is_analyzed = False
         self._srdd = self._jvm_spatial_rdd()
 
     def _do_init(self, sc: Optional[SparkContext] = None):
@@ -80,6 +78,8 @@ class SpatialRDD:
         self._sc = sc
         self._jvm = sc._jvm
         self._jsc = self._sc._jsc
+        self._spatial_partitioned = False
+        self._is_analyzed = False
 
     def analyze(self) -> bool:
         """
