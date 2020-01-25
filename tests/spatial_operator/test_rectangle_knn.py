@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter
@@ -30,6 +30,9 @@ class TestRectangleKNN(TestBase):
     loop_times = 5
     query_point = Point(-84.01, 34.01)
     top_k = 100
+    query_polygon = Polygon(
+        [(-84.01, 34.01), (-84.01, 34.11), (-83.91, 34.11), (-83.91, 34.01), (-84.01, 34.01)]
+    )
 
     def test_spatial_knn_query(self):
         rectangle_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)
@@ -69,3 +72,13 @@ class TestRectangleKNN(TestBase):
             difference += sorted_result_no_index[x].geom.distance(sorted_result_with_index[x].geom)
 
         assert difference == 0
+
+    def test_spatial_knn_using_polygon(self):
+        rectangle_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)
+
+        result_no_index = KNNQuery.SpatialKnnQuery(rectangle_rdd, self.query_polygon, self.top_k, False)
+
+        print(result_no_index)
+
+    def test_spatial_knn_using_linestring(self):
+        pass
