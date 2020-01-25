@@ -27,3 +27,6 @@ class GeoSparkLib(Enum):
     IndexType = "org.datasyslab.geospark.enums.IndexType"
     AdapterWrapper = "org.imbruced.geo_pyspark.AdapterWrapper"
     WktReader = "org.datasyslab.geospark.formatMapper.WktReader"
+    GeometryAdapter = "org.imbruced.geo_pyspark.serializers.GeometryAdapter"
+    RawJvmIndexRDDSetter = "org.imbruced.geo_pyspark.RawJvmIndexRDDSetter"
+    ObjectSpatialRDDLoader = "org.imbruced.geo_pyspark.ObjectSpatialRDDLoader"
