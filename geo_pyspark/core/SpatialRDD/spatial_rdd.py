@@ -6,13 +6,13 @@ from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
 from pyspark.sql import SparkSession
 
-from build.lib.geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.jvm.partitioner import JvmPartitioner
+from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import require
 from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
 from geo_pyspark.utils.types import crs
@@ -41,6 +41,8 @@ class JvmSpatialRDD:
     sc = attr.ib(type=SparkContext)
     tp = attr.ib(type=SpatialType)
 
+    def saveAsObjectFile(self, location: str):
+        self.jsrdd.saveAsObjectFile(location)
 
 @attr.s
 class JvmGrids:
@@ -276,12 +278,18 @@ class SpatialRDD:
         """
         return self._srdd.indexedRDD()
 
+    @property
     def indexedRawRDD(self):
         """
 
         :return:
         """
-        return self._srdd.indexedRawRDD()
+        return get_field(self._srdd, "indexedRawRDD")
+
+    @indexedRawRDD.setter
+    @require([GeoSparkLib.RawJvmIndexRDDSetter])
+    def indexedRawRDD(self, value):
+        self._jvm.RawJvmIndexRDDSetter.setRawIndexRDD(self._srdd, value)
 
     @property
     def partitionTree(self) -> JvmPartitioner:
