@@ -2,7 +2,7 @@ from enum import Enum
 
 from pyspark import SparkContext
 
-from geo_pyspark.core.SpatialRDD import SpatialRDD, PolygonRDD, LineStringRDD
+from geo_pyspark.core.SpatialRDD import SpatialRDD, PolygonRDD, LineStringRDD, PointRDD
 from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import require
 
@@ -29,20 +29,20 @@ class PolygonRDDDiscLoader(DiscLoader):
     @require([GeoSparkLib.ObjectSpatialRDDLoader])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
-        point_rdd = PolygonRDD()
+        polygon_rdd = PolygonRDD()
         srdd = jvm.ObjectSpatialRDDLoader.loadPointSpatialRDD(sc._jsc, path)
-        point_rdd.set_srdd(srdd)
-        return point_rdd
+        polygon_rdd.set_srdd(srdd)
+        return polygon_rdd
 
 
 class PointRDDDiscLoader(DiscLoader):
 
     @classmethod
-    @require([GeoSparkLib])
+    @require([GeoSparkLib.ObjectSpatialRDDLoader])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
-        polygon_rdd = PolygonRDD()
-        srdd = jvm.ObjectSpatialRDDLoader.loadPolygonSpatialRDD(sc._jsc, path)
+        polygon_rdd = PointRDD()
+        srdd = jvm.ObjectSpatialRDDLoader.loadPointSpatialRDD(sc._jsc, path)
         polygon_rdd.set_srdd(srdd)
         return polygon_rdd
 
@@ -50,7 +50,7 @@ class PointRDDDiscLoader(DiscLoader):
 class LineStringRDDDiscLoader(DiscLoader):
 
     @classmethod
-    @require([GeoSparkLib])
+    @require([GeoSparkLib.ObjectSpatialRDDLoader])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
         line_string_rdd = LineStringRDD()
@@ -62,7 +62,7 @@ class LineStringRDDDiscLoader(DiscLoader):
 class SpatialRDDDiscLoader(DiscLoader):
 
     @classmethod
-    @require([GeoSparkLib])
+    @require([GeoSparkLib.ObjectSpatialRDDLoader])
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
         spatial_rdd = SpatialRDD()

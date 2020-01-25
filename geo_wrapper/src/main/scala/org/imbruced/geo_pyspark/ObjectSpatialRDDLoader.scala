@@ -3,29 +3,29 @@ package org.imbruced.geo_pyspark
 import com.vividsolutions.jts.geom.{Geometry, LineString, Point, Polygon}
 import com.vividsolutions.jts.index.SpatialIndex
 import org.apache.spark.SparkContext
-import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.api.java.{JavaRDD, JavaSparkContext}
 import org.datasyslab.geospark.spatialRDD.{LineStringRDD, PointRDD, PolygonRDD, SpatialRDD}
 
 object ObjectSpatialRDDLoader {
-  def loadPointSpatialRDD(sc:SparkContext, path: String, geomType: String): PointRDD = {
+  def loadPointSpatialRDD(sc:JavaSparkContext, path: String): PointRDD = {
     new PointRDD(sc.objectFile[Point](path))
   }
 
-  def loadPolygonSpatialRDD(sc: SparkContext, path: String): PolygonRDD = {
+  def loadPolygonSpatialRDD(sc: JavaSparkContext, path: String): PolygonRDD = {
     new PolygonRDD(sc.objectFile[Polygon](path))
   }
 
-  def loadSpatialRDD(sc: SparkContext, path: String): SpatialRDD[Geometry] = {
+  def loadSpatialRDD(sc: JavaSparkContext, path: String): SpatialRDD[Geometry] = {
     val spatialRDD = new SpatialRDD[Geometry]
     spatialRDD.rawSpatialRDD = sc.objectFile[Geometry](path)
     spatialRDD
   }
 
-  def loadLineStringSpatialRDD(sc: SparkContext, path: String): LineStringRDD = {
+  def loadLineStringSpatialRDD(sc: JavaSparkContext, path: String): LineStringRDD = {
     new LineStringRDD(sc.objectFile[LineString](path))
   }
 
-  def loadIndexRDD(sc: SparkContext, path: String): JavaRDD[SpatialIndex] = {
+  def loadIndexRDD(sc: JavaSparkContext, path: String): JavaRDD[SpatialIndex] = {
     sc.objectFile[SpatialIndex](path)
   }
 }
