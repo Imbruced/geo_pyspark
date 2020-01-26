@@ -2,11 +2,11 @@ import pickle
 from typing import Optional, List, Union
 
 import attr
+from geo_pyspark.register.java_libs import GeoSparkLib
 from py4j.java_gateway import get_field
 from pyspark import SparkContext, RDD
 from pyspark.sql import SparkSession
 
-from build.lib.geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
