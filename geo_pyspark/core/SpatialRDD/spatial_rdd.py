@@ -11,6 +11,7 @@ from geo_pyspark.core.enums.grid_type import GridTypeJvm, GridType
 from geo_pyspark.core.enums.index_type import IndexTypeJvm, IndexType
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.jvm.config import since
 from geo_pyspark.core.jvm.partitioner import JvmPartitioner
 from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.decorators import require
@@ -169,6 +170,7 @@ class SpatialRDD:
         return self._srdd.countWithoutDuplicatesSPRDD()
 
     @property
+    @since("1.2.0")
     def fieldNames(self) -> List[str]:
         """
 
