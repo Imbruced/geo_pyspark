@@ -1,30 +1,11 @@
-    # GeoSpark Core
+# GeoSpark Core
 
-The page outlines the steps to create Spatial RDDs and run spatial queries using GeoSpark-core. ==The example code is written in Scala but also works for Java==.
-
-
-## Set up dependencies
+## Installing package
 
 
-## Initiate SparkContext
+## GeoSpark Serializers
+GeoSpark has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
-```python
-from pyspark import SparkConf, SparkContext
-
-from geo_pyspark.utils import KryoSerializer, GeoSparkKryoRegistrator
-
-conf = SparkConf()
-conf.setAppName("GeoSparkRunnableExample")
-conf.setMaster("local[*]")
-conf.set("spark.serializer", KryoSerializer.getName)
-conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.getName)
-sc = SparkContext(conf)
-```
-
-!!!warning
-    GeoSpark has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
-
-If you add ==the GeoSpark full dependencies== as suggested above, please use the following two lines to enable GeoSpark Kryo serializer instead:
 ```python
 conf.set("spark.serializer", KryoSerializer.getName)
 conf.set("spark.kryo.registrator", GeoSparkKryoRegistrator.getName)
@@ -140,21 +121,12 @@ rdd_with_other_attributes = object_rdd.rawSpatialRDD.map(lambda x: x.getUserData
 ```python
 from geo_pyspark.core import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery
-# TODO Add other geometries to range query window
 
 range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
 using_index = False
 query_result = RangeQuery.SpatialRangeQuery(spatial_rdd, range_query_window, consider_boundary_intersection, using_index)
 ```
-
-!!!note
-    Spatial range query is equal to ==ST_Within== and ==ST_Intersects== in Spatial SQL. An example query is as follows:
-    ```SQL
-    SELECT *
-    FROM checkin
-    WHERE ST_Intersects(queryWindow, checkin.location)
-    ```
 
 ### Range query window
 
@@ -215,15 +187,6 @@ k = 1000 ## K Nearest Neighbors
 using_index = False
 result = KNNQuery.SpatialKnnQuery(object_rdd, point, k, using_index)
 ```
-
-!!!note
-    Spatial KNN query that returns 5 Nearest Neighbors is equal to the following statement in Spatial SQL
-    ```SQL
-    SELECT ck.name, ck.rating, ST_Distance(ck.location, myLocation) AS distance
-    FROM checkins ck
-    ORDER BY distance DESC
-    LIMIT 5
-    ```
 
 ### Query center geometry
 
