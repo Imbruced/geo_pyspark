@@ -30,3 +30,4 @@ class GeoSparkLib(Enum):
     GeometryAdapter = "org.imbruced.geo_pyspark.serializers.GeometryAdapter"
     RawJvmIndexRDDSetter = "org.imbruced.geo_pyspark.RawJvmIndexRDDSetter"
     ObjectSpatialRDDLoader = "org.imbruced.geo_pyspark.ObjectSpatialRDDLoader"
+    WkbReader = "org.datasyslab.geospark.formatMapper.WkbReader"
