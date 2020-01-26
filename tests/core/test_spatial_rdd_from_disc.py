@@ -135,8 +135,12 @@ class TestDiscUtils(TestBase):
         linestring_rdd.analyze()
         print(linestring_rdd.boundaryEnvelope)
 
+        linestring_rdd.spatialPartitioning(GridType.RTREE)
+        polygon_rdd.spatialPartitioning(linestring_rdd.grids)
+        polygon_rdd.buildIndex(IndexType.RTREE, True)
+        linestring_rdd.buildIndex(IndexType.RTREE, True)
+
         result = JoinQuery.SpatialJoinQuery(
             linestring_rdd, polygon_rdd, True, True).collect()
 
         print(result)
-
