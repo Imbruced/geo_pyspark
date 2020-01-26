@@ -206,21 +206,3 @@ class TestSpatialRDD(TestBase):
         spatial_rdd.spatialPartitioning(GridType.QUADTREE)
 
         print(spatial_rdd.partitionTree)
-
-    def test_raw_spatial_rdd(self):
-        pass
-
-    def test_save_as_geojson(self):
-        pass
-
-    def test_set_raw_spatial_rdd(self):
-        pass
-
-    def test_set_sample_number(self):
-        pass
-
-    def test_spatial_partitioned_rdd(self):
-        pass
-
-    def test_spatial_partitioning(self):
-        pass
