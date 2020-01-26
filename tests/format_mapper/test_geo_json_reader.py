@@ -1,5 +1,7 @@
 import os
 
+import pyspark
+
 from geo_pyspark.core.jvm.config import compare_versions, GeoSparkMeta
 
 from geo_pyspark.core.formatMapper.geo_json_reader import GeoJsonReader
@@ -83,7 +85,10 @@ class TestGeoJsonReader(TestBase):
             )
 
             assert geo_json_rdd.rawSpatialRDD.count() == 1
-            assert geo_json_rdd.fieldNames.__len__() == 3
+            if pyspark.version.__version__[:3] == "2.2":
+                assert geo_json_rdd.fieldNames.__len__() == 2
+            else:
+                assert geo_json_rdd.fieldNames.__len__() == 3
 
     def test_read_to_geometry_rdd_invalid_syntax(self):
         if compare_versions(GeoSparkMeta.version, "1.2.0"):
