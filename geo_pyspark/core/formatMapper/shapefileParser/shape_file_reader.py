@@ -4,6 +4,7 @@ from pyspark import SparkContext
 from geo_pyspark.core.SpatialRDD import PolygonRDD, PointRDD, LineStringRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.formatMapper.geo_reader import GeoDataReader
+from geo_pyspark.core.jvm.config import since
 from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.utils.meta import MultipleMeta
@@ -14,6 +15,7 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
     @require([GeoSparkLib.ShapeFileReader])
+    @since("1.2.0")
     def validate_imports(cls):
         return True
 
