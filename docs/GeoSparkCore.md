@@ -412,8 +412,8 @@ Typed SpatialRDD and generic SpatialRDD can be saved to permanent storage.
 Use the following code to save an SpatialRDD as a distributed WKT text file:
 
 ```Scala
-objectRDD.rawSpatialRDD.saveAsTextFile("hdfs://PATH")
-objectRDD.rawSpatialRDD.saveAsWKT("hdfs://PATH")
+objectRDD.rawJvmSpatialRDD.saveAsTextFile("hdfs://PATH")
+objectRDD.saveAsWKT("hdfs://PATH")
 ```
 
 #### Save to distributed WKB text file
@@ -428,8 +428,8 @@ objectRDD.saveAsWKB("hdfs://PATH")
 
 Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
 
-```Scala
-objectRDD.saveAsGeoJSON("hdfs://PATH")
+```python
+object_rdd.saveAsGeoJSON("hdfs://PATH")
 ```
 
 
@@ -453,7 +453,7 @@ Indexed typed SpatialRDD and generic SpatialRDD can be saved to permanent storag
 Use the following code to save an SpatialRDD as a distributed object file:
 
 ```python
-objectRDD.indexedRawRDD.saveAsObjectFile("hdfs://PATH")
+object_rdd.indexedRawRDD.saveAsObjectFile("hdfs://PATH")
 ```
 
 ### Save an SpatialRDD (spatialPartitioned W/O indexed)
@@ -469,24 +469,21 @@ You can easily reload an SpatialRDD that has been saved to ==a distributed objec
 Use the following code to reload the PointRDD/PolygonRDD/LineStringRDD:
 
 ```python
-var savedRDD = new PointRDD(sc.objectFile[Point]("hdfs://PATH"))
-
-var savedRDD = new PointRDD(sc.objectFile[Polygon]("hdfs://PATH"))
-
-var savedRDD = new PointRDD(sc.objectFile[LineString]("hdfs://PATH"))
+polygon_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeometryType.POLYGON)
+point_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeometryType.POINT)
+linestring_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeometryType.LINESTRING)
 ```
 
 #### Load to a generic SpatialRDD
 
 Use the following code to reload the SpatialRDD:
 
-```Scala
-var savedRDD = new SpatialRDD[Geometry]
-savedRDD.rawSpatialRDD = sc.objectFile[Geometry]("hdfs://PATH")
+```python
+saved_rdd = load_spatial_rdd_from_disc(sc, "hdfs://PATH", GeometryType.GEOMETRY)
 ```
 
 Use the following code to reload the indexed SpatialRDD:
-```Scala
-var savedRDD = new SpatialRDD[Geometry]
-savedRDD.indexedRawRDD = sc.objectFile[SpatialIndex]("hdfs://PATH")
+```python
+saved_rdd = SpatialRDD()
+saved_rdd.indexedRawRDD = load_spatial_index_rdd_from_disc(sc, "hdfs://PATH")
 ```
