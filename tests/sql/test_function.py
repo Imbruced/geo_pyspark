@@ -1,3 +1,4 @@
+import pyspark
 from shapely.wkt import loads
 
 from tests.data import mixed_wkt_geometry_input_location
@@ -192,9 +193,15 @@ class TestPredicateJoin(TestBase):
         assert polygon_df.take(1)[0]["countyshape"].wkt == loads(wkt_df.take(1)[0]["wkt"]).wkt
 
     def test_st_n_points(self):
-        test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
-        assert test.take(1)[0][0] == 4
+        if pyspark.version.__version__[:3] == "2.2":
+            pass
+        else:
+            test = self.spark.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+            assert test.take(1)[0][0] == 4
 
     def test_st_geometry_type(self):
-        test = self.spark.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
-        assert test.take(1)[0][0].upper() == "ST_LINESTRING"
+        if pyspark.version.__version__[:3] == "2.2":
+            pass
+        else:
+            test = self.spark.sql("SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
+            assert test.take(1)[0][0].upper() == "ST_LINESTRING"

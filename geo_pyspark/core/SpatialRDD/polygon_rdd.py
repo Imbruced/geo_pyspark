@@ -10,8 +10,7 @@ from geo_pyspark.utils.meta import MultipleMeta
 class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self, rdd: RDD, newLevel: StorageLevel):
-        self._sc = rdd.ctx
-        self._jvm = self._sc._jvm
+        super().__init__(rdd.ctx)
 
         spatial_rdd = self._jvm.GeoSerializerData.deserializeToPolygonRawRDD(rdd._jrdd)
 

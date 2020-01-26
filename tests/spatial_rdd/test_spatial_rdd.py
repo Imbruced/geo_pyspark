@@ -1,5 +1,6 @@
 import os
 
+import pyspark
 import pytest
 from pyspark import StorageLevel, RDD
 from shapely.geometry import Point
@@ -99,7 +100,10 @@ class TestSpatialRDD(TestBase):
             True,
             False
         )
-        assert geo_json_rdd.fieldNames == ['id', 'zipcode', 'name']
+        if pyspark.version.__version__[:3] == "2.2":
+            assert geo_json_rdd.fieldNames == ['zipcode', 'name']
+        else:
+            assert geo_json_rdd.fieldNames == ['id', 'zipcode', 'name']
 
     def test_get_crs_transformation(self):
         spatial_rdd = PointRDD(

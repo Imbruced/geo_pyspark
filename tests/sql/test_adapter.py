@@ -1,5 +1,6 @@
 import logging
 
+import pyspark
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.functions import col
@@ -227,7 +228,10 @@ class TestAdapter(TestBase):
         spatial_rdd.analyze()
         df = Adapter.toDf(spatial_rdd, self.spark)
         df.show()
-        assert df.columns.__len__() == 4
+        if pyspark.version.__version__[:3] == "2.2":
+            assert df.columns.__len__() == 3
+        else:
+            assert df.columns.__len__() == 4
         assert df.count() == 1
 
     def _create_spatial_point_table(self) -> DataFrame:

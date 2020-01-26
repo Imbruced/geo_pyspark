@@ -1,6 +1,7 @@
 import os
 
 from geo_pyspark.core import Envelope
+from geo_pyspark.core.jvm.config import GeoSparkMeta, compare_versions
 from geo_pyspark.core.spatialOperator import RangeQuery
 from tests.tools import tests_path
 from geo_pyspark.core.formatMapper.shapefileParser import ShapefileReader
@@ -16,7 +17,9 @@ class TestShapeFileReader(TestBase):
         shape_rdd = ShapefileReader.readToGeometryRDD(
             sc=self.sc, inputPath=undefined_type_shape_location
         )
-        assert shape_rdd.fieldNames == ['LGA_CODE16', 'LGA_NAME16', 'STE_CODE16', 'STE_NAME16', 'AREASQKM16']
+
+        if compare_versions(GeoSparkMeta.version, "1.2.0"):
+            assert shape_rdd.fieldNames == ['LGA_CODE16', 'LGA_NAME16', 'STE_CODE16', 'STE_NAME16', 'AREASQKM16']
         assert shape_rdd.getRawSpatialRDD().count() == 545
 
     def test_read_geometry_rdd(self):

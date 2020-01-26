@@ -1,10 +1,12 @@
 import attr
 from shapely.geometry import Point
+from shapely.geometry.base import BaseGeometry
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.geom_types import JvmCoordinate, JvmPoint
 from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
+from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.binary_parser import BinaryParser
 from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData
 
@@ -13,8 +15,8 @@ from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData
 class KNNQuery:
 
     @classmethod
-    @require([GeoSparkLib.KNNQuery])
-    def SpatialKnnQuery(self, spatialRDD: SpatialRDD, originalQueryPoint: Point, k: int,  useIndex: bool):
+    @require([GeoSparkLib.KNNQuery, GeoSparkLib.GeometryAdapter])
+    def SpatialKnnQuery(self, spatialRDD: SpatialRDD, originalQueryPoint: BaseGeometry, k: int,  useIndex: bool):
         """
 
         :param spatialRDD: spatialRDD
@@ -24,14 +26,12 @@ class KNNQuery:
         :return: pyspark.RDD
         """
 
+        geom = GeometryFactory.to_bytes(originalQueryPoint)
         jvm = spatialRDD._jvm
 
-        coordinate = JvmCoordinate(jvm, originalQueryPoint.x, originalQueryPoint.y)
+        jvm_geom = jvm.GeometryAdapter.deserializeToGeometry(geom)
 
-        point = JvmPoint(spatialRDD._jvm, coordinate.jvm_instance)
-        jvm_point = point.jvm_instance
-
-        knn_neighbours = jvm.KNNQuery.SpatialKnnQuery(spatialRDD._srdd, jvm_point, k, useIndex)
+        knn_neighbours = jvm.KNNQuery.SpatialKnnQuery(spatialRDD._srdd, jvm_geom, k, useIndex)
 
         srdd = jvm.GeoSerializerData.serializeToPython(knn_neighbours)
 

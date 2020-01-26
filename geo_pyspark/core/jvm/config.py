@@ -26,11 +26,12 @@ def compare_versions(version_a: str, version_b: str) -> bool:
 def since(version: str):
     def wrapper(function):
         def applier(*args, **kwargs):
-            result = function(*args, **kwargs)
             geo_spark_version = GeoSparkMeta.version
-            if compare_versions(geo_spark_version, version):
+            if not compare_versions(geo_spark_version, version):
                 logging.warning(f"This function is not available for {geo_spark_version}, "
                                 f"please use version higher than {version}")
+                raise AttributeError(f"Not available before {version} geospark version")
+            result = function(*args, **kwargs)
             return result
         return applier
     return wrapper
