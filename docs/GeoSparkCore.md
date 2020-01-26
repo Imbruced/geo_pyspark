@@ -338,34 +338,37 @@ Each object on the left is covered/intersected by the object on the right.
 
 ## Write a Distance Join Query
 
-A distance join query takes as input two Spatial RDD A and B and a distance. For each geometry in A, finds the geometries (from B) are within the given distance to it. A and B can be any geometry type and are not necessary to have the same geometry type. The unit of the distance is explained [here](#transform-the-coordinate-reference-system).
+A distance join query takes two spatial RDD assuming that we have two SpatialRDD's:
+<li> object_rdd </li>
+<li> spatial_rdd </li>
 
-Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.
+And finds the geometries (from spatial_rdd) are within given distance to it. spatial_rdd and object_rdd
+can be any geometry type (point, line, polygon) and are not necessary to have the same geometry type
+ 
+You can use the following code to issue an Distance Join Query on them.
 
 ```python
 object_rdd.analyze()
 
-circle_rdd = CircleRDD(object_rdd, 0.1) // Create a CircleRDD using the given distance
+circle_rdd = CircleRDD(object_rdd, 0.1) ## Create a CircleRDD using the given distance
+circle_rdd.analyze()
 
 circle_rdd.spatialPartitioning(GridType.KDBTREE)
-spatial_rdd.spatialPartitioning(circleRDD.getPartitioner)
+spatial_rdd.spatialPartitioning(circle_rdd.getPartitioner())
 
 consider_boundary_intersection = False ## Only return gemeotries fully covered by each query window in queryWindowRDD
 using_index = False
 
-result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, circleRDD, using_index, consider_boundary_intersection)
+result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, consider_boundary_intersection)
 ```
 
+Result for this query is RDD which holds two GeoData objects within list of lists.
+Example:
+```python
+result.collect()
+[[GeoData, GeoData], [GeoData, GeoData] ...]
+```
 
-
-!!!note
-    Distance join query is equal to the following query in Spatial SQL:
-    ```SQL
-    SELECT superhero.name
-    FROM city, superhero
-    WHERE ST_Distance(city.geom, superhero.geom) <= 10;
-    ```
-    Find the super heros within 10 miles of each city
     
 ## Save to permanent storage
 
