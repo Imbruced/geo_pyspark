@@ -263,26 +263,41 @@ A spatial join query takes as input two Spatial RDD A and B. For each geometry i
 
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.
 
-```Scala
-val considerBoundaryIntersection = false // Only return gemeotries fully covered by each query window in queryWindowRDD
-val usingIndex = false
+```python
+consider_boundary_intersection = False ## Only return geometries fully covered by each query window in queryWindowRDD
+using_index = False
 
-objectRDD.analyze()
+object_rdd.analyze()
 
-objectRDD.spatialPartitioning(GridType.KDBTREE)
-queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+object_rdd.spatialPartitioning(GridType.KDBTREE)
+query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
-val result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, considerBoundaryIntersection)
+result = JoinQuery.SpatialJoinQuery(object_rdd, query_window_rdd, using_index, consider_boundary_intersection)
+
 ```
 
-!!!note
-    Spatial join query is equal to the following query in Spatial SQL:
-    ```SQL
-    SELECT superhero.name
-    FROM city, superhero
-    WHERE ST_Contains(city.geom, superhero.geom);
-    ```
-    Find the super heros in each city
+Result of SpatialJoinQuery is RDD which consists of GeoData instance and list of GeoData instances which spatially intersects or 
+are covered by GeoData. 
+
+```python
+result.collect())
+[[
+Geometry: Polygon userData: ,
+  [Geometry: Polygon userData: ,
+   Geometry: Polygon userData: ,
+   Geometry: Polygon userData: ,
+   Geometry: Polygon userData: ,
+   Geometry: Polygon userData: ]],
+ [Geometry: Polygon userData: , [Geometry: Polygon userData: ]],
+ [Geometry: Polygon userData: ,
+  [Geometry: Polygon userData: ,
+   Geometry: Polygon userData: ,
+   Geometry: Polygon userData: ,
+   Geometry: Polygon userData: ]],
+...
+]
+
+```
 
 ### Use spatial partitioning
 
@@ -369,6 +384,17 @@ result.collect()
 [[GeoData, GeoData], [GeoData, GeoData] ...]
 ```
 
+It is possible to do some RDD operation on result data ex. Getting polygon centroid.
+```python
+result.map(lambda x: x[0].geom.centroid).collect()
+[
+ <shapely.geometry.point.Point at 0x7efee2d28128>,
+ <shapely.geometry.point.Point at 0x7efee2d280b8>,
+ <shapely.geometry.point.Point at 0x7efee2d28fd0>,
+ <shapely.geometry.point.Point at 0x7efee2d28080>,
+ ...
+]
+```
     
 ## Save to permanent storage
 
