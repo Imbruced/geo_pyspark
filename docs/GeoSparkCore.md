@@ -231,23 +231,22 @@ Besides the Point type, GeoSpark KNN query center can be
 <li> Polygon </li>
 <li> LineString </li>
 
-To create Polygon or Linestring object please follow Shapely official <a href=""> documentation </a>
+To create Polygon or Linestring object please follow Shapely official <a href="https://shapely.readthedocs.io/en/stable/manual.html"> documentation </a>
 
 ### Use spatial indexes
 
 To utilize a spatial index in a spatial KNN query, use the following code:
 
-```Scala
-val geometryFactory = new GeometryFactory()
-val pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
-val K = 1000 // K Nearest Neighbors
+```python
+point = Point(-84.01, 34.01)
+k = 1000 ## K Nearest Neighbors
 
 
-val buildOnSpatialPartitionedRDD = false // Set to TRUE only if run join query
-spatialRDD.buildIndex(IndexType.RTREE, buildOnSpatialPartitionedRDD)
+build_on_spatial_partitioned_rdd = False ## Set to TRUE only if run join query
+spatial_rdd.buildIndex(IndexType.RTREE, build_on_spatial_partitioned_rdd)
 
-val usingIndex = true
-val result = KNNQuery.SpatialKnnQuery(objectRDD, pointObject, K, usingIndex)
+using_index = True
+result = KNNQuery.SpatialKnnQuery(spatial_rdd, point, k, using_index)
 ```
 
 !!!warning
@@ -430,7 +429,7 @@ Indexed typed SpatialRDD and generic SpatialRDD can be saved to permanent storag
 
 Use the following code to save an SpatialRDD as a distributed object file:
 
-```
+```python
 objectRDD.indexedRawRDD.saveAsObjectFile("hdfs://PATH")
 ```
 
