@@ -305,16 +305,16 @@ GeoSpark spatial partitioning method can significantly speed up the join query. 
 
 If you first partition SpatialRDD A, then you must use the partitioner of A to partition B.
 
-```Scala
-objectRDD.spatialPartitioning(GridType.KDBTREE)
-queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+```python
+object_rdd.spatialPartitioning(GridType.KDBTREE)
+query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 ```
 
 Or 
 
-```Scala
-queryWindowRDD.spatialPartitioning(GridType.KDBTREE)
-objectRDD.spatialPartitioning(queryWindowRDD.getPartitioner)
+```python
+query_window_rdd.spatialPartitioning(GridType.KDBTREE)
+object_rdd.spatialPartitioning(query_window_rdd.getPartitioner())
 ```
 
 
@@ -322,15 +322,15 @@ objectRDD.spatialPartitioning(queryWindowRDD.getPartitioner)
 
 To utilize a spatial index in a spatial join query, use the following code:
 
-```Scala
-objectRDD.spatialPartitioning(joinQueryPartitioningType)
-queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
+```python
+object_rdd.spatialPartitioning(GridType.KDBTREE)
+query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
-val buildOnSpatialPartitionedRDD = true // Set to TRUE only if run join query
-val usingIndex = true
-queryWindowRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
+build_on_spatial_partitioned_rdd = True ## Set to TRUE only if run join query
+using_index = True
+query_window_rdd.buildIndex(IndexType.QUADTREE, build_on_spatial_partitioned_rdd)
 
-val result = JoinQuery.SpatialJoinQueryFlat(objectRDD, queryWindowRDD, usingIndex, considerBoundaryIntersection)
+result = JoinQuery.SpatialJoinQueryFlat(object_rdd, query_window_rdd, using_index, True)
 ```
 
 The index should be built on either one of two SpatialRDDs. In general, you should build it on the larger SpatialRDD.
