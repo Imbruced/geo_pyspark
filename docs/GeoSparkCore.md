@@ -342,27 +342,21 @@ A distance join query takes as input two Spatial RDD A and B and a distance. For
 
 Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.
 
-```Scala
-objectRddA.analyze()
+```python
+object_rdd.analyze()
 
-val circleRDD = new CircleRDD(objectRddA, 0.1) // Create a CircleRDD using the given distance
+circle_rdd = CircleRDD(object_rdd, 0.1) // Create a CircleRDD using the given distance
 
-circleRDD.spatialPartitioning(GridType.KDBTREE)
-objectRddB.spatialPartitioning(circleRDD.getPartitioner)
+circle_rdd.spatialPartitioning(GridType.KDBTREE)
+spatial_rdd.spatialPartitioning(circleRDD.getPartitioner)
 
-val considerBoundaryIntersection = false // Only return gemeotries fully covered by each query window in queryWindowRDD
-val usingIndex = false
+consider_boundary_intersection = False ## Only return gemeotries fully covered by each query window in queryWindowRDD
+using_index = False
 
-val result = JoinQuery.DistanceJoinQueryFlat(objectRddB, circleRDD, usingIndex, considerBoundaryIntersection)
+result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, circleRDD, using_index, consider_boundary_intersection)
 ```
 
-The rest part of the join query is same as the spatial join query.
 
-The details of spatial partitioning in join query is [here](#use-spatial-partitioning).
-
-The details of using spatial indexes in join query is [here](#use-spatial-indexes_2).
-
-The output format of the distance join query is [here](#output-format_2).
 
 !!!note
     Distance join query is equal to the following query in Spatial SQL:
