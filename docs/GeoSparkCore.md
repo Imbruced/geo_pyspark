@@ -300,7 +300,8 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
 
 ### Output format
 
-The output format of the spatial join query is a PairRDD. In this PairRDD, each object is a pair of two geometries. The left one is the geometry from objectRDD and the right one is the geometry from the queryWindowRDD.
+The output format of the spatial join query is a PairRDD. In this PairRDD, each object is a pair of two GeoData objects.
+The left one is the GeoData from object_rdd and the right one is the GeoData from the query_window_rdd.
 
 ```
 Point,Polygon
@@ -310,6 +311,22 @@ Polygon,Polygon
 LineString,LineString
 Polygon,LineString
 ...
+```
+
+example 
+```python
+result.collect()
+[
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ],
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ],
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ],
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ]
+ ...
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ],
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ],
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ],
+ [Geometry: Polygon userData: , Geometry: Polygon userData: ],
+]
 ```
 
 Each object on the left is covered/intersected by the object on the right.
@@ -339,6 +356,7 @@ using_index = False
 
 result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, consider_boundary_intersection)
 ```
+### Output format
 
 Result for this query is RDD which holds two GeoData objects within list of lists.
 Example:
