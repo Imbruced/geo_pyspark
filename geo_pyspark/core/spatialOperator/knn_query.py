@@ -8,6 +8,7 @@ from geo_pyspark.core.utils import require
 from geo_pyspark.register.java_libs import GeoSparkLib
 from geo_pyspark.sql.geometry import GeometryFactory
 from geo_pyspark.utils.binary_parser import BinaryParser
+from geo_pyspark.utils.geometry_adapter import GeometryAdapter
 from geo_pyspark.utils.spatial_rdd_parser import SpatialRDDParserData
 
 
@@ -25,11 +26,8 @@ class KNNQuery:
         :param useIndex: bool
         :return: pyspark.RDD
         """
-
-        geom = GeometryFactory.to_bytes(originalQueryPoint)
         jvm = spatialRDD._jvm
-
-        jvm_geom = jvm.GeometryAdapter.deserializeToGeometry(geom)
+        jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(jvm, originalQueryPoint)
 
         knn_neighbours = jvm.KNNQuery.SpatialKnnQuery(spatialRDD._srdd, jvm_geom, k, useIndex)
 
