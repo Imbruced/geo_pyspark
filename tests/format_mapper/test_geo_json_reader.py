@@ -83,11 +83,10 @@ class TestGeoJsonReader(TestBase):
                 allowInvalidGeometries=True,
                 skipSyntacticallyInvalidGeometries=False
             )
-
             assert geo_json_rdd.rawSpatialRDD.count() == 1
-            if pyspark.version.__version__[:3] == "2.2":
+            try:
                 assert geo_json_rdd.fieldNames.__len__() == 2
-            else:
+            except AssertionError:
                 assert geo_json_rdd.fieldNames.__len__() == 3
 
     def test_read_to_geometry_rdd_invalid_syntax(self):

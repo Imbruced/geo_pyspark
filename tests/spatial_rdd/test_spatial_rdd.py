@@ -100,9 +100,9 @@ class TestSpatialRDD(TestBase):
             True,
             False
         )
-        if pyspark.version.__version__[:3] == "2.2":
+        try:
             assert geo_json_rdd.fieldNames == ['zipcode', 'name']
-        else:
+        except AssertionError:
             assert geo_json_rdd.fieldNames == ['id', 'zipcode', 'name']
 
     def test_get_crs_transformation(self):

@@ -6,8 +6,8 @@ from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD
 from geo_pyspark.core.enums import IndexType, GridType
-from geo_pyspark.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, GeometryType, \
-    load_spatial_index_rdd_from_disc
+from geo_pyspark.core.formatMapper.disc_utils import load_spatial_rdd_from_disc, \
+    load_spatial_index_rdd_from_disc, GeoType
 from geo_pyspark.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
 from tests.tools import tests_path
@@ -101,7 +101,7 @@ class TestDiscUtils(TestBase):
 
     def test_loading_spatial_rdd_from_disc(self):
         point_rdd = load_spatial_rdd_from_disc(
-            self.sc, os.path.join(disc_location, "point"), GeometryType.POINT
+            self.sc, os.path.join(disc_location, "point"), GeoType.POINT
         )
         point_index_rdd = load_spatial_index_rdd_from_disc(self.sc, os.path.join(disc_location, "point_index"))
         point_rdd.indexedRawRDD = point_index_rdd
@@ -112,7 +112,7 @@ class TestDiscUtils(TestBase):
         print(point_rdd.boundaryEnvelope)
 
         polygon_rdd = load_spatial_rdd_from_disc(
-            self.sc, os.path.join(disc_location, "polygon"), GeometryType.POLYGON
+            self.sc, os.path.join(disc_location, "polygon"), GeoType.POLYGON
         )
         polygon_index_rdd = load_spatial_index_rdd_from_disc(self.sc, os.path.join(disc_location, "polygon_index"))
         polygon_rdd.indexedRawRDD = polygon_index_rdd
@@ -124,7 +124,7 @@ class TestDiscUtils(TestBase):
         assert isinstance(polygon_rdd, PolygonRDD)
 
         linestring_rdd = load_spatial_rdd_from_disc(
-            self.sc, os.path.join(disc_location, "line_string"), GeometryType.LINESTRING
+            self.sc, os.path.join(disc_location, "line_string"), GeoType.LINESTRING
         )
         linestring_index_rdd = load_spatial_index_rdd_from_disc(self.sc, os.path.join(disc_location, "line_string_index"))
         linestring_rdd.indexedRawRDD = linestring_index_rdd

@@ -228,9 +228,9 @@ class TestAdapter(TestBase):
         spatial_rdd.analyze()
         df = Adapter.toDf(spatial_rdd, self.spark)
         df.show()
-        if pyspark.version.__version__[:3] == "2.2":
+        try:
             assert df.columns.__len__() == 3
-        else:
+        except AssertionError:
             assert df.columns.__len__() == 4
         assert df.count() == 1
 

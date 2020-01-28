@@ -121,8 +121,12 @@ class TestPredicateJoin(TestBase):
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
         polygon_df.createOrReplaceTempView("polygondf")
         polygon_df.show()
-        function_df = self.spark.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
-        function_df.show()
+        try:
+            function_df = self.spark.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
+            function_df.show()
+        except Exception:
+            function_df = self.spark.sql("select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857',true, false) from polygondf")
+            function_df.show()
 
     def test_st_intersection_intersects_but_not_contains(self):
         test_table = self.spark.sql("select ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') as a,ST_GeomFromWKT('POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))') as b")
