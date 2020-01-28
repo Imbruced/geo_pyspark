@@ -33,3 +33,4 @@ class JvmStorageLevel(JvmObject):
             self.storage_level.useOffHeap, self.storage_level.deserialized,
             self.storage_level.replication
         )
+

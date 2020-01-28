@@ -58,7 +58,7 @@ class Adapter(metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def toSpatialRdd(cls, dataFrame: DataFrame, fieldNames: List[str]) -> SpatialRDD:
+    def toSpatialRdd(cls, dataFrame: DataFrame, fieldNames: List) -> SpatialRDD:
         """
 
         :param dataFrame:
@@ -77,7 +77,7 @@ class Adapter(metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def toDf(cls, spatialRDD: SpatialRDD, fieldNames: List[str], sparkSession: SparkSession) -> DataFrame:
+    def toDf(cls, spatialRDD: SpatialRDD, fieldNames: List, sparkSession: SparkSession) -> DataFrame:
         """
 
         :param spatialRDD:
@@ -126,7 +126,7 @@ class Adapter(metaclass=MultipleMeta):
         return df
 
     @classmethod
-    def toDf(cls, spatialPairRDD: RDD, leftFieldnames: List[str], rightFieldNames: List[str], sparkSession: SparkSession):
+    def toDf(cls, spatialPairRDD: RDD, leftFieldnames: List, rightFieldNames: List, sparkSession: SparkSession):
         """
 
         :param spatialPairRDD:

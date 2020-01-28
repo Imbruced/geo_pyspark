@@ -13,6 +13,9 @@ class classproperty(object):
     def __get__(self, obj, owner):
         return self.f(owner)
 
+    def __set__(self, instance, value):
+        return self.f()
+
 
 def get_first_meet_criteria_element_from_iterable(iterable: Iterable[T], criteria: Callable[[T], int]) -> int:
     for index, element in enumerate(iterable):
