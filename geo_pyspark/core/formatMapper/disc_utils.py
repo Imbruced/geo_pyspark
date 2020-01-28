@@ -71,7 +71,7 @@ class SpatialRDDDiscLoader(DiscLoader):
         return spatial_rdd
 
 
-class GeometryType(Enum):
+class GeoType(Enum):
     POINT = "POINT"
     POLYGON = "POLYGON"
     LINESTRING = "LINESTRING"
@@ -79,14 +79,14 @@ class GeometryType(Enum):
 
 
 loaders = {
-    GeometryType.POINT: PointRDDDiscLoader,
-    GeometryType.POLYGON: PolygonRDDDiscLoader,
-    GeometryType.LINESTRING: LineStringRDDDiscLoader,
-    GeometryType.GEOMETRY: SpatialRDDDiscLoader
+    GeoType.POINT: PointRDDDiscLoader,
+    GeoType.POLYGON: PolygonRDDDiscLoader,
+    GeoType.LINESTRING: LineStringRDDDiscLoader,
+    GeoType.GEOMETRY: SpatialRDDDiscLoader
 }
 
 
-def load_spatial_rdd_from_disc(sc: SparkContext, path: str, geometry_type: GeometryType):
+def load_spatial_rdd_from_disc(sc: SparkContext, path: str, geometry_type: GeoType):
     """
 
     :param sc:
