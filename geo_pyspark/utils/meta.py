@@ -4,7 +4,11 @@ import types
 from geo_pyspark.exceptions import InvalidParametersException
 
 from typing import Any
-from typing import GenericMeta
+try:
+    from typing import GenericMeta
+except ImportError:
+    class GenericMeta(type):
+        pass
 
 
 def is_subclass_with_typing(type_a: Any, type_b: Any):
@@ -57,10 +61,11 @@ class MultiMethod:
                 raise InvalidParametersException(
                     'Argument {} must be annotated with a type'.format(name)
                 )
-            if not isinstance(parm.annotation, type):
-                raise InvalidParametersException(
-                    'Argument {} annotation must be a type'.format(name)
-                )
+            # if not isinstance(parm.annotation, type):
+            #     print("s")
+            #     raise InvalidParametersException(
+            #         'Argument {} annotation must be a type'.format(name)
+            #     )
             if parm.default is not inspect.Parameter.empty:
                 self._methods[tuple(types)] = meth
             types.append((name, parm.annotation))

@@ -49,6 +49,12 @@ class GeoData:
     def __repr__(self):
         return f"Geometry: {str(self.geom.__class__.__name__)} userData: {self.userData}"
 
+    def __eq__(self, other):
+        return self.geom == other.geom and self.userData == other.userData
+
+    def __ne__(self, other):
+        return self.geom != other.geom or self.userData != other.userData
+
 
 @attr.s
 class AbstractSpatialRDDParser(ABC):
