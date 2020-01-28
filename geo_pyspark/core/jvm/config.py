@@ -12,8 +12,8 @@ logging.basicConfig(format=FORMAT)
 
 
 def compare_versions(version_a: str, version_b: str) -> bool:
-    version_numbers = version_a.split("."), version_b.split(".")
-
+    if all([version_b, version_a]):
+        version_numbers = version_a.split("."), version_b.split(".")
     if any([version[0] == "" for version in version_numbers]):
         return False
 
@@ -64,7 +64,6 @@ class SparkJars:
         try:
             used_jar_files = java_spark_conf.get("spark.jars")
         except Exception as e:
-            print(e)
             used_jar_files = ",".join(os.listdir(os.path.join(os.environ["SPARK_HOME"], "jars")))
         return used_jar_files
 
@@ -79,7 +78,7 @@ class GeoSparkMeta:
 
     @classmethod
     def get_version(cls, spark_jars: str) -> Optional[str]:
-        geospark_version = findall(r"geospark-(\d{1}\.\d{1}\.\d{1})\.jar", spark_jars)
+        geospark_version = findall(r"geospark-(\d{1}\.\d{1}\.\d{1}).*?jar", spark_jars)
         try:
             version = geospark_version[0]
         except IndexError:
