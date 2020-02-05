@@ -2,6 +2,7 @@ import pyspark
 from shapely.wkt import loads
 
 from tests.data import mixed_wkt_geometry_input_location
+from tests.data import mixed_wkt_geometry_input_location_1
 from tests.test_base import TestBase
 
 
