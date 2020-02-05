@@ -16,6 +16,6 @@ install:
 - tar -xvzf spark-2.4.4-bin-hadoop2.7.tgz
 - rm spark-2.4.4-bin-hadoop2.7.tgz
 - export SPARK_HOME=spark-2.4.4-bin-hadoop2.7
-script: pipenv run pytest tests
+script: pipenv run pytest tests/core
 after_success:
   - codecov # submit coverage
