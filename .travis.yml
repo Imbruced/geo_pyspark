@@ -4,5 +4,5 @@ python:
 install:
 - pip install pipenv
 - pipenv install --dev
-- pipenv install pyspark=2.4
+- pipenv install pyspark=2.4.4
 - pipenv run pytest tests/
