@@ -1,0 +1,19 @@
+os:
+  - linux
+
+env:
+  - JDK=openjdk8
+dist: trusty
+before_script:
+  - jdk_switcher use $JDK
+language: python
+python:
+  - '3.6'
+install:
+- pip install pipenv
+- pipenv install --dev
+- wget http://apache.mirrors.tworzy.net/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz
+- tar -xvzf spark-2.4.4-bin-hadoop2.7.tgz
+- rm spark-2.4.4-bin-hadoop2.7.tgz
+- export SPARK_HOME=spark-2.4.4-bin-hadoop2.7
+- pipenv run pytest tests/
