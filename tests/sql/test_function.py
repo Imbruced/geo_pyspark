@@ -114,7 +114,7 @@ class TestPredicateJoin(TestBase):
         polygon_wkt_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\
             option("header", "false").\
-            load(mixed_wkt_geometry_input_location)
+            load(mixed_wkt_geometry_input_location_1)
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_wkt_df.show()
