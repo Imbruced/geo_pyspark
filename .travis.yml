@@ -1,11 +1,11 @@
 os:
   - linux
 
-before_install:
-  - sudo add-apt-repository ppa:openjdk-r/ppa
-  - sudo apt-get -qq update
-  - sudo apt-get install -y openjdk-8-jdk
-  - sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
+env:
+  - JDK=openjdk8
+dist: trusty
+before_script:
+  - jdk_switcher use $JDK
 language: python
 python:
   - '3.6'
