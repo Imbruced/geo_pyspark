@@ -3,7 +3,7 @@ from pyspark import SparkContext, StorageLevel, RDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
-from geo_pyspark.core.utils import JvmStorageLevel
+from geo_pyspark.utils.jvm import JvmStorageLevel
 from geo_pyspark.utils.meta import MultipleMeta
 
 
@@ -12,8 +12,8 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, rdd: RDD, newLevel: StorageLevel):
         """
 
-        :param rdd:
-        :param newLevel:
+        :param rdd: RDD
+        :param newLevel: StorageLevel StorageLevel
         """
         super().__init__(rdd.ctx)
 
@@ -26,7 +26,7 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, rdd: RDD):
         """
 
-        :param rdd:
+        :param rdd: RDD
         """
         super().__init__(rdd.ctx)
 
@@ -36,12 +36,13 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
         self._srdd = srdd
 
     def __init__(self):
-        self._srdd = self._empty_srdd()
+        self._do_init()
+        self._srdd = self._jvm_spatial_rdd()
 
     def __init__(self, rawSpatialRDD: JvmSpatialRDD):
         """
 
-        :param rawSpatialRDD:
+        :param rawSpatialRDD: JvmSpatialRDD, jvm representation of spatial rdd RDD
         """
         super().__init__(rawSpatialRDD.sc)
         jsrdd = rawSpatialRDD.jsrdd
@@ -50,9 +51,9 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, rawSpatialRDD: JvmSpatialRDD, sourceEpsgCode: str, targetEpsgCode: str):
         """
 
-        :param rawSpatialRDD:
-        :param sourceEpsgCode:
-        :param targetEpsgCode:
+        :param rawSpatialRDD: JvmSpatialRDD, jvm representation of spatial rdd RDD
+        :param sourceEpsgCode: str
+        :param targetEpsgCode: str, epsg code to transform SpatialRDD str
         """
 
         super().__init__(rawSpatialRDD.sc)
@@ -64,12 +65,12 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  carryInputData: bool, partitions: int):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param Offset:
-        :param splitter:
-        :param carryInputData:
-        :param partitions:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param Offset: int, point offset int
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param partitions: int, number of partitions int
         """
 
         super().__init__(sparkContext)
@@ -87,11 +88,11 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  carryInputData: bool):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param Offset:
-        :param splitter:
-        :param carryInputData:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param Offset: int, point offset
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
         """
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
@@ -107,11 +108,11 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  partitions: int):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param splitter:
-        :param carryInputData:
-        :param partitions:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param partitions: int, number of partitions
         """
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
@@ -126,10 +127,10 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param splitter:
-        :param carryInputData:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
         """
 
         super().__init__(sparkContext)
@@ -145,8 +146,7 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
         """
 
         :param rawSpatialRDD:
-        :param sourceEpsgCode:
-        :param targetEpsgCode:
+        :param newLevel:
         """
 
         super().__init__(rawSpatialRDD.sc)
@@ -158,13 +158,13 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  carryInputData: bool, partitions: int, newLevel: StorageLevel):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param Offset:
-        :param splitter:
-        :param carryInputData:
-        :param partitions:
-        :param newLevel:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param Offset: int, point offset
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param partitions: int, number of partitions
+        :param newLevel: StorageLevel
         """
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
@@ -183,12 +183,12 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  carryInputData: bool, newLevel: StorageLevel):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param Offset:
-        :param splitter:
-        :param carryInputData:
-        :param newLevel:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param Offset: int, point offset
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param newLevel: StorageLevel
         """
 
         super().__init__(sparkContext)
@@ -208,12 +208,12 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  partitions: int, newLevel: StorageLevel):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param splitter:
-        :param carryInputData:
-        :param partitions:
-        :param newLevel:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param partitions: int, number of partitions
+        :param newLevel: StorageLevel
         """
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
@@ -232,11 +232,11 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  newLevel: StorageLevel):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param splitter:
-        :param carryInputData:
-        :param newLevel:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param newLevel: StorageLevel
         """
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
@@ -253,10 +253,10 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, rawSpatialRDD: JvmSpatialRDD, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
-        :param rawSpatialRDD:
-        :param newLevel:
-        :param sourceEpsgCRSCode:
-        :param targetEpsgCode:
+        :param rawSpatialRDD: JvmSpatialRDD, jvm representation of spatial rdd
+        :param newLevel: StorageLevel
+        :param sourceEpsgCRSCode: str, epsg code which loaded files is in, ex. epsg:4326 stands for WGS84
+        :param targetEpsgCode: str, epsg code to transform SpatialRDD
         """
 
         super().__init__(rawSpatialRDD.sc)
@@ -270,15 +270,15 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
 
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param Offset:
-        :param splitter:
-        :param carryInputData:
-        :param partitions:
-        :param newLevel:
-        :param sourceEpsgCRSCode:
-        :param targetEpsgCode:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param Offset: int, point offset
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param partitions: int, number of partitions
+        :param newLevel: StorageLevel
+        :param sourceEpsgCRSCode: str, epsg code which loaded files is in, ex. epsg:4326 stands for WGS84
+        :param targetEpsgCode: str, epsg code to transform SpatialRDD
         """
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
@@ -300,14 +300,14 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  carryInputData: bool, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param Offset:
-        :param splitter:
-        :param carryInputData:
-        :param newLevel:
-        :param sourceEpsgCRSCode:
-        :param targetEpsgCode:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param Offset: int, point offset
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param newLevel: StorageLevel
+        :param sourceEpsgCRSCode: str, epsg code which loaded files is in, ex. epsg:4326 stands for WGS84
+        :param targetEpsgCode: str, epsg code to transform SpatialRDD
         """
 
         super().__init__(sparkContext)
@@ -329,14 +329,14 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  partitions: int, newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param splitter:
-        :param carryInputData:
-        :param partitions:
-        :param newLevel:
-        :param sourceEpsgCRSCode:
-        :param targetEpsgCode:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param partitions: int, number of partitions
+        :param newLevel: StorageLevel
+        :param sourceEpsgCRSCode: str, epsg code which loaded files is in, ex. epsg:4326 stands for WGS84
+        :param targetEpsgCode: str, epsg code to transform SpatialRDD
         """
 
         super().__init__(sparkContext)
@@ -358,13 +358,13 @@ class PointRDD(SpatialRDD, metaclass=MultipleMeta):
                  newLevel: StorageLevel, sourceEpsgCRSCode: str, targetEpsgCode: str):
         """
 
-        :param sparkContext:
-        :param InputLocation:
-        :param splitter:
-        :param carryInputData:
-        :param newLevel:
-        :param sourceEpsgCRSCode:
-        :param targetEpsgCode:
+        :param sparkContext: SparkContext instance
+        :param InputLocation: str, location for loaded file
+        :param splitter: FileDataSplitter, data file splitter
+        :param carryInputData: bool, if spatial rdd should keep non geometry attributes
+        :param newLevel: StorageLevel
+        :param sourceEpsgCRSCode: str, epsg code which loaded files is in, ex. epsg:4326 stands for WGS84
+        :param targetEpsgCode: str, epsg code to transform SpatialRDD
         """
 
         super().__init__(sparkContext)

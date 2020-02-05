@@ -5,7 +5,7 @@ from pyspark import StorageLevel
 
 from geo_pyspark.core.SpatialRDD import RectangleRDD
 from geo_pyspark.core.enums import IndexType, GridType, FileDataSplitter
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_path
 
@@ -72,7 +72,7 @@ class TestRectangleRDD(TestBase):
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 
         spatial_rdd_copy = RectangleRDD()
-        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
+        spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
     def test_hilbert_curve_spatial_partitioning(self):
@@ -145,10 +145,3 @@ class TestRectangleRDD(TestBase):
 
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 
-    def test_build_rtree_index(self):
-        pass
-        # TODO write this test
-
-    def test_build_quad_tree_index(self):
-        pass
-        # TODO write this test

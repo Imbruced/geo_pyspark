@@ -1,5 +1,6 @@
 import os
 
+import pyspark
 import pytest
 from pyspark import StorageLevel, RDD
 from shapely.geometry import Point
@@ -7,7 +8,7 @@ from shapely.geometry import Point
 from geo_pyspark.core.SpatialRDD import PointRDD
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.formatMapper.geo_json_reader import GeoJsonReader
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_path
 
@@ -99,7 +100,10 @@ class TestSpatialRDD(TestBase):
             True,
             False
         )
-        assert geo_json_rdd.fieldNames == ['id', 'zipcode', 'name']
+        try:
+            assert geo_json_rdd.fieldNames == ['zipcode', 'name']
+        except AssertionError:
+            assert geo_json_rdd.fieldNames == ['id', 'zipcode', 'name']
 
     def test_get_crs_transformation(self):
         spatial_rdd = PointRDD(
@@ -206,21 +210,3 @@ class TestSpatialRDD(TestBase):
         spatial_rdd.spatialPartitioning(GridType.QUADTREE)
 
         print(spatial_rdd.partitionTree)
-
-    def test_raw_spatial_rdd(self):
-        pass
-
-    def test_save_as_geojson(self):
-        pass
-
-    def test_set_raw_spatial_rdd(self):
-        pass
-
-    def test_set_sample_number(self):
-        pass
-
-    def test_spatial_partitioned_rdd(self):
-        pass
-
-    def test_spatial_partitioning(self):
-        pass

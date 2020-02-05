@@ -1,7 +1,5 @@
 from typing import List, Iterable, Callable, TypeVar
 
-from geo_pyspark.register.java_libs import GeoSparkLib
-
 T = TypeVar('T')
 
 
@@ -13,6 +11,9 @@ class classproperty(object):
     def __get__(self, obj, owner):
         return self.f(owner)
 
+    def __set__(self, instance, value):
+        return self.f()
+
 
 def get_first_meet_criteria_element_from_iterable(iterable: Iterable[T], criteria: Callable[[T], int]) -> int:
     for index, element in enumerate(iterable):
@@ -21,7 +22,7 @@ def get_first_meet_criteria_element_from_iterable(iterable: Iterable[T], criteri
     return -1
 
 
-def require(library_names: List[GeoSparkLib]):
+def require(library_names: List[str]):
     def wrapper(func):
         def run_function(*args, **kwargs):
             from geo_pyspark.core.utils import ImportedJvmLib
@@ -34,7 +35,7 @@ def require(library_names: List[GeoSparkLib]):
                 return func(*args, **kwargs)
             else:
                 raise ModuleNotFoundError(f"Did not found {has_all_libs[first_not_fulfill_value]}, make sure that was correctly imported via py4j"
-                                          f"Did you use GeoSparkRegistrator.registerAll ? ")
+                                          f"Did you use GeoSparkRegistrator.registerAll, Your jars were properly copied to $SPARK_HOME/jars ? ")
         return run_function
     return wrapper
 

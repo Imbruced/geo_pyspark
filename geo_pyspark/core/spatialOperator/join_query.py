@@ -2,22 +2,21 @@ from pyspark import RDD
 
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
-from geo_pyspark.core.utils import require
-from geo_pyspark.register.java_libs import GeoSparkLib
-from geo_pyspark.utils.rdd_pickling import GeoSparkPickler
+from geo_pyspark.utils.decorators import require
+from geo_pyspark.utils.spatial_rdd_parser import GeoSparkPickler
 
 
 class JoinQuery:
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def SpatialJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
-        :param spatialRDD:
-        :param queryRDD:
-        :param useIndex:
-        :param considerBoundaryIntersection:
+        :param spatialRDD: SpatialRDD
+        :param queryRDD: SpatialRDD
+        :param useIndex: bool
+        :param considerBoundaryIntersection: bool
         :return:
         """
 
@@ -35,14 +34,14 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def DistanceJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
-        :param spatialRDD:
-        :param queryRDD:
-        :param useIndex:
-        :param considerBoundaryIntersection:
+        :param spatialRDD: SpatialRDD
+        :param queryRDD: SpatialRDD
+        :param useIndex: bool
+        :param considerBoundaryIntersection: bool
         :return:
         """
 
@@ -59,13 +58,13 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def spatialJoin(cls, queryWindowRDD: SpatialRDD, objectRDD: SpatialRDD, joinParams: JoinParams) -> RDD:
         """
 
-        :param queryWindowRDD:
-        :param objectRDD:
-        :param joinParams:
+        :param queryWindowRDD: SpatialRDD
+        :param objectRDD: SpatialRDD
+        :param joinParams: JoinParams
         :return:
         """
 
@@ -81,14 +80,20 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def DistanceJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool, considerBoundaryIntersection: bool) -> RDD:
         """
 
-        :param spatialRDD:
-        :param queryRDD:
-        :param useIndex:
-        :param considerBoundaryIntersection:
+        :param spatialRDD: SpatialRDD
+        :param queryRDD: SpatialRDD
+        :param useIndex: bool
+        :param considerBoundaryIntersection: bool
+
+        >> spatial_rdd =
+        >> query_rdd =
+        >> spatial_join_result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, query_rdd, True, True)
+        >> spatial_join_result.collect()
+        [GeoData(), GeoData()]
         :return:
         """
 
@@ -108,16 +113,26 @@ class JoinQuery:
         return RDD(serlialized, sc, GeoSparkPickler())
 
     @classmethod
-    @require([GeoSparkLib.JoinQuery])
+    @require(["JoinQuery"])
     def SpatialJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
                               considerBoundaryIntersection: bool) -> RDD:
         """
+        Function takes SpatialRDD and other SpatialRDD and based on two parameters
+        - useIndex
+        - considerBoundaryIntersection
+        creates RDD with result of Spatial Join operation. It Returns RDD[GeoData, GeoData]
 
-        :param spatialRDD:
-        :param queryRDD:
-        :param useIndex:
-        :param considerBoundaryIntersection:
-        :return:
+        :param spatialRDD: SpatialRDD
+        :param queryRDD: SpatialRDD
+        :param useIndex: bool
+        :param considerBoundaryIntersection: bool
+        :return: RDD
+
+        >> spatial_join_result = JoinQuery.SpatialJoinQueryFlat(
+        >>      spatialRDD, queryRDD, useIndex, considerBoundaryIntersection
+        >> )
+        >> spatial_join_result.collect()
+        [[GeoData(Polygon, ), GeoData()], [GeoData(), GeoData()], [GeoData(), GeoData()]]
         """
 
         jvm = spatialRDD._jvm

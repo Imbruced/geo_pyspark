@@ -6,12 +6,12 @@ from shapely.geometry import Point
 from geo_pyspark.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
 from geo_pyspark.core.enums import GridType, FileDataSplitter, IndexType
 from geo_pyspark.core.enums.join_build_side import JoinBuildSide
-from geo_pyspark.core.geom_types import Envelope
+from geo_pyspark.core.geom.envelope import Envelope
 from geo_pyspark.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
 import os
 
-from tests.polygon_properties import polygon_rdd_input_location, polygon_rdd_start_offset, polygon_rdd_end_offset, \
+from tests.properties.polygon_properties import polygon_rdd_input_location, polygon_rdd_start_offset, polygon_rdd_end_offset, \
     polygon_rdd_splitter, polygon_rdd_index_type
 from tests.test_base import TestBase
 from tests.tools import tests_path
@@ -303,41 +303,6 @@ class TestSpatialRDD(TestBase):
                 True,
                 True
             ).count
-
-    def test_earthdata_format_mapper(self):
-        pass
-        # input_location = "test/data/modis/modis.csv"
-        # splitter = FileDataSplitter.CSV
-        # index_type = IndexType.RTREE
-        # query_envelope = Envelope(-90.01, -80.01, 30.01, 40.01)
-        # num_partitions = 5
-        # loop_times = 1
-        # hdf_increment = 5
-        # hdf_offset = 2
-        # hdf_root_group_name = "MOD_Swath_LST"
-        # hdf_data_variable_name = "LST"
-        # url_prefix = "test/resources/modis/"
-        # hdf_daya_variable_list = ["LST", "QC", "Error_LST", "Emis_31", "Emis_32"]
-        #
-        # earth_data_hdf_point = EarthdataHDFPointMapper(
-        #     hdf_increment, hdf_offset, hdf_root_group_name,
-        #     hdf_daya_variable_list, hdf_data_variable_name, url_prefix)
-        # spatial_rdd = PointRDD(
-        #     sc,
-        #     input_location,
-        #     num_partitions,
-        #     earth_data_hdf_point)
-        #
-        # i = 0
-        # while i < loop_times:
-        #     result_size = 0
-        #     result_size = RangeQuery.SpatialRangeQuery(
-        #         spatial_rdd,
-        #         query_envelope,
-        #         False,
-        #         False
-        #     ).count
-        #     i = i + 1
 
     def test_crs_transformed_spatial_range_query(self):
         object_rdd = PointRDD(

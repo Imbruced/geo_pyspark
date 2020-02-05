@@ -3,7 +3,7 @@ from pyspark import SparkContext, StorageLevel, RDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from geo_pyspark.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
-from geo_pyspark.core.utils import JvmStorageLevel
+from geo_pyspark.utils.jvm import JvmStorageLevel
 from geo_pyspark.utils.meta import MultipleMeta
 
 
@@ -20,7 +20,8 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         self._srdd = srdd
 
     def __init__(self):
-        self._srdd = self._empty_srdd()
+        self._do_init()
+        self._srdd = self._jvm_spatial_rdd()
 
     def __init__(self, rawSpatialRDD: JvmSpatialRDD):
         """

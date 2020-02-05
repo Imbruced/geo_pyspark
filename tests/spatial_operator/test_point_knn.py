@@ -1,6 +1,5 @@
 import os
 
-import pytest
 from shapely.geometry import Point
 
 from geo_pyspark.core.SpatialRDD import PointRDD

@@ -26,3 +26,16 @@ class GeoSparkLib(Enum):
     GridType = "org.datasyslab.geospark.enums.GridType"
     IndexType = "org.datasyslab.geospark.enums.IndexType"
     AdapterWrapper = "org.imbruced.geo_pyspark.AdapterWrapper"
+    WktReader = "org.datasyslab.geospark.formatMapper.WktReader"
+    GeometryAdapter = "org.imbruced.geo_pyspark.serializers.GeometryAdapter"
+    RawJvmIndexRDDSetter = "org.imbruced.geo_pyspark.RawJvmIndexRDDSetter"
+    ObjectSpatialRDDLoader = "org.imbruced.geo_pyspark.ObjectSpatialRDDLoader"
+    WkbReader = "org.datasyslab.geospark.formatMapper.WkbReader"
+
+    @classmethod
+    def from_str(cls, geo_lib: str) -> 'GeoSparkLib':
+        try:
+            lib = getattr(cls, geo_lib.upper())
+        except AttributeError:
+            raise AttributeError(f"{cls.__class__.__name__} has no {geo_lib} attribute")
+        return lib

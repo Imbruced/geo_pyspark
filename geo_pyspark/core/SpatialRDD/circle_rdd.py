@@ -8,10 +8,10 @@ class CircleRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, spatialRDD: SpatialRDD, Radius: float):
         """
 
-        :param spatialRDD:
-        :param Radius:
+        :param spatialRDD: SpatialRDD
+        :param Radius: float
         """
-        super().__init__(spatialRDD._sc)
+        super()._do_init(spatialRDD._sc)
         self._srdd = self._jvm_spatial_rdd(
             spatialRDD._srdd,
             Radius

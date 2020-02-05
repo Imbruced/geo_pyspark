@@ -3,7 +3,7 @@ from typing import List
 from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession
 
-from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
+from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums.spatial import SpatialType
 from geo_pyspark.utils.meta import MultipleMeta
 
@@ -14,7 +14,8 @@ class Adapter(metaclass=MultipleMeta):
     """
 
     @classmethod
-    def toRdd(cls, dataFrame: DataFrame) -> JvmSpatialRDD:
+    def toRdd(cls, dataFrame: DataFrame) -> 'JvmSpatialRDD':
+        from geo_pyspark.core.SpatialRDD.spatial_rdd import JvmSpatialRDD
         sc = dataFrame._sc
         jvm = sc._jvm
 
@@ -58,7 +59,7 @@ class Adapter(metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def toSpatialRdd(cls, dataFrame: DataFrame, fieldNames: List[str]) -> SpatialRDD:
+    def toSpatialRdd(cls, dataFrame: DataFrame, fieldNames: List) -> SpatialRDD:
         """
 
         :param dataFrame:
@@ -77,7 +78,7 @@ class Adapter(metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def toDf(cls, spatialRDD: SpatialRDD, fieldNames: List[str], sparkSession: SparkSession) -> DataFrame:
+    def toDf(cls, spatialRDD: SpatialRDD, fieldNames: List, sparkSession: SparkSession) -> DataFrame:
         """
 
         :param spatialRDD:
@@ -119,14 +120,14 @@ class Adapter(metaclass=MultipleMeta):
         :param sparkSession:
         :return:
         """
-        spatialPairRDD_mapped = spatialPairRDD.map(
+        spatial_pair_rdd_mapped = spatialPairRDD.map(
             lambda x: [x[0].geom, *x[0].getUserData().split("\t"), x[1].geom, *x[1].getUserData().split("\t")]
         )
-        df = sparkSession.createDataFrame(spatialPairRDD_mapped)
+        df = sparkSession.createDataFrame(spatial_pair_rdd_mapped)
         return df
 
     @classmethod
-    def toDf(cls, spatialPairRDD: RDD, leftFieldnames: List[str], rightFieldNames: List[str], sparkSession: SparkSession):
+    def toDf(cls, spatialPairRDD: RDD, leftFieldnames: List, rightFieldNames: List, sparkSession: SparkSession):
         """
 
         :param spatialPairRDD:

@@ -41,15 +41,9 @@ class TestSpatialRDDToDataFrame(TestBase):
         )
 
         rdd_data = self.spark.sparkContext.parallelize(point_data)
-        df = self.spark.createDataFrame(rdd_data)
+        df = self.spark.createDataFrame(rdd_data, schema, verifySchema=False)
         df.show()
         df.printSchema()
-
-    def test_polygon_rdd(self):
-        pass
-
-    def test_rectangle_rdd(self):
-        pass
 
     def test_point_rdd(self):
         spatial_rdd = PointRDD(
@@ -76,15 +70,10 @@ class TestSpatialRDDToDataFrame(TestBase):
         )
 
         spatial_rdd_with_schema = self.spark.createDataFrame(
-            raw_spatial_rdd, schema
+            raw_spatial_rdd, schema, verifySchema=False
         )
 
         spatial_rdd_with_schema.show()
 
         assert spatial_rdd_with_schema.take(1)[0][0].wkt == "POINT (32.324142 -88.331492)"
 
-    def test_linestring_rdd(self):
-        pass
-
-    def test_circle_rdd(self):
-        pass

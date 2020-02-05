@@ -3,8 +3,8 @@ from pyspark import StorageLevel
 from geo_pyspark.core.SpatialRDD import PolygonRDD
 from geo_pyspark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from geo_pyspark.core.enums import IndexType, FileDataSplitter, GridType
-from geo_pyspark.core.geom_types import Envelope
-from tests.polygon_properties import input_location, splitter, num_partitions, input_count, input_boundary, grid_type, \
+from geo_pyspark.core.geom.envelope import Envelope
+from tests.properties.polygon_properties import input_location, splitter, num_partitions, input_count, input_boundary, grid_type, \
     input_location_geo_json, input_location_wkt, input_location_wkb, query_envelope, polygon_rdd_input_location, \
     polygon_rdd_start_offset, polygon_rdd_end_offset, polygon_rdd_splitter
 from tests.test_base import TestBase
@@ -231,7 +231,7 @@ class TestPolygonRDD(TestBase):
         spatial_rdd.spatialPartitioning(grid_type)
         spatial_rdd.buildIndex(IndexType.RTREE, True)
         spatial_rdd_copy = PolygonRDD()
-        spatial_rdd_copy.rawSpatialRDD = spatial_rdd
+        spatial_rdd_copy.rawJvmSpatialRDD = spatial_rdd.rawJvmSpatialRDD
         spatial_rdd_copy.analyze()
 
     def test_geojson_constructor(self):

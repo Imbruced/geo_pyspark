@@ -3,7 +3,6 @@ import os
 
 from geo_pyspark.core.enums import FileDataSplitter, GridType, IndexType
 from geo_pyspark.core.enums.join_build_side import JoinBuildSide
-from geo_pyspark.core.geom_types import Envelope
 from geo_pyspark.core.spatialOperator import JoinQuery
 from geo_pyspark.core.spatialOperator.join_params import JoinParams
 from tests.spatial_operator.test_join_base import TestJoinBase
@@ -11,15 +10,8 @@ from tests.tools import tests_path
 
 input_location = os.path.join(tests_path, "resources/primaryroads-linestring.csv")
 query_window_set = os.path.join(tests_path, "resources/zcta510-small.csv")
-# offset=0
 splitter = FileDataSplitter.CSV
-# gridType=rtree
-# indexType=rtree
-# numPartitions=5
-# distance=0.01
 query_polygon_set = os.path.join(tests_path, "resources/primaryroads-polygon.csv")
-# inputCount=3000
-# inputBoundary=-123.393766, -65.648659, 17.982169, 49.002374
 match_count = 535
 match_with_original_duplicates_count = 875
 

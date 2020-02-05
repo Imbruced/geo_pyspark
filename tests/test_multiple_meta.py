@@ -1,5 +1,3 @@
-import pytest
-
 from geo_pyspark.utils.meta import MultipleMeta
 
 

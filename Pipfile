@@ -11,15 +11,15 @@ ipykernel="*"
 jupyter="*"
 toree="*"
 pytest="*"
-javaobj-py3="==0.3.0" 
+mypy="*"
+pytest-json-report="*"
 
 [packages]
 findspark="*"
 pandas="*"
-geopandas="==0.5.0"
+geopandas="==0.6.0"
 pyspark="==2.4.4"
-jupyter = "*"
-toree = "*"
+pytest-json-report = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
