@@ -17,7 +17,7 @@ javaobj-py3="==0.3.0"
 findspark="*"
 pandas="*"
 geopandas="==0.5.0"
-pyspark="==2.4.4"
+pyspark="==3.2.2"
 jupyter = "*"
 toree = "*"
 
